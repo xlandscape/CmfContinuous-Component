@@ -1,0 +1,355 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>numdifftools.run_benchmark &mdash; numdifftools 0.9.17 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="numdifftools 0.9.17 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> numdifftools
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.17
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html">Introduction to Numdifftools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#documentation-and-code">Documentation and code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#unit-tests">Unit tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#acknowledgement">Acknowledgement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/numerical/main.html">Numerical differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/algorithmic/main.html">Algorithmic differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../authors.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">Module reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">numdifftools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>numdifftools.run_benchmark</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for numdifftools.run_benchmark</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">timeit</span>
+
+<span class="kn">import</span> <span class="nn">numdifftools</span> <span class="kn">as</span> <span class="nn">nd</span>
+<span class="kn">import</span> <span class="nn">numdifftools.nd_algopy</span> <span class="kn">as</span> <span class="nn">nda</span>
+<span class="kn">from</span> <span class="nn">algopy</span> <span class="kn">import</span> <span class="n">dot</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">numdifftools.core</span> <span class="kn">import</span> <span class="n">MinStepGenerator</span><span class="p">,</span> <span class="n">MaxStepGenerator</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+
+<div class="viewcode-block" id="BenchmarkFunction"><a class="viewcode-back" href="../../api/numdifftools.html#numdifftools.run_benchmark.BenchmarkFunction">[docs]</a><span class="k">class</span> <span class="nc">BenchmarkFunction</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Return 0.5 * np.dot(x**2, np.dot(A,x))&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xi</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dot</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span></div>
+
+
+<span class="k">def</span> <span class="nf">_plot</span><span class="p">(</span><span class="n">plot</span><span class="p">,</span> <span class="n">problem_sizes</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">symbols</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">logx</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">title</span><span class="p">,</span> <span class="n">funcs</span><span class="p">,</span> <span class="n">results</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">method</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">funcs</span><span class="p">):</span>
+            <span class="n">plot</span><span class="p">(</span><span class="n">problem_sizes</span><span class="p">,</span> <span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">symbols</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                 <span class="n">markerfacecolor</span><span class="o">=</span><span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">ylabel</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;problem size $N$&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">logx</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">loglimits</span><span class="p">(</span><span class="n">problem_sizes</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">loglimits</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+        <span class="n">leg</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">loc</span><span class="p">)</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">leg</span><span class="o">.</span><span class="n">get_frame</span><span class="p">()</span>
+        <span class="n">frame</span><span class="o">.</span><span class="n">set_alpha</span><span class="p">(</span><span class="mf">0.4</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">title</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="plot_errors"><a class="viewcode-back" href="../../api/numdifftools.html#numdifftools.run_benchmark.plot_errors">[docs]</a><span class="k">def</span> <span class="nf">plot_errors</span><span class="p">(</span><span class="n">error_objects</span><span class="p">,</span> <span class="n">problem_sizes</span><span class="p">,</span> <span class="n">symbols</span><span class="p">):</span>
+    <span class="n">_plot</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">,</span> <span class="n">problem_sizes</span><span class="p">,</span> <span class="n">error_objects</span><span class="p">,</span> <span class="n">symbols</span><span class="p">,</span>
+          <span class="n">ylabel</span><span class="o">=</span><span class="s1">r&#39;Absolute error $\|g_{ref} - g\|$&#39;</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">logx</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="plot_runtimes"><a class="viewcode-back" href="../../api/numdifftools.html#numdifftools.run_benchmark.plot_runtimes">[docs]</a><span class="k">def</span> <span class="nf">plot_runtimes</span><span class="p">(</span><span class="n">run_time_objects</span><span class="p">,</span> <span class="n">problem_sizes</span><span class="p">,</span> <span class="n">symbols</span><span class="p">):</span>
+    <span class="n">_plot</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">loglog</span><span class="p">,</span> <span class="n">problem_sizes</span><span class="p">,</span> <span class="n">run_time_objects</span><span class="p">,</span> <span class="n">symbols</span><span class="p">,</span>
+          <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;time $t$&#39;</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">logx</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="loglimits"><a class="viewcode-back" href="../../api/numdifftools.html#numdifftools.run_benchmark.loglimits">[docs]</a><span class="k">def</span> <span class="nf">loglimits</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">border</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+    <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="p">(</span><span class="n">high</span><span class="o">/</span><span class="n">low</span><span class="p">)</span><span class="o">**</span><span class="n">border</span>
+    <span class="k">return</span> <span class="n">low</span><span class="o">/</span><span class="n">scale</span><span class="p">,</span> <span class="n">high</span><span class="o">*</span><span class="n">scale</span></div>
+
+
+<span class="n">fixed_step</span> <span class="o">=</span> <span class="n">MinStepGenerator</span><span class="p">(</span><span class="n">num_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">use_exact_steps</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">epsilon</span> <span class="o">=</span> <span class="n">MaxStepGenerator</span><span class="p">(</span><span class="n">num_steps</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">use_exact_steps</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                           <span class="n">step_ratio</span><span class="o">=</span><span class="mf">1.6</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">adaptiv_txt</span> <span class="o">=</span> <span class="s1">&#39;_adaptive_{0:d}_{1!s}_{2:d}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">epsilon</span><span class="o">.</span><span class="n">num_steps</span><span class="p">,</span>
+                                                   <span class="nb">str</span><span class="p">(</span><span class="n">epsilon</span><span class="o">.</span><span class="n">step_ratio</span><span class="p">),</span>
+                                                   <span class="n">epsilon</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
+<span class="n">gradient_funs</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+<span class="n">nda_method</span> <span class="o">=</span> <span class="s1">&#39;forward&#39;</span>
+<span class="n">nda_txt</span> <span class="o">=</span> <span class="s1">&#39;algopy_&#39;</span> <span class="o">+</span> <span class="n">nda_method</span>
+<span class="n">gradient_funs</span><span class="p">[</span><span class="n">nda_txt</span><span class="p">]</span> <span class="o">=</span> <span class="n">nda</span><span class="o">.</span><span class="n">Jacobian</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">nda_method</span><span class="p">)</span>
+
+<span class="n">hessian_fun</span> <span class="o">=</span> <span class="s1">&#39;Hessdiag&#39;</span>
+<span class="n">ndc_hessian</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">nd</span><span class="p">,</span> <span class="n">hessian_fun</span><span class="p">)</span>
+<span class="n">hessian_funs</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+<span class="n">hessian_funs</span><span class="p">[</span><span class="n">nda_txt</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">nda</span><span class="p">,</span> <span class="n">hessian_fun</span><span class="p">)(</span><span class="mi">1</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">nda_method</span><span class="p">)</span>
+
+<span class="n">order</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="s1">&#39;central&#39;</span><span class="p">,</span> <span class="s1">&#39;complex&#39;</span><span class="p">]:</span>
+    <span class="n">method2</span> <span class="o">=</span> <span class="n">method</span> <span class="o">+</span> <span class="n">adaptiv_txt</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+    <span class="n">gradient_funs</span><span class="p">[</span><span class="n">method</span><span class="p">]</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Jacobian</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">fixed_step</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+    <span class="n">gradient_funs</span><span class="p">[</span><span class="n">method2</span><span class="p">]</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Jacobian</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">epsilon</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+    <span class="n">hessian_funs</span><span class="p">[</span><span class="n">method</span><span class="p">]</span> <span class="o">=</span> <span class="n">ndc_hessian</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">fixed_step</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+    <span class="n">hessian_funs</span><span class="p">[</span><span class="n">method2</span><span class="p">]</span> <span class="o">=</span> <span class="n">ndc_hessian</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">epsilon</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_compute_benchmark</span><span class="p">(</span><span class="n">functions</span><span class="p">,</span> <span class="n">problem_sizes</span><span class="p">):</span>
+    <span class="n">result_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">problem_sizes</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;n=&#39;</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="n">num_methods</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">functions</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_methods</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">ref_g</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">BenchmarkFunction</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">_key</span><span class="p">,</span> <span class="n">function</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">functions</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">default_timer</span><span class="p">()</span>
+            <span class="n">function</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">f</span>
+            <span class="n">preproc_time</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">default_timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">default_timer</span><span class="p">()</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">run_time</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">default_timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span>
+            <span class="k">if</span> <span class="n">ref_g</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">ref_g</span> <span class="o">=</span> <span class="n">val</span>
+                <span class="n">err</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">norm_ref_g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ref_g</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">val</span> <span class="o">-</span> <span class="n">ref_g</span><span class="p">)</span> <span class="o">/</span> <span class="n">norm_ref_g</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">run_time</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">preproc_time</span>
+
+        <span class="n">result_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">result_list</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-16</span>
+
+<div class="viewcode-block" id="compute_gradients"><a class="viewcode-back" href="../../api/numdifftools.html#numdifftools.run_benchmark.compute_gradients">[docs]</a><span class="k">def</span> <span class="nf">compute_gradients</span><span class="p">(</span><span class="n">gradient_funs</span><span class="p">,</span> <span class="n">problem_sizes</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;starting gradient computation &#39;</span><span class="p">)</span>
+    <span class="n">results_gradients</span> <span class="o">=</span> <span class="n">_compute_benchmark</span><span class="p">(</span><span class="n">gradient_funs</span><span class="p">,</span> <span class="n">problem_sizes</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;results_gradients=</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">results_gradients</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">results_gradients</span></div>
+
+
+<div class="viewcode-block" id="compute_hessians"><a class="viewcode-back" href="../../api/numdifftools.html#numdifftools.run_benchmark.compute_hessians">[docs]</a><span class="k">def</span> <span class="nf">compute_hessians</span><span class="p">(</span><span class="n">hessian_funs</span><span class="p">,</span> <span class="n">problem_sizes</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;starting hessian computation &#39;</span><span class="p">)</span>
+    <span class="n">results_hessians</span> <span class="o">=</span> <span class="n">_compute_benchmark</span><span class="p">(</span><span class="n">hessian_funs</span><span class="p">,</span> <span class="n">problem_sizes</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">problem_sizes</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;results_hessians=</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">results_hessians</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">results_hessians</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../api/numdifftools.html#numdifftools.run_benchmark.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">problem_sizes</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">96</span><span class="p">)</span>
+    <span class="n">symbols</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;-kx&#39;</span><span class="p">,</span> <span class="s1">&#39;:k&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;:k&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;--k^&#39;</span><span class="p">,</span> <span class="s1">&#39;--kv&#39;</span><span class="p">,</span> <span class="s1">&#39;-kp&#39;</span><span class="p">,</span> <span class="s1">&#39;-ks&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;--b&#39;</span><span class="p">,</span> <span class="s1">&#39;-k+&#39;</span><span class="p">)</span>
+
+    <span class="n">results_gradients</span> <span class="o">=</span> <span class="n">compute_gradients</span><span class="p">(</span><span class="n">gradient_funs</span><span class="p">,</span> <span class="n">problem_sizes</span><span class="p">)</span>
+    <span class="n">results_hessians</span> <span class="o">=</span> <span class="n">compute_hessians</span><span class="p">(</span><span class="n">hessian_funs</span><span class="p">,</span> <span class="n">problem_sizes</span><span class="p">)</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="n">results_gradients</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">txt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="s1">&#39;run times&#39;</span><span class="p">,</span> <span class="s1">&#39;errors&#39;</span><span class="p">]):</span>
+        <span class="n">objects</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;Jacobian &#39;</span> <span class="o">+</span> <span class="n">txt</span><span class="p">,</span> <span class="n">gradient_funs</span><span class="p">,</span>
+                    <span class="n">results_gradients</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">),</span>
+                   <span class="p">(</span><span class="s1">&#39;Hessian &#39;</span> <span class="o">+</span> <span class="n">txt</span><span class="p">,</span> <span class="n">hessian_funs</span><span class="p">,</span>
+                    <span class="n">results_hessians</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">plot_runtimes</span><span class="p">(</span><span class="n">objects</span><span class="p">,</span> <span class="n">problem_sizes</span><span class="p">,</span> <span class="n">symbols</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plot_errors</span><span class="p">(</span><span class="n">objects</span><span class="p">,</span> <span class="n">problem_sizes</span><span class="p">,</span> <span class="n">symbols</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2009-2015, Per A Brodtkorb, John D&#39;Errico.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.9.17',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

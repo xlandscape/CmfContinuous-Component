@@ -1,0 +1,532 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Concept &#8212; LanscapeModelingToolbox 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">LanscapeModelingToolbox 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="concept">
+<h1><strong>Concept</strong><a class="headerlink" href="#concept" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="catchment">
+<h2>Catchment<a class="headerlink" href="#catchment" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="programming-structure">
+<h3>Programming structure<a class="headerlink" href="#programming-structure" title="Permalink to this headline">¶</a></h3>
+<p>The model is implemented following an object-oriented programming approach using <a class="reference external" href="https://www.python.org/">Python3</a>. Natural entities
+are represented by a Class in Python. The relation between these classes is defined by
+a <a class="reference external" href="https://en.wikipedia.org/wiki/Has-a">has-a-relationship</a>, e.g. a catchment has one or more reaches and cells.
+Furthermore, the catchment holds one CatchmentOutlet, which is connected to the most downstream reaches. A DeepAquifer is connected to one or
+more cells and to the CatchmentOutlet and has no connection to the reaches. The storages are connected by various water fluxes (surface runoff, drainage,
+groundwater, discharge, evaporation, water uptake). All of them tranport water and solutes, except the fluxes evaporation and water uptake.
+Evaporation does not transport solutes at all. Solute transport by water uptake can be set by the user (plant uptake factor compound).</p>
+<div class="align-center figure">
+<img alt="_images/concept_uml_catchment.png" src="_images/concept_uml_catchment.png" />
+</div>
+<p>The cell is further divided into several storages which are represented by a fleible
+number of soil layer as well as a surface water, drainage and groundwater storage.
+The storages are connected to further cells or reaches.</p>
+<div class="align-center figure">
+<img alt="_images/concept_uml_cells.png" src="_images/concept_uml_cells.png" />
+</div>
+<p>Another set of classes provides functionalities, i.e. representations of natural processes. Most processes are taken from the CMF core library,
+but functionalities have been added related to canopy processes, drift assessment and aquatic efate (e.g. STEPS-1-2-3-4).</p>
+</div>
+<div class="section" id="modelling-structure">
+<h3>Modelling structure<a class="headerlink" href="#modelling-structure" title="Permalink to this headline">¶</a></h3>
+<p>The catchment with all its components, i.e. forests, fields, rivers and urban areas, is divided into a set of cells and river segments.
+Each cell has its unique land use, climate and soil type. Cells and river segments are connected to each other
+automatically by the model in order to simulate water and solute fluxes across the catchment. Water and solute fluxes are routed across the catchment
+with respect to different levels of detail. Exposure models can be coupled to assess the entry of solutes by drift, runoff and drainage into aquatic systems
+in order to derive predicted environmental concentrations (PEC) in sediment and water.</p>
+<div class="align-center figure">
+<img alt="_images/concept_assesmentsteps.png" src="_images/concept_assesmentsteps.png" />
+</div>
+<p>The user has the opportunity to select from three different option for running the whole catchment and one option to simulate only single cells. This is a unique future
+of the model, because it provides flexibility in terms of hydrological detail and spatial representation of the catchment.
+The different options are as follows:</p>
+<p>(a) <strong>completeCatchment:</strong> The entire flow network of the catchment is simulating including river segments and cells. All fluxes are simulated by CMF
+on the basis of climate and soil data.</p>
+<div class="align-center figure">
+<img alt="_images/concept_storageconnections.png" src="_images/concept_storageconnections.png" />
+</div>
+<p>(b) <strong>timeseriesCatchment:</strong> The entire flow network of the catchment is simulating including river segments and cells. The fluxes from single cells
+must be provided as time series for surface runoff, drainage flow and groundwater flow. Theses flows can be calculated using the <strong>*1dField</strong> option or by any other
+1D field scale model such as MACRO or PEARL.</p>
+<div class="align-center figure">
+<img alt="_images/concept_timeseries.png" src="_images/concept_timeseries.png" />
+</div>
+<p>(c) <strong>areayieldCatchment:</strong> Only the stream network is simulated. In order to simulate the inflow into each reach, the area weighted inflow
+is calculated by multiplying the related catchment area by observed flow. The catchment
+area is calculated on the basis on the cumulative areas of cells which are connected to directly or indirectly to the reach.</p>
+<div class="align-center figure">
+<img alt="_images/concept_instream.png" src="_images/concept_instream.png" />
+</div>
+<p>The last option differs from previous ones:</p>
+<p>(d) <strong>1dField:</strong> Only single fields are simulated with a 1D simulation approach. The soil is divided into several layers as well as holds a
+surface, drainage and groundwater flow. This approach is equal to the field representation of completeCatchment,
+but without connecting the cells across the catchment.</p>
+<div class="align-center figure">
+<img alt="_images/concept_1dfieldscale.png" src="_images/concept_1dfieldscale.png" />
+</div>
+</div>
+<div class="section" id="flow-connections">
+<h3>Flow connections<a class="headerlink" href="#flow-connections" title="Permalink to this headline">¶</a></h3>
+<p>An automatic procedure exist to create a flow network across a catchment by connecting cells and reaches to each other.
+The underlying script makes us of the Python packages scipy (<a class="reference external" href="https://docs.scipy.org/doc/scipy-0.18.1/reference/generated/scipy.spatial.Voronoi.html">scipy.spatial.Voronoi</a> ,
+<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html">scipy.interpolate.griddata</a> ) and <a class="reference external" href="https://pypi.org/project/Shapely/">shapely</a> .</p>
+<p>First, Thiessen-Polygons are calculated for each cell. Second, the altitude of each cell is compared with each neighbouring cell.
+The cell is connected to the nearest downslope cell. If a reach crosses the Thiessen-Polygon of a cell or a connection to another cell,
+a connection to the reach is created. Each cell has only one downslope neighbour (cell or reach), but can obtain flows from several cells.</p>
+<div class="align-center figure">
+<img alt="_images/usermanual_CatchmentConnector.png" src="_images/usermanual_CatchmentConnector.png" />
+</div>
+<p>Third, the flow network is simplified. The aim of the simplification is to achieve a flow network with
+direct flow connection which avoid long chains of cell connections. For each connection an algorithms test if the next cell
+can be skipped. This is the case, if the current cell touches the after next cell as well. The result
+of this procedure is shown in the example below. Each red connection was revised. For example,
+field f390 (left mid) would be connected to f419.By using the optimisation, the final connection is
+done with the field f444.</p>
+<div class="align-center figure">
+<img alt="_images/usermanual_CatchmentConnector2.png" src="_images/usermanual_CatchmentConnector2.png" />
+</div>
+</div>
+<div class="section" id="spatial-discretisation">
+<h3>Spatial discretisation<a class="headerlink" href="#spatial-discretisation" title="Permalink to this headline">¶</a></h3>
+<p>A catchment can be grouped into solver units in order to create independent sub-catchments which are integrated by one solver Of CMF.
+The algorithm starts at the catchment outlet and divides the catchment into solver units.
+which are create at each branch of the river. Each solver unit represents a hydrological independent unit which has one outlet, but
+can have one or more inflows from other solver units.</p>
+<div class="align-center figure">
+<img alt="_images/usermanual_CatchmentSeparator.png" src="_images/usermanual_CatchmentSeparator.png" />
+</div>
+<p>The process runs in the background. A sub-folder is automatically created which holds a single project folder for each solver unit.</p>
+<div class="align-center figure">
+<img alt="_images/usermanual_CatchmentSeparator2.png" src="_images/usermanual_CatchmentSeparator2.png" />
+</div>
+<p>A file called ‘solverunits_runorder.csv’ holds the information on the run sequence and the connection between solver units. If a solver unit has a downslope
+neighbour, the inflow data from the outlet is copied into the ‘Timeseries folder’ of the downslope solver unit as input for the upstream reach.</p>
+<div class="align-center figure">
+<img alt="_images/usermanual_CatchmentSeparator3.png" src="_images/usermanual_CatchmentSeparator3.png" />
+</div>
+</div>
+<div class="section" id="analysis">
+<h3>Analysis<a class="headerlink" href="#analysis" title="Permalink to this headline">¶</a></h3>
+<p>The results can be analysed for a whole catchment, a branch which consists of several reaches and individual reaches, e.g. closed to the outlet.
+The focus of the analysis is on the water flows as well as solute concentration in water and sediment of reaches. The latter one are part of
+each modelling option (completeCatchment, timeseriesCatchment, areayieldCatchment).</p>
+<div class="align-center figure">
+<a class="reference internal image-reference" href="_images/usermanual_CatchmentSummary.png"><img alt="_images/usermanual_CatchmentSummary.png" src="_images/usermanual_CatchmentSummary.png" style="width: 691.5px; height: 510.0px;" /></a>
+</div>
+</div>
+</div>
+<div class="section" id="natural-processes">
+<h2>Natural processes<a class="headerlink" href="#natural-processes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="hydrology">
+<h3>Hydrology<a class="headerlink" href="#hydrology" title="Permalink to this headline">¶</a></h3>
+<p>CMF serves as core library for this catchment model. Detailed information on the implementation of CMF and specific flux equations
+can be found in the documentation of CMF (<a class="reference external" href="https://philippkraft.github.io/cmf/">https://philippkraft.github.io/cmf/</a>).
+The processes which are used by the catchment model are explained shortly in the next paragraphs.</p>
+<p>Generally, a catchment model consists of storages which hold water and solutes. These storages are connected to each other by flux connections.
+Three types of flux connections are used which are related to different spatial units in the catchment:</p>
+<ul class="simple">
+<li><strong>Soil flux</strong>: The soil layer of a 1dField scale cell are connected via the <a class="reference external" href="https://philippkraft.github.io/cmf/classcmf_1_1upslope_1_1connections_1_1_richards.html">Richards’ equation</a>.</li>
+<li><strong>catchment flux</strong>: The field storages for surface water, drainage and groundwater are connected to neighbouring cells and reaches by a <a class="reference external" href="https://philippkraft.github.io/cmf/classcmf_1_1water_1_1kinematic__wave.html">Kinematic wave</a>. Note that CMF would also allow for more physical based methods such as <a class="reference external" href="https://philippkraft.github.io/cmf/classcmf_1_1upslope_1_1connections_1_1_darcy.html">Darcy</a> , but such an approach is limited by the high computational demand and availability of parameter.</li>
+<li><strong>River flux</strong>: The flux from one river segment to another is modelled with the <a class="reference external" href="https://philippkraft.github.io/cmf/classcmf_1_1river_1_1_manning.html">Manning’s equation</a>.</li>
+</ul>
+<p>The storages are localised by the spatial coordinates and altitude. Reaches can have one of three different types:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://philippkraft.github.io/cmf/classcmf_1_1river_1_1_triangular_reach.html">Triangular</a> : The profile of a river segment is represented by a v-shape. Even if this is not the case for most natural rivers, it is the preferable option if no information is at hand on the actual shape of the river segments.</li>
+<li><a class="reference external" href="https://philippkraft.github.io/cmf/classcmf_1_1river_1_1_rectangular_reach.html">Rectangular</a>: The rectangualar shape might be needed for artificial channels in urban areas or to represent manmade open water drainage channels.</li>
+<li><a class="reference external" href="https://philippkraft.github.io/cmf/classcmf_1_1river_1_1_s_w_a_t_reach_type.html">Trapezoidal</a>: The trapezoidal shape might results in the optimal representation of natural rivers. But more detailed information is needed on the shape of the river bed.</li>
+</ul>
+</div>
+<div class="section" id="solutes">
+<h3>Solutes<a class="headerlink" href="#solutes" title="Permalink to this headline">¶</a></h3>
+<p>The solute processes differ with the environmental compartment:</p>
+<ul class="simple">
+<li><strong>Soil flux</strong>: When assessing the flux of water and solutes along a 1D soil profile, a <a class="reference external" href="https://philippkraft.github.io/cmf/classcmf_1_1water_1_1_linear_adsorption.html">linear adsorption term</a>  is used to simulate adsorption/desorption to the soil matrix.</li>
+</ul>
+<div class="align-center figure">
+<img alt="_images/concept_soilsolutetransport.png" src="_images/concept_soilsolutetransport.png" />
+</div>
+<ul class="simple">
+<li><strong>catchment flux</strong>: CMF calculates conservative solute transport between storages with the possibility of assuming a fixed decay rate of the solute in the <a class="reference external" href="https://philippkraft.github.io/cmf/classcmf_1_1water_1_1_solute_storage.html">storage</a>.</li>
+<li><strong>River flux</strong>: The transport is conservative. In order to account for exchange between water and sediment phase, the model ships with an implementation of the STEPS-1-2-3-4 approach to assess adsorption/desorption to two sediment layer as well as degradation.</li>
+</ul>
+<p>Note, when using the time series option the user has the opportunity to set the water flux per hour (m³/day) as well as the related concentration of the solute.
+CMF solves than the transport across the catchment as defined by the different hydrological processes considering the spatial and temporal information from the time series.</p>
+</div>
+<div class="section" id="canopy">
+<h3>Canopy<a class="headerlink" href="#canopy" title="Permalink to this headline">¶</a></h3>
+<p>The canopy water balance is calculated on the basis of the approach and parametrisation provided by
+<a class="reference external" href="https://esdac.jrc.ec.europa.eu/projects/macro-0">FOCUS MARCO5.2</a> . A database ships with the model which holds
+a parametrisation of all FOCUS crops and scenarios.</p>
+<p>The crop development is modelled related to several development stages (emergence, maturity, harvest) which are
+in-turn defined by a cumulative sum of days. The leaf area index (LAI) is calculated based on the current development
+stage in relation to the cumulative days after sowing (DAS). Shape parameter are applied to scale the LAI to
+specific crop types. LAI is corrected for senescence at the end of the growing season resulting in
+the so called green LAI (GLAI).</p>
+<div class="align-center figure">
+<img alt="_images/concept_LAI.png" src="_images/concept_LAI.png" />
+</div>
+<p>The rooting depth defines the number of soil layer available for crop water uptake. Root growth is calculated by crop specific
+parameters (initial depth at emergence, maximum depth at maturity) related to crop development as shown below.</p>
+<div class="align-center figure">
+<img alt="_images/concept_rootingdepth.png" src="_images/concept_rootingdepth.png" />
+</div>
+<p>Actual water uptake and evaporation is calculated based on the LAI, rooting depth and potential evapotranspiration (PET).
+Firstly, PET is adjusted by the LAI to crop specific conditions resulting in resulting potential crop specific evapotranspiration,
+which is allocated over the rooting zone as potential root water uptake and evaporation (upper 10cm by default, set by user)
+depending on GLAI and LAI.</p>
+<p>Water uptake is limited by the available water in the soil as given by the matrix potential in each soil layer.
+The amount of water which can be extracted by the plant from the soil is given by the approach by Feddes et al.,
+where root water uptake takes place at matrix potential between field capacity (pF=1.8) and permanent wilting point (pF=4.2).
+In a certain range the water uptake is 100% and decreases to zero when the matrix potential reaches its upper and lower boundary.</p>
+<div class="align-center figure">
+<img alt="_images/concept_rootwateruptake.png" src="_images/concept_rootwateruptake.png" />
+</div>
+<p>Finally, the actual crop specific transpiration and evaporation is calculated related to actual soil moisture.</p>
+<div class="align-center figure">
+<img alt="_images/concept_eta.png" src="_images/concept_eta.png" />
+</div>
+<p>Please refer to the MACRO manual for further details. Some example parametrisations are shown below:</p>
+<div class="align-center figure">
+<img alt="_images/usermanual_cropcoefficients.png" src="_images/usermanual_cropcoefficients.png" />
+</div>
+</div>
+<div class="section" id="aquatic-efate">
+<h3>Aquatic efate<a class="headerlink" href="#aquatic-efate" title="Permalink to this headline">¶</a></h3>
+<p>The STEPS-1-2-3-4 approach by M. Klein (<a class="reference external" href="http://publica.fraunhofer.de/documents/N-73445.html">http://publica.fraunhofer.de/documents/N-73445.html</a>) has been implemented to assess
+aquatic PEC surface water and PEC sediment. Model coupling is realised by interfaces (see chapter model coupling).
+This way of coupling is known as operator split. Both models assess their own state variables and an
+interface (here a Python script) defines functions for data transfer between models on the memory level.
+The key features of STEPS-1-2-3-4 are as follow:</p>
+<ul class="simple">
+<li>A substance is defined by KOC and DT50.</li>
+<li>The system consists of one water layer and two sediment layer.</li>
+<li>Degradation is calculated by by DT50 in water and sediment.</li>
+<li>Sorption / desorption are calculated by the gradient between water layer and pore water of sediment.</li>
+</ul>
+<div class="align-center figure">
+<img alt="_images/concept_steps1234.png" src="_images/concept_steps1234.png" />
+</div>
+<p>Each river segment of the catchment model is coupled to a STEPS-1-2-3-4 instance.
+The catchment model solves the conservative solute transport between river segments.
+STEPS-1-2-3-4 calculates degradation in the water and sediment phase as well as sorption/adsorption to the sediment layer</p>
+<div class="align-center figure">
+<img alt="_images/concept_steps1234_processes.png" src="_images/concept_steps1234_processes.png" />
+</div>
+</div>
+</div>
+<div class="section" id="model-coupling">
+<h2>Model coupling<a class="headerlink" href="#model-coupling" title="Permalink to this headline">¶</a></h2>
+<p>Model coupling is done by using pre-defined interfaces which are implemented as classes
+in Python which is a common strategy to couple environmental models (Kraft et. al, 2010; Sanner et al. 1999).
+The following code-snippet shows an example where a Model1 delivers a parameter which is
+used by Model2. Moreover, the interface holds unit conversion factors if required.</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Model1</span><span class="p">:</span>
+      <span class="sd">&quot;&quot;&quot; A model which calculates stateA.&quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">interface</span> <span class="o">=</span> <span class="bp">None</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">stateA</span> <span class="o">=</span> <span class="mf">0.</span>
+      <span class="k">def</span> <span class="nf">get_stateA</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stateA</span>
+      <span class="k">def</span> <span class="nf">calculate_stateA</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <span class="sd">&quot;&quot;&quot; Calculate stateA variable.&quot;&quot;&quot;</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">stateA</span> <span class="o">=</span> <span class="mi">42</span>
+      <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">interface</span><span class="p">):</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">interface</span> <span class="o">=</span> <span class="n">interface</span>
+      <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <span class="sd">&quot;&quot;&quot; Run model for one time step.&quot;&quot;&quot;</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">calcualte_stateA</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">Model2</span><span class="p">:</span>
+      <span class="sd">&quot;&quot;&quot; A model which requires stateA to calculate stateB&quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">interface</span> <span class="o">=</span> <span class="bp">None</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">stateB</span> <span class="o">=</span> <span class="mf">0.</span>
+      <span class="k">def</span> <span class="nf">get_stateB</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stateB</span>
+      <span class="k">def</span> <span class="nf">calculate_stateB</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">stateA</span><span class="p">):</span>
+              <span class="sd">&quot;&quot;&quot; Calculate stateB variable based on stateA.&quot;&quot;&quot;</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">stateB</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">stateA</span>
+      <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">interface</span><span class="p">):</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">interface</span> <span class="o">=</span> <span class="n">interface</span>
+      <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <span class="sd">&quot;&quot;&quot; Run model for one time step.&quot;&quot;&quot;</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">calcualte_stateB</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">get_stateA</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Interface_model1_2</span><span class="p">:</span>
+      <span class="sd">&quot;&quot;&quot; Interface between Model1 and Model2&quot;&quot;&quot;</span>
+      <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">model1</span><span class="p">,</span><span class="n">model2</span><span class="p">,</span><span class="n">unit_conversion_stateA</span><span class="p">):</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">model1</span> <span class="o">=</span> <span class="n">model1</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">model2</span> <span class="o">=</span> <span class="n">model2</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">unit_conversion_stateA</span> <span class="o">=</span> <span class="n">unit_conversion_stateA</span>
+      <span class="k">def</span> <span class="nf">get_stateA</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <span class="c1"># get data from model</span>
+              <span class="n">stateA</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model1</span><span class="o">.</span><span class="n">get_stateA</span><span class="p">()</span>
+              <span class="c1"># convert unit if required</span>
+              <span class="n">stateA</span> <span class="o">*=</span> <span class="n">unit_conversion_stateA</span>
+              <span class="k">return</span> <span class="n">stateA</span>
+      <span class="k">def</span> <span class="nf">connect_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">model1</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">model2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span>
+
+<span class="c1">##################################################################</span>
+<span class="c1"># setup models and conduct model runs for a certain time period</span>
+<span class="c1"># create models</span>
+<span class="n">model1</span> <span class="o">=</span> <span class="n">Model1</span><span class="p">()</span>
+<span class="n">model2</span> <span class="o">=</span> <span class="n">Model2</span><span class="p">()</span>
+<span class="c1"># create interface</span>
+<span class="n">interface</span> <span class="o">=</span> <span class="n">Inferace_model1_2</span><span class="p">(</span><span class="n">model1</span><span class="p">,</span><span class="n">model2</span><span class="p">,</span><span class="n">unit_conversion_stateA</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="c1"># connect models</span>
+<span class="n">interface</span><span class="o">.</span><span class="n">connect_models</span><span class="p">()</span>
+<span class="c1"># run models</span>
+<span class="n">timesteps</span> <span class="o">=</span> <span class="p">[</span> <span class="o">...</span>  <span class="n">some</span> <span class="n">time</span> <span class="n">period</span> <span class="o">...</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">timestep</span> <span class="ow">in</span> <span class="n">timesteps</span><span class="p">:</span>
+      <span class="n">model1</span><span class="p">()</span>
+      <span class="n">model2</span><span class="p">()</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="what-is-meant-by-is-based-on-cmf-library">
+<h2>What is meant by “is based on CMF library”?<a class="headerlink" href="#what-is-meant-by-is-based-on-cmf-library" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://github.com/philippkraft/cmf">CMF</a> is a hydrological programming
+library which holds functions to create storages (e.g. groundwater) and
+connect them by processes (e.g. kinematic wave). Thus, CMF is a toolbox
+which allows to setup individual models using Python scripting. The
+following code-snippet shows a straight forward hydrological model with
+one cell which has two soil layer as well as a surface water and a groundwater
+storage. The surface and groundwater storage are connect to a river segment:</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># import library</span>
+<span class="kn">import</span> <span class="nn">CMF</span>
+<span class="c1"># create a new container for all CMF objects</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">cmf</span><span class="o">.</span><span class="n">project</span><span class="p">()</span>
+<span class="c1"># create a groundwater storage</span>
+<span class="n">gw</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">NewStorage</span><span class="p">(</span><span class="s2">&quot;groundwater storage&quot;</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">z</span><span class="o">=</span><span class="mf">9.5</span><span class="p">)</span>
+<span class="c1"># create a cell</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">NewCell</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">z</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">area</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">with_surfacewater</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="c1"># add soil layer (0m-1m) with a saturated conductivity of 1m/day</span>
+<span class="n">l_upper</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">add_alyer</span><span class="p">(</span><span class="n">depth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">rcurve</span><span class="o">=</span><span class="n">cmf</span><span class="o">.</span><span class="n">VanGenuchtenMualem</span><span class="p">(</span><span class="n">Ksat</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="c1"># add another soil layer (1m-2m) with a saturated conductivity of 1m/day</span>
+<span class="n">l_lower</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">add_alyer</span><span class="p">(</span><span class="n">depth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">rcurve</span><span class="o">=</span><span class="n">cmf</span><span class="o">.</span><span class="n">VanGenuchtenMualem</span><span class="p">(</span><span class="n">Ksat</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="c1"># connect soil layer with Richards equation</span>
+<span class="n">c</span><span class="o">.</span><span class="n">install_connection</span><span class="p">(</span><span class="n">cmf</span><span class="o">.</span><span class="n">Richards</span><span class="p">)</span>
+<span class="c1"># connect lower soil layer with groundwater storage</span>
+<span class="n">cmf</span><span class="o">.</span><span class="n">Richards</span><span class="p">(</span><span class="n">l_lower</span><span class="p">,</span><span class="n">gw</span><span class="p">)</span>
+<span class="c1"># create a river segment with a length of 100m and a triangular shape</span>
+<span class="n">reach</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">NewReach</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">z</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
+               <span class="n">shape</span><span class="o">=</span><span class="n">cmf</span><span class="o">.</span><span class="n">TriangularReach</span><span class="p">(</span><span class="n">flowwidth</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="n">bankslope</span><span class="o">=</span><span class="mf">0.2</span><span class="p">))</span>
+<span class="c1"># connect gw with reach (residence time = 1day)</span>
+<span class="n">cmf</span><span class="o">.</span><span class="n">kinematic_wave</span><span class="p">(</span><span class="n">gw</span><span class="p">,</span><span class="n">reach</span><span class="p">,</span><span class="n">res_t</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="c1"># create a numerical solver and set number of threads</span>
+<span class="n">cmf</span><span class="o">.</span><span class="n">set_parallel_threads</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">solver</span> <span class="o">=</span> <span class="n">cmf</span><span class="o">.</span><span class="n">CVodeIntegrator</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="mf">1e-9</span><span class="p">)</span>
+<span class="c1"># run the model for a certain timeperiod</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">begin</span><span class="p">,</span><span class="n">end</span><span class="p">,</span><span class="n">step</span><span class="o">=</span><span class="n">cmf</span><span class="o">.</span><span class="n">h</span><span class="p">):</span>
+    <span class="c1"># e.g. store some state variables</span>
+    <span class="n">gw_flux</span> <span class="o">=</span> <span class="n">gw</span><span class="o">.</span><span class="n">flux_to</span><span class="p">(</span><span class="n">reach</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<p>This example is only for illustration of the functionalities of the CMF library.
+CMF itself holds no information on specific parameterization or a pre-defined
+spatial discretization. It provides a infrastructure to setup a catchment
+(storages, connections, mechanistic processes) and uses the finite volume method to turn
+the related partial differential equations into a system of
+<a class="reference external" href="https://philippkraft.github.io/cmf/finite_volume_method.html">ordinary differential equations (ODE)</a>. The ODE system in turn is solved by using
+the <a class="reference external" href="https://computation.llnl.gov/projects/sundials">CVODE solver</a> .</p>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<p>Klein, M. 2007. “Long term surface water simulations with STEPS-1-2-3-4”. Proceedings of the 13th Symposium on Pesticide Chemistry,Piacenza.</p>
+<p>Kraft, P., S. Multsch, K. B. Vaché, H.-G. Frede, and L. Breuer. 2010. “Using Python as a Coupling Platform for Integrated Catchment Models.” Advances in Geosciences 27 (27): 51–56. <a class="reference external" href="https://doi.org/10.5194/adgeo-27-51-2010">https://doi.org/10.5194/adgeo-27-51-2010</a>.</p>
+<p>Kraft, Philipp, Kellie B. Vaché, Hans-Georg Frede, and Lutz Breuer. 2011. “CMF: A Hydrological Programming Language Extension for Integrated Catchment Models.” Environmental Modelling &amp; Software 26 (6):828–830.</p>
+<p>Sanner, Michel F. 1999. “Python: A Programming Language for Software Integration and Development.” J Mol Graph Model 17 (1):57–61.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><strong>Concept</strong></a><ul>
+<li><a class="reference internal" href="#catchment">Catchment</a><ul>
+<li><a class="reference internal" href="#programming-structure">Programming structure</a></li>
+<li><a class="reference internal" href="#modelling-structure">Modelling structure</a></li>
+<li><a class="reference internal" href="#flow-connections">Flow connections</a></li>
+<li><a class="reference internal" href="#spatial-discretisation">Spatial discretisation</a></li>
+<li><a class="reference internal" href="#analysis">Analysis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#natural-processes">Natural processes</a><ul>
+<li><a class="reference internal" href="#hydrology">Hydrology</a></li>
+<li><a class="reference internal" href="#solutes">Solutes</a></li>
+<li><a class="reference internal" href="#canopy">Canopy</a></li>
+<li><a class="reference internal" href="#aquatic-efate">Aquatic efate</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#model-coupling">Model coupling</a></li>
+<li><a class="reference internal" href="#what-is-meant-by-is-based-on-cmf-library">What is meant by “is based on CMF library”?</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/concept.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2018, knoell Germany GmbH.
+    </div>
+  </body>
+</html>

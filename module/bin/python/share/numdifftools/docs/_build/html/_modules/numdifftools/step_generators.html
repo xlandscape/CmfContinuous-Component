@@ -1,0 +1,532 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>numdifftools.step_generators &mdash; numdifftools 0.9.17 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="numdifftools 0.9.17 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> numdifftools
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.17
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html">Introduction to Numdifftools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#documentation-and-code">Documentation and code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#unit-tests">Unit tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#acknowledgement">Acknowledgement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/numerical/main.html">Numerical differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/algorithmic/main.html">Algorithmic differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../authors.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">Module reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">numdifftools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>numdifftools.step_generators</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for numdifftools.step_generators</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numdifftools.extrapolation</span> <span class="kn">import</span> <span class="n">EPS</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+
+<span class="n">_STATE</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;State&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;method&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">make_exact</span><span class="p">(</span><span class="n">h</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Make sure h is an exact representable number</span>
+
+<span class="sd">    This is important when calculating numerical derivatives and is</span>
+<span class="sd">    accomplished by adding 1.0 and then subtracting 1.0.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">h</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span>
+
+
+<span class="k">def</span> <span class="nf">valarray</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">NaN</span><span class="p">,</span> <span class="n">typecode</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return an array of all value.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">typecode</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">typecode</span> <span class="o">=</span> <span class="nb">bool</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">typecode</span><span class="p">)</span> <span class="o">*</span> <span class="n">value</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="k">def</span> <span class="nf">nominal_step</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return nominal step&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">1.0</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x</span><span class="p">))</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">base_step</span><span class="p">(</span><span class="n">scale</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return base_step = EPS ** (1. / scale)&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">EPS</span> <span class="o">**</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="n">scale</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">default_scale</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="n">high_order</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">order</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">order2</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">order</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">n4</span> <span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">4</span>
+    <span class="n">n_mod_4</span> <span class="o">=</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">4</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="p">([</span><span class="n">n4</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span> <span class="o">+</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">)),</span>
+          <span class="mf">3.65</span> <span class="o">+</span> <span class="n">n4</span> <span class="o">*</span> <span class="p">(</span><span class="mi">5</span> <span class="o">+</span> <span class="mf">1.5</span><span class="o">**</span><span class="n">n4</span><span class="p">),</span>
+          <span class="mf">3.65</span> <span class="o">+</span> <span class="n">n4</span> <span class="o">*</span> <span class="p">(</span><span class="mi">5</span> <span class="o">+</span> <span class="mf">1.7</span><span class="o">**</span><span class="n">n4</span><span class="p">),</span>
+          <span class="mf">7.30</span> <span class="o">+</span> <span class="n">n4</span> <span class="o">*</span> <span class="p">(</span><span class="mi">5</span> <span class="o">+</span> <span class="mf">2.1</span><span class="o">**</span><span class="n">n4</span><span class="p">)][</span><span class="n">n_mod_4</span><span class="p">])</span> <span class="k">if</span> <span class="n">high_order</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">multicomplex</span><span class="o">=</span><span class="mf">1.35</span><span class="p">,</span> <span class="nb">complex</span><span class="o">=</span><span class="mf">1.35</span><span class="o">+</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">)</span> <span class="o">+</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="nb">dict</span><span class="p">(</span><span class="n">multicomplex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">complex</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="mf">1.3</span><span class="p">)</span> <span class="o">+</span>
+            <span class="n">order2</span> <span class="o">*</span> <span class="nb">dict</span><span class="p">(</span><span class="n">central</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">forward</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">backward</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+
+<span class="k">class</span> <span class="nc">BasicMaxStepGenerator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a sequence of steps of decreasing magnitude</span>
+
+<span class="sd">    where</span>
+<span class="sd">        steps = base_step * step_ratio ** (-i + offset), i=0, 1,.., num_steps-1.</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    base_step : float, array-like.</span>
+<span class="sd">       Defines the start step, i.e., maximum step</span>
+<span class="sd">    step_ratio : real scalar.</span>
+<span class="sd">        Ratio between sequential steps generated.  Note: Ratio &gt; 1</span>
+<span class="sd">    num_steps : scalar integer.</span>
+<span class="sd">        defines number of steps generated.</span>
+<span class="sd">    offset : real scalar, optional, default 0</span>
+<span class="sd">        offset to the base step</span>
+
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; step_gen = BasicMaxStepGenerator(base_step=2.0, step_ratio=2, num_steps=4)</span>
+<span class="sd">    &gt;&gt;&gt; [s for s in step_gen()]</span>
+<span class="sd">    [2.0, 1.0, 0.5, 0.25]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_sign</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_step</span><span class="p">,</span> <span class="n">step_ratio</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_step</span> <span class="o">=</span> <span class="n">base_step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step_ratio</span> <span class="o">=</span> <span class="n">step_ratio</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span> <span class="o">=</span> <span class="n">num_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span>
+
+    <span class="k">def</span> <span class="nf">_range</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">base_step</span><span class="p">,</span> <span class="n">step_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_step</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_ratio</span>
+        <span class="n">sgn</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_range</span><span class="p">():</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="n">base_step</span> <span class="o">*</span> <span class="n">step_ratio</span> <span class="o">**</span> <span class="p">(</span><span class="n">sgn</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="n">offset</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">step</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="k">yield</span> <span class="n">step</span>
+
+
+<span class="k">class</span> <span class="nc">BasicMinStepGenerator</span><span class="p">(</span><span class="n">BasicMaxStepGenerator</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a sequence of steps of decreasing magnitude</span>
+
+<span class="sd">    where</span>
+<span class="sd">        steps = base_step * step_ratio ** (i + offset), i=num_steps-1,... 1, 0.</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    base_step : float, array-like.</span>
+<span class="sd">       Defines the end step, i.e., minimum step</span>
+<span class="sd">    step_ratio : real scalar.</span>
+<span class="sd">        Ratio between sequential steps generated.  Note: Ratio &gt; 1</span>
+<span class="sd">    num_steps : scalar integer.</span>
+<span class="sd">        defines number of steps generated.</span>
+<span class="sd">    offset : real scalar, optional, default 0</span>
+<span class="sd">        offset to the base step</span>
+
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; step_gen = BasicMinStepGenerator(base_step=0.25, step_ratio=2, num_steps=4)</span>
+<span class="sd">    &gt;&gt;&gt; [s for s in step_gen()]</span>
+<span class="sd">    [2.0, 1.0, 0.5, 0.25]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_sign</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">_range</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="MinStepGenerator"><a class="viewcode-back" href="../../api/generated/numdifftools.limits.MinStepGenerator.html#numdifftools.core.MinStepGenerator">[docs]</a><span class="k">class</span> <span class="nc">MinStepGenerator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a sequence of steps</span>
+
+<span class="sd">    where</span>
+<span class="sd">        steps = step_nom * base_step * step_ratio ** (i + offset)</span>
+<span class="sd">    for  i = num_steps-1,... 1, 0.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    base_step : float, array-like, optional</span>
+<span class="sd">        Defines the minimum step, if None, the value is set to EPS**(1/scale)</span>
+<span class="sd">    step_ratio : real scalar, optional, default 2</span>
+<span class="sd">        Ratio between sequential steps generated.</span>
+<span class="sd">        Note: Ratio &gt; 1</span>
+<span class="sd">        If None then step_ratio is 2 for n=1 otherwise step_ratio is 1.6</span>
+<span class="sd">    num_steps : scalar integer, optional, default  min_num_steps + num_extrap</span>
+<span class="sd">        defines number of steps generated. It should be larger than</span>
+<span class="sd">        min_num_steps = (n + order - 1) / fact where fact is 1, 2 or 4 depending</span>
+<span class="sd">        on differentiation method used.</span>
+<span class="sd">    step_nom :  default maximum(log(1+|x|), 1)</span>
+<span class="sd">        Nominal step where x is supplied at runtime through the __call__ method.</span>
+<span class="sd">    offset : real scalar, optional, default 0</span>
+<span class="sd">        offset to the base step</span>
+<span class="sd">    num_extrap : scalar integer</span>
+<span class="sd">        num_extrap</span>
+<span class="sd">    check_num_steps : boolean</span>
+<span class="sd">        If True make sure num_steps larger than the minimum required steps.</span>
+<span class="sd">    use_exact_steps : boolean</span>
+<span class="sd">        If true make sure exact steps are generated</span>
+<span class="sd">    scale : real scalar, optional</span>
+<span class="sd">        scale used in base step. If not None it will override the default</span>
+<span class="sd">        computed with the default_scale function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_step_generator</span> <span class="o">=</span> <span class="n">BasicMinStepGenerator</span>
+
+<div class="viewcode-block" id="MinStepGenerator.__init__"><a class="viewcode-back" href="../../api/generated/numdifftools.limits.MinStepGenerator.html#numdifftools.core.MinStepGenerator.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_step</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">step_ratio</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">step_nom</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_extrap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">use_exact_steps</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                 <span class="n">check_num_steps</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_step</span> <span class="o">=</span> <span class="n">base_step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step_nom</span> <span class="o">=</span> <span class="n">step_nom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span> <span class="o">=</span> <span class="n">num_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step_ratio</span> <span class="o">=</span> <span class="n">step_ratio</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_extrap</span> <span class="o">=</span> <span class="n">num_extrap</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_num_steps</span> <span class="o">=</span> <span class="n">check_num_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_exact_steps</span> <span class="o">=</span> <span class="n">use_exact_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">scale</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="n">_STATE</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">class_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="n">kwds</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;{0!s}={1!s}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)))</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;{0!s}({1!s})&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">class_name</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">kwds</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">_x</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span>
+            <span class="k">return</span> <span class="n">default_scale</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span>
+
+    <span class="nd">@scale.setter</span>
+    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span> <span class="o">=</span> <span class="n">scale</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">base_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_step</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">base_step</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_step</span>
+
+    <span class="nd">@base_step.setter</span>
+    <span class="k">def</span> <span class="nf">base_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_step</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_base_step</span> <span class="o">=</span> <span class="n">base_step</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">min_num_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">_x</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span>
+        <span class="n">num_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="n">order</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;central&#39;</span><span class="p">,</span> <span class="s1">&#39;central2&#39;</span><span class="p">,</span> <span class="s1">&#39;complex&#39;</span><span class="p">,</span> <span class="s1">&#39;multicomplex&#39;</span><span class="p">]:</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="mi">4</span> <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;complex&#39;</span> <span class="ow">and</span> <span class="p">(</span><span class="n">n</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">order</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">)</span> <span class="k">else</span> <span class="mi">2</span>
+            <span class="n">num_steps</span> <span class="o">=</span> <span class="n">num_steps</span> <span class="o">//</span> <span class="n">step</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">num_steps</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">min_num_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_num_steps</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_steps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">num_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_steps</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_num_steps</span><span class="p">:</span>
+                <span class="n">num_steps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">num_steps</span><span class="p">,</span> <span class="n">min_num_steps</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">num_steps</span>
+        <span class="k">return</span> <span class="n">min_num_steps</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_extrap</span><span class="p">)</span>
+
+    <span class="nd">@num_steps.setter</span>
+    <span class="k">def</span> <span class="nf">num_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_steps</span> <span class="o">=</span> <span class="n">num_steps</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">step_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
+        <span class="n">step_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_ratio</span>
+        <span class="k">if</span> <span class="n">step_ratio</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">step_ratio</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_state</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="mf">1.6</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">step_ratio</span><span class="p">)</span>
+
+    <span class="nd">@step_ratio.setter</span>
+    <span class="k">def</span> <span class="nf">step_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_ratio</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step_ratio</span> <span class="o">=</span> <span class="n">step_ratio</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">step_nom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span><span class="o">.</span><span class="n">x</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_nom</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">nominal_step</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">valarray</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_step_nom</span><span class="p">)</span>
+
+    <span class="nd">@step_nom.setter</span>
+    <span class="k">def</span> <span class="nf">step_nom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_nom</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step_nom</span> <span class="o">=</span> <span class="n">step_nom</span>
+
+    <span class="k">def</span> <span class="nf">step_generator_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="n">_STATE</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">method</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
+        <span class="n">base_step</span><span class="p">,</span> <span class="n">step_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_step</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_nom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_ratio</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_exact_steps</span><span class="p">:</span>
+            <span class="n">base_step</span> <span class="o">=</span> <span class="n">make_exact</span><span class="p">(</span><span class="n">base_step</span><span class="p">)</span>
+            <span class="n">step_ratio</span> <span class="o">=</span> <span class="n">make_exact</span><span class="p">(</span><span class="n">step_ratio</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_generator</span><span class="p">(</span><span class="n">base_step</span><span class="o">=</span><span class="n">base_step</span><span class="p">,</span>
+                                    <span class="n">step_ratio</span><span class="o">=</span><span class="n">step_ratio</span><span class="p">,</span>
+                                    <span class="n">num_steps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_steps</span><span class="p">,</span>
+                                    <span class="n">offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="n">step_generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_generator_function</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">step_generator</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MaxStepGenerator"><a class="viewcode-back" href="../../api/generated/numdifftools.core.MaxStepGenerator.html#numdifftools.core.MaxStepGenerator">[docs]</a><span class="k">class</span> <span class="nc">MaxStepGenerator</span><span class="p">(</span><span class="n">MinStepGenerator</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a sequence of steps</span>
+
+<span class="sd">    where</span>
+<span class="sd">        steps = step_nom * base_step * step_ratio ** (-i + offset)</span>
+<span class="sd">    for  i = 0, 1, ..., num_steps-1.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    base_step : float, array-like, default 2.0</span>
+<span class="sd">        Defines the maximum step, if None, the value is set to EPS**(1/scale)</span>
+<span class="sd">    step_ratio : real scalar, optional, default 2</span>
+<span class="sd">        Ratio between sequential steps generated.</span>
+<span class="sd">        Note: Ratio &gt; 1</span>
+<span class="sd">        If None then step_ratio is 2 for n=1 otherwise step_ratio is 1.6</span>
+<span class="sd">    num_steps : scalar integer, optional, default  min_num_steps + num_extrap</span>
+<span class="sd">        defines number of steps generated. It should be larger than</span>
+<span class="sd">        min_num_steps = (n + order - 1) / fact where fact is 1, 2 or 4 depending</span>
+<span class="sd">        on differentiation method used.</span>
+<span class="sd">    step_nom :  default maximum(log(1+|x|), 1)</span>
+<span class="sd">        Nominal step where x is supplied at runtime through the __call__ method.</span>
+<span class="sd">    offset : real scalar, optional, default 0</span>
+<span class="sd">        offset to the base step</span>
+<span class="sd">    num_extrap : scalar integer</span>
+<span class="sd">        num_extrap</span>
+<span class="sd">    check_num_steps : boolean</span>
+<span class="sd">        If True make sure num_steps larger than the minimum required steps.</span>
+<span class="sd">    use_exact_steps : boolean</span>
+<span class="sd">        If true make sure exact steps are generated</span>
+<span class="sd">    scale : real scalar, default 500</span>
+<span class="sd">        scale used in base step.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_step_generator</span> <span class="o">=</span> <span class="n">BasicMaxStepGenerator</span>
+
+<div class="viewcode-block" id="MaxStepGenerator.__init__"><a class="viewcode-back" href="../../api/generated/numdifftools.core.MaxStepGenerator.html#numdifftools.core.MaxStepGenerator.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_step</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">step_ratio</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+                 <span class="n">step_nom</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_extrap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">use_exact_steps</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">check_num_steps</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MaxStepGenerator</span><span class="p">,</span>
+              <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">base_step</span><span class="o">=</span><span class="n">base_step</span><span class="p">,</span> <span class="n">step_ratio</span><span class="o">=</span><span class="n">step_ratio</span><span class="p">,</span>
+                             <span class="n">num_steps</span><span class="o">=</span><span class="n">num_steps</span><span class="p">,</span> <span class="n">step_nom</span><span class="o">=</span><span class="n">step_nom</span><span class="p">,</span>
+                             <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">num_extrap</span><span class="o">=</span><span class="n">num_extrap</span><span class="p">,</span>
+                             <span class="n">use_exact_steps</span><span class="o">=</span><span class="n">use_exact_steps</span><span class="p">,</span>
+                             <span class="n">check_num_steps</span><span class="o">=</span><span class="n">check_num_steps</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">)</span></div></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">numdifftools.testing</span> <span class="kn">import</span> <span class="n">test_docstrings</span>
+    <span class="n">test_docstrings</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2009-2015, Per A Brodtkorb, John D&#39;Errico.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.9.17',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

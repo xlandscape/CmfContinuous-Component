@@ -1,0 +1,4 @@
+[console_scripts]
+intake = intake.cli.client.__main__:main
+intake-server = intake.cli.server.__main__:main
+

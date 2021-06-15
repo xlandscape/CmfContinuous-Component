@@ -1,0 +1,41 @@
+Metadata-Version: 2.1
+Name: pythreejs
+Version: 2.0.2
+Summary: Interactive 3d graphics for the Jupyter notebook, using Three.js from Jupyter interactive widgets.
+Home-page: https://github.com/jupyter-widgets/pythreejs
+Author: PyThreejs Development Team
+Author-email: jason@jasongrout.org
+License: BSD
+Keywords: ipython,jupyter,widgets,webgl,graphics,3d
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Multimedia :: Graphics
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: JavaScript
+Provides-Extra: docs
+Provides-Extra: examples
+Provides-Extra: test
+Requires-Dist: ipywidgets (>=7.2.1)
+Requires-Dist: ipydatawidgets (>=1.1.1)
+Requires-Dist: numpy
+Provides-Extra: docs
+Requires-Dist: sphinx (>=1.5); extra == 'docs'
+Requires-Dist: nbsphinx (>=0.2.13); extra == 'docs'
+Requires-Dist: jupyter-sphinx; extra == 'docs'
+Requires-Dist: nbsphinx-link; extra == 'docs'
+Provides-Extra: examples
+Requires-Dist: scipy; extra == 'examples'
+Requires-Dist: matplotlib; extra == 'examples'
+Requires-Dist: scikit-image; extra == 'examples'
+Provides-Extra: test
+Requires-Dist: nbval; extra == 'test'
+Requires-Dist: pytest-check-links; extra == 'test'
+Requires-Dist: numpy (>=1.14); extra == 'test'
+
+A Python/ThreeJS bridge utilizing the Jupyter widget infrastructure.
+
+

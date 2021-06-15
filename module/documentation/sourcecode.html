@@ -1,0 +1,922 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Source code &#8212; LanscapeModelingToolbox 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">LanscapeModelingToolbox 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-exam">
+<span id="source-code"></span><h1><strong>Source code</strong><a class="headerlink" href="#module-exam" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="cell">
+<h2>Cell<a class="headerlink" href="#cell" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-exam.Cmf1d">
+<span id="cmf1d"></span><h3>Cmf1d<a class="headerlink" href="#module-exam.Cmf1d" title="Permalink to this headline">¶</a></h3>
+<span class="target" id="module-Cmf1d"></span><dl class="class">
+<dt id="exam.Cmf1d.Cmf1d">
+<em class="property">class </em><code class="descclassname">exam.Cmf1d.</code><code class="descname">Cmf1d</code><span class="sig-paren">(</span><em>AgricultureField</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Cmf1d.html#Cmf1d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Cmf1d.Cmf1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>The soil layer are paramterized according to the input table from
+AgriculturalField.SoilLayerInfo. Each soil layer holds a Neuman-
+Boundary which enables the connection to the plant model.</p>
+<p>Surface runoff is caclulated based on GreenAmptInfiltration and 
+connected with a river segment by KinematicSurfaceRunoff. Other 
+connection types are possible.</p>
+<p>A groundwater storage recieves water from the lowest soil layer
+vie Richards’ flow. The gr storage is connected with the river 
+segment with kinematic_wave.</p>
+<p>A drainage can be installed which enables wate rflow from a specific 
+deprh into the river segment.</p>
+<p>Plant ET is modelled with CMDF or Plant.py. In both cases, plant LAI and 
+development is calcualted by Plant.py.</p>
+<p>A linear isotherm for adsorption is assumed with a decay rate according
+to substance information.</p>
+<p>Soil column and reaches can be connected in different ways as defined
+in the input file, e.g. the sw,gw and drainage storage of one cell can
+be connected with a river segment or another soil column. Moreover, not
+all storages (sw,gw,drainage) must be considered.</p>
+<p>Note that CMF1d represents the base class for the implementation of other
+more specific setups of a 1DField with CMF:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Cmf1d_richards.py</li>
+<li>Cmf1d_richards_bucket.py</li>
+<li>Cmf1d_storage.py</li>
+<li>Cmf1d_timeseries.py</li>
+</ul>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>AgricultureField</strong> (<em>AgricultureField</em>) – Agriculture field</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="exam.Cmf1d.Cmf1d.Eact">
+<code class="descname">Eact</code><a class="headerlink" href="#exam.Cmf1d.Cmf1d.Eact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns actual evaporation (mm, read-only).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Cmf1d.Cmf1d.Kr">
+<code class="descname">Kr</code><a class="headerlink" href="#exam.Cmf1d.Cmf1d.Kr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns evaporation reduction factor (list,read-only).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Cmf1d.Cmf1d.PressureHead">
+<code class="descname">PressureHead</code><a class="headerlink" href="#exam.Cmf1d.Cmf1d.PressureHead" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns pressure headof soil layer (cm, read-only).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Cmf1d.Cmf1d.Tact">
+<code class="descname">Tact</code><a class="headerlink" href="#exam.Cmf1d.Cmf1d.Tact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns actual transpiration (mm, read-only).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Cmf1d.Cmf1d.Vdr">
+<code class="descname">Vdr</code><a class="headerlink" href="#exam.Cmf1d.Cmf1d.Vdr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns draiange water volume (m3, read-only)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Cmf1d.Cmf1d.Vgw">
+<code class="descname">Vgw</code><a class="headerlink" href="#exam.Cmf1d.Cmf1d.Vgw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns groundwater volume in (m3, read-only)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Cmf1d.Cmf1d.Vsoil">
+<code class="descname">Vsoil</code><a class="headerlink" href="#exam.Cmf1d.Cmf1d.Vsoil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns water volume of each soil layer (m3)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Cmf1d.Cmf1d.Vsw">
+<code class="descname">Vsw</code><a class="headerlink" href="#exam.Cmf1d.Cmf1d.Vsw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns surface water volume in (m3, read-only)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Cmf1d.Cmf1d.add_drainage">
+<code class="descname">add_drainage</code><span class="sig-paren">(</span><em>depth</em>, <em>suction_limit</em>, <em>t_ret</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Cmf1d.html#Cmf1d.add_drainage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Cmf1d.Cmf1d.add_drainage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a drainage with a kinematic wave representation at depth.
+Here, the drainage becomes active when the layer saturation 
+is above field capacity
+:param: depth in m
+:param: suction_limit The drainage becomes active below the 
+suction pressure in m.</p>
+<blockquote>
+<div>Field capacity is between pF 1.8 to pF 2.5, that is 
+a suction pressure between 0.63 - 3.16m</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Param:</th><td class="field-body">t_ret Retention time in drainage</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary describing the drainage:
+dict(outlet=outlet, depth=depth, layer=l, connection=connection,
+Vret=Vret)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Cmf1d.Cmf1d.concdrainage">
+<code class="descname">concdrainage</code><a class="headerlink" href="#exam.Cmf1d.Cmf1d.concdrainage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns substance concentration in surface water (mg/m3, read-only).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Cmf1d.Cmf1d.concgw">
+<code class="descname">concgw</code><a class="headerlink" href="#exam.Cmf1d.Cmf1d.concgw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns substance concentration in groundwater (mg/m3, read-only).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Cmf1d.Cmf1d.concsoil">
+<code class="descname">concsoil</code><a class="headerlink" href="#exam.Cmf1d.Cmf1d.concsoil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the substance concentration in each soil layer (mg/m3, read-only).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Cmf1d.Cmf1d.concsw">
+<code class="descname">concsw</code><a class="headerlink" href="#exam.Cmf1d.Cmf1d.concsw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns substance concentration in surface water (mg/m3, read-only)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Cmf1d.Cmf1d.connect_to_adjacent_field">
+<code class="descname">connect_to_adjacent_field</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Cmf1d.html#Cmf1d.connect_to_adjacent_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Cmf1d.Cmf1d.connect_to_adjacent_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connects the field to an adjancent field. The connections depends on
+the type, e.g. “RO” (runoff) and/or “GW” (groudnwater) and/or
+“DR” (drainage). The type of connection is defined in the input data
+in Fields.csv.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Cmf1d.Cmf1d.connect_to_adjacent_river">
+<code class="descname">connect_to_adjacent_river</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Cmf1d.html#Cmf1d.connect_to_adjacent_river"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Cmf1d.Cmf1d.connect_to_adjacent_river" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connects the field to an adjancent field. The connections depends on
+the type, e.g. “RO” (runoff) and/or “GW” (groudnwater) and/or
+“DR” (drainage). The type of connection is defined in the input data
+in Fields.csv.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Cmf1d.Cmf1d.connect_to_catchment_gw">
+<code class="descname">connect_to_catchment_gw</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Cmf1d.html#Cmf1d.connect_to_catchment_gw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Cmf1d.Cmf1d.connect_to_catchment_gw" title="Permalink to this definition">¶</a></dt>
+<dd><p>connects the groundwater storage of hte single cell to the groundwater
+storages of the catchment.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Cmf1d.Cmf1d.create_vegetation">
+<code class="descname">create_vegetation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Cmf1d.html#Cmf1d.create_vegetation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Cmf1d.Cmf1d.create_vegetation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connects the cell to a cmf vegetation object with standard values. Crop
+height, rooting depth and LAI is calculated with the MACRO plant growth
+classPlant.py. Root growth is calculated based on a fixed distribution
+of root related to the actual depth. Plant water uptake according
+to Feddes et al..</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Cmf1d.Cmf1d.flux">
+<code class="descname">flux</code><a class="headerlink" href="#exam.Cmf1d.Cmf1d.flux" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns water balance of NeumannBoundary per layer (list).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Cmf1d.Cmf1d.get_Rs">
+<code class="descname">get_Rs</code><span class="sig-paren">(</span><em>time</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Cmf1d.html#Cmf1d.get_Rs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Cmf1d.Cmf1d.get_Rs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns total solar radiation in (MJ/m2, read-only).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Cmf1d.Cmf1d.get_Sunshine">
+<code class="descname">get_Sunshine</code><span class="sig-paren">(</span><em>time</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Cmf1d.html#Cmf1d.get_Sunshine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Cmf1d.Cmf1d.get_Sunshine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns sunshine hours (hours).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> (<em>datetime</em>) – Actual time.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Sunshine hours (hours)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">double</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Cmf1d.Cmf1d.get_Windspeed">
+<code class="descname">get_Windspeed</code><span class="sig-paren">(</span><em>time</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Cmf1d.html#Cmf1d.get_Windspeed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Cmf1d.Cmf1d.get_Windspeed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns windspeed (m/s, read-only).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Cmf1d.Cmf1d.get_rHmean">
+<code class="descname">get_rHmean</code><span class="sig-paren">(</span><em>time</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Cmf1d.html#Cmf1d.get_rHmean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Cmf1d.Cmf1d.get_rHmean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns relative humidity (%, read-only).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Cmf1d.Cmf1d.get_rain">
+<code class="descname">get_rain</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Cmf1d.html#Cmf1d.get_rain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Cmf1d.Cmf1d.get_rain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns rainfall (mm, read-only).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Cmf1d.Cmf1d.get_tmax">
+<code class="descname">get_tmax</code><span class="sig-paren">(</span><em>time</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Cmf1d.html#Cmf1d.get_tmax"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Cmf1d.Cmf1d.get_tmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return actual maximum temperature (Celsius, read-only).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Cmf1d.Cmf1d.get_tmin">
+<code class="descname">get_tmin</code><span class="sig-paren">(</span><em>time</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Cmf1d.html#Cmf1d.get_tmin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Cmf1d.Cmf1d.get_tmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return actual minimum temperature (Celsius, read-only).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Cmf1d.Cmf1d.qdrain">
+<code class="descname">qdrain</code><a class="headerlink" href="#exam.Cmf1d.Cmf1d.qdrain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns drainage flow to next reach or cell (m3, read-only).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Cmf1d.Cmf1d.qgw_gw">
+<code class="descname">qgw_gw</code><a class="headerlink" href="#exam.Cmf1d.Cmf1d.qgw_gw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns groundwater flow to deep aquifer (m3, read-only).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Cmf1d.Cmf1d.qgw_river">
+<code class="descname">qgw_river</code><a class="headerlink" href="#exam.Cmf1d.Cmf1d.qgw_river" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns groundwater flow to next reach or cell (m3, read-only).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Cmf1d.Cmf1d.qperc">
+<code class="descname">qperc</code><a class="headerlink" href="#exam.Cmf1d.Cmf1d.qperc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns percolation to groundwater (m3, read-only).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Cmf1d.Cmf1d.qsurf">
+<code class="descname">qsurf</code><a class="headerlink" href="#exam.Cmf1d.Cmf1d.qsurf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns surface water flow to next each or cell (m3, read-only).</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-exam.Plant">
+<span id="plant"></span><h2>Plant<a class="headerlink" href="#module-exam.Plant" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-Plant"></span><dl class="class">
+<dt id="exam.Plant.Plant">
+<em class="property">class </em><code class="descclassname">exam.Plant.</code><code class="descname">Plant</code><span class="sig-paren">(</span><em>af=None</em>, <em>name=None</em>, <em>GLAImax=None</em>, <em>GLAImin=None</em>, <em>GLAIharv=None</em>, <em>Dstart=None</em>, <em>Dmin=None</em>, <em>Dmax=None</em>, <em>Dharv=None</em>, <em>cform=None</em>, <em>dform=None</em>, <em>rootinit=None</em>, <em>rootmax=None</em>, <em>heightinit=None</em>, <em>heightmax=None</em>, <em>rpin=None</em>, <em>soil_delta_z=None</em>, <em>soil_zm=None</em>, <em>soil_evap_depth=None</em>, <em>feddes=None</em>, <em>croptype=None</em>, <em>altitude=None</em>, <em>latitude=None</em>, <em>maxcomp=2.0</em>, <em>a_f=0.6</em>, <em>wintercrop=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Plant.html#Plant"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Plant.Plant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates plant development, leaf area index, evapotranspiration, 
+root distribution and wateruptake from soil according to the waterflow and 
+solute transport model MACRO 5.0 (Larbo and Jarvis,2003)</p>
+<p>Plant developement is calculated based on Julian days. Development is
+divided into a linear and exponential growth phase of the leaf area inde as
+well as a decreasing phase after maturity.</p>
+<p>The leaf area index is calculated based on the crop development and fixed 
+shape parameter.</p>
+<p>Roots are allocated along the entire rootign depth with a
+decreasing exponential function.</p>
+<p>Potential evapotranspiration is calculated according to Hargreaves-Samani 
+method. Evaporation and transpiration are separated by the leaf area index.</p>
+<p>Actual transpiration is calculated based on root water uptake. The latter one
+is calculated related to the root distribution and the soil water content.
+Water stress is calcualted accordign to Feddes (1976). If no sufficient 
+water content is available for water uptake, compensation takes place.</p>
+<p>Actual evaporation is calculated from the potential evaporation rate and
+the water content in the upper soil layer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>af</strong> (<em>AgriculturalField</em>) – Agricultural field which holds plant</li>
+<li><strong>name</strong> (<em>str</em>) – Name of plant.</li>
+<li><strong>GLAI</strong> (<em>double</em>) – Green leaf area index (-)</li>
+<li><strong>GLAImax</strong> (<em>double</em>) – Max green leaf area index (-)</li>
+<li><strong>GLAImin</strong> (<em>double</em>) – Min green leaf area index (-)</li>
+<li><strong>GLAIharv</strong> (<em>double</em>) – Green leaf area index at harvest (-)</li>
+<li><strong>Dstart</strong> (<em>int</em>) – Day at emergence (days)</li>
+<li><strong>Dmin</strong> (<em>int</em>) – Day at GLAImin (days)</li>
+<li><strong>Dmax</strong> (<em>int</em>) – Day at GLAImax (days)</li>
+<li><strong>Dharv</strong> (<em>int</em>) – Day at harvest (days)</li>
+<li><strong>cform</strong> (<em>double</em>) – Empirical ‘form’ exponent development</li>
+<li><strong>dform</strong> (<em>double</em>) – Empirical ‘form’ exponent senencence</li>
+<li><strong>rootinit</strong> (<em>double</em>) – Rootdepth at Dmin (m)</li>
+<li><strong>rootmax</strong> (<em>double</em>) – Max root depth (m)</li>
+<li><strong>heightinit</strong> (<em>double</em>) – Height at Dmin (m)</li>
+<li><strong>heightmax</strong> (<em>double</em>) – Max height (m)</li>
+<li><strong>rpin</strong> (<em>double</em>) – Emprical root distribution parameter</li>
+<li><strong>soil_delta_z</strong> (<em>list</em>) – Thickness of each soil layer (m)</li>
+<li><strong>soil_zm</strong> (<em>list</em>) – Midpoint of each soil layer (m)</li>
+<li><strong>soil_evap_depth</strong> (<em>list</em>) – Indicates if soil layer contributes to
+evaporation (1=yes; 0=no)</li>
+<li><strong>feddes</strong> (<em>list</em>) – Four water stress parameter in cm water column</li>
+<li><strong>croptype</strong> (<em>str</em>) – ‘annual’ or ‘perennial’</li>
+<li><strong>altitude</strong> (<em>double</em>) – Altitude (m)</li>
+<li><strong>latitude</strong> (<em>double</em>) – Latitude in (decimal degree)</li>
+<li><strong>maxcomp</strong> (<em>double</em>) – Maximum water uptake compensation factor (-)</li>
+<li><strong>a_f</strong> (<em>double</em>) – Radiation attenuationfacotr</li>
+<li><strong>wintercrop</strong> (<em>bool</em>) – Indicates if plant is a winter crop</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="exam.Plant.Plant.CropType">
+<code class="descname">CropType</code><a class="headerlink" href="#exam.Plant.Plant.CropType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plant type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Plant.Plant.DAS">
+<code class="descname">DAS</code><a class="headerlink" href="#exam.Plant.Plant.DAS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Days after sowing (days)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Plant.Plant.Eact">
+<code class="descname">Eact</code><a class="headerlink" href="#exam.Plant.Plant.Eact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Actual evaporation (mm/day)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Plant.Plant.Epot">
+<code class="descname">Epot</code><a class="headerlink" href="#exam.Plant.Plant.Epot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Potential evaporation (mm/day).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Plant.Plant.GLAI">
+<code class="descname">GLAI</code><a class="headerlink" href="#exam.Plant.Plant.GLAI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Green leaf area index (-)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Plant.Plant.Harvest">
+<code class="descname">Harvest</code><a class="headerlink" href="#exam.Plant.Plant.Harvest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Harvest day (days after sowing)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Plant.Plant.Height">
+<code class="descname">Height</code><a class="headerlink" href="#exam.Plant.Plant.Height" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plant height (cm)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Plant.Plant.LAI">
+<code class="descname">LAI</code><a class="headerlink" href="#exam.Plant.Plant.LAI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Leaf area index (-)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Plant.Plant.Name">
+<code class="descname">Name</code><a class="headerlink" href="#exam.Plant.Plant.Name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plant name.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Plant.Plant.PET">
+<code class="descname">PET</code><a class="headerlink" href="#exam.Plant.Plant.PET" title="Permalink to this definition">¶</a></dt>
+<dd><p>Potential evapotranspiration (mm/day)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Plant.Plant.RootDistribution">
+<code class="descname">RootDistribution</code><a class="headerlink" href="#exam.Plant.Plant.RootDistribution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Root distribtuion per layer (-)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Plant.Plant.RootingDepth">
+<code class="descname">RootingDepth</code><a class="headerlink" href="#exam.Plant.Plant.RootingDepth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rooting depth (cm)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Plant.Plant.SoilEvaporation">
+<code class="descname">SoilEvaporation</code><a class="headerlink" href="#exam.Plant.Plant.SoilEvaporation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Soil evaporation per layer (mm/day)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Plant.Plant.SoilRootWaterUptake">
+<code class="descname">SoilRootWaterUptake</code><a class="headerlink" href="#exam.Plant.Plant.SoilRootWaterUptake" title="Permalink to this definition">¶</a></dt>
+<dd><p>Root water uptake per layer (mm/day)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Plant.Plant.SoilWaterExtraction">
+<code class="descname">SoilWaterExtraction</code><a class="headerlink" href="#exam.Plant.Plant.SoilWaterExtraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Soil water abstraction (Eact+Tact) per layer (mm/day)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Plant.Plant.Tact">
+<code class="descname">Tact</code><a class="headerlink" href="#exam.Plant.Plant.Tact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Actual transpiration (mm/day)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exam.Plant.Plant.Tpot">
+<code class="descname">Tpot</code><a class="headerlink" href="#exam.Plant.Plant.Tpot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Potential transpiration (mm/day)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Plant.Plant.calcETo2">
+<code class="descname">calcETo2</code><span class="sig-paren">(</span><em>DOY</em>, <em>Rs</em>, <em>Tmin</em>, <em>Tmax</em>, <em>Wind</em>, <em>vapourpressure</em>, <em>G</em>, <em>altitude</em>, <em>latitude</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Plant.html#Plant.calcETo2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Plant.Plant.calcETo2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates potential evapotranspiration.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>DOY</strong> (<em>int</em>) – Day of year (days)</li>
+<li><strong>Rs</strong> (<em>double</em>) – Solar raidation (MJ/m2)</li>
+<li><strong>Tmin</strong> (<em>double</em>) – Minimum temperature</li>
+<li><strong>Tmax</strong> (<em>double</em>) – Maximum temperature</li>
+<li><strong>Wind</strong> (<em>double</em>) – Wind speed (m/s)</li>
+<li><strong>vapourpressure</strong> (<em>double</em>) – Vapour pressure (kpa)</li>
+<li><strong>G</strong> (<em>double</em>) – Soil heat fuc (MJ/m2)</li>
+<li><strong>altitude</strong> (<em>double</em>) – Altitude (m)</li>
+<li><strong>latitude</strong> (<em>double</em>) – Latitude (decimal degree)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Potential evapotranspiration (m)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">double</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Plant.Plant.calc_Fcrop">
+<code class="descname">calc_Fcrop</code><span class="sig-paren">(</span><em>GLAI</em>, <em>a_f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Plant.html#Plant.calc_Fcrop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Plant.Plant.calc_Fcrop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates transpiration factor ‘Fcrop’ (-).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>GLAI</strong> (<em>double</em>) – Green leaf area index (-)</li>
+<li><strong>a_f</strong> (<em>double</em>) – Radiation attenuationfacotr (-)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Transpiration factor ‘Fcrop’ (-)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">double</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Plant.Plant.calc_FeddedWaterstress">
+<code class="descname">calc_FeddedWaterstress</code><span class="sig-paren">(</span><em>h_soil</em>, <em>feddes_waterstress</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Plant.html#Plant.calc_FeddedWaterstress"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Plant.Plant.calc_FeddedWaterstress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes water uptake stress factor alpha (0-1.)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parm h_soil:</th><td class="field-body">Soil pressurehead per layer in (cm water column)</td>
+</tr>
+</tbody>
+</table>
+<p>feddes_waterstress: plant specific parameter for Feddes et al.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Plant height (m)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">double</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Plant.Plant.calc_Fsoil">
+<code class="descname">calc_Fsoil</code><span class="sig-paren">(</span><em>LAI</em>, <em>a_f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Plant.html#Plant.calc_Fsoil"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Plant.Plant.calc_Fsoil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates evaporation factor ‘Fsoil’ (-).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>LAI</strong> (<em>double</em>) – Leaf area index (-)</li>
+<li><strong>a_f</strong> (<em>double</em>) – Radiation attenuationfacotr (-)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Evaporation factor ‘Fsoil’ (-)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">double</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Plant.Plant.calc_Ra_from_DOY">
+<code class="descname">calc_Ra_from_DOY</code><span class="sig-paren">(</span><em>latitude</em>, <em>DOY</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Plant.html#Plant.calc_Ra_from_DOY"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Plant.Plant.calc_Ra_from_DOY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates extraterrestrial radiation based on latitude and day of year.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>latitude</strong> (<em>double</em>) – Latitude (decimal degree)</li>
+<li><strong>DOY</strong> (<em>double</em>) – Day of year (days)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Radiation (MJ/m2)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">double</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Plant.Plant.calc_development">
+<code class="descname">calc_development</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Plant.html#Plant.calc_development"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Plant.Plant.calc_development" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calcualtes plant development.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Plant.Plant.calc_development_exponential">
+<code class="descname">calc_development_exponential</code><span class="sig-paren">(</span><em>D</em>, <em>GLAImin</em>, <em>GLAImax</em>, <em>Dmin</em>, <em>Dmax</em>, <em>cform</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Plant.html#Plant.calc_development_exponential"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Plant.Plant.calc_development_exponential" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates green leaf area index ‘GLAI’ (-) during exponential 
+growh period.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>D</strong> (<em>int</em>) – Actual days after sowing (days)</li>
+<li><strong>GLAI</strong> (<em>double</em>) – Green leaf area index (-)</li>
+<li><strong>GLAImax</strong> (<em>double</em>) – Max green leaf area index (-)</li>
+<li><strong>GLAImin</strong> (<em>double</em>) – Min green leaf area index (-)</li>
+<li><strong>Dmax</strong> (<em>int</em>) – Day at GLAImax (days)</li>
+<li><strong>Dmin</strong> (<em>int</em>) – Day at GLAImin (days)</li>
+<li><strong>cform</strong> (<em>double</em>) – Empirical ‘form’ exponent development</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">GLAI during expontetial growth period (-)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">double</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Plant.Plant.calc_development_linear">
+<code class="descname">calc_development_linear</code><span class="sig-paren">(</span><em>D</em>, <em>GLAImin</em>, <em>Dmin</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Plant.html#Plant.calc_development_linear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Plant.Plant.calc_development_linear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates green leaf area index ‘GLAI’ (-) during linear 
+growth period.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>D</strong> (<em>int</em>) – Actual days after sowing (days)</li>
+<li><strong>GLAI</strong> (<em>double</em>) – Green leaf area index (-)</li>
+<li><strong>GLAImin</strong> (<em>double</em>) – Min green leaf area index (-)</li>
+<li><strong>Dmin</strong> (<em>int</em>) – Day at GLAImin (days)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">GLAI during linear growth period (-)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">double</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Plant.Plant.calc_height">
+<code class="descname">calc_height</code><span class="sig-paren">(</span><em>D</em>, <em>Lini</em>, <em>Ldev</em>, <em>heightmax</em>, <em>heightinit</em>, <em>croptype</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Plant.html#Plant.calc_height"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Plant.Plant.calc_height" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates ‘plant height’ in (m).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>D</strong> (<em>int</em>) – Actual days after sowing (days)</li>
+<li><strong>Lini</strong> (<em>double</em>) – Lenght of initial period (days)</li>
+<li><strong>Ldev</strong> (<em>double</em>) – Lenght of development period (days)</li>
+<li><strong>heightmax</strong> (<em>double</em>) – Maximum plant height (m)</li>
+<li><strong>heightinit</strong> (<em>double</em>) – Initial plant height (m)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:param croptype : ‘annual’ or ‘perennial’
+:type croptype: str
+:returns: Plant height (m)
+:rtype: double</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Plant.Plant.calc_rootDistribution">
+<code class="descname">calc_rootDistribution</code><span class="sig-paren">(</span><em>delta_z</em>, <em>zm</em>, <em>zr</em>, <em>rpin</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Plant.html#Plant.calc_rootDistribution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Plant.Plant.calc_rootDistribution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates ‘root distribution’ (-) at depth zm (m).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>delta_z</strong> (<em>double</em>) – Thickness of layer i</li>
+<li><strong>zm</strong> (<em>double</em>) – Mid-point of layer i (m)</li>
+<li><strong>zr</strong> (<em>double</em>) – Rootdepth (m)</li>
+<li><strong>rpin</strong> (<em>double</em>) – Emprical root distribution parameter</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Root distribution (-)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">double</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Plant.Plant.calc_rootdepth">
+<code class="descname">calc_rootdepth</code><span class="sig-paren">(</span><em>D</em>, <em>Lini</em>, <em>Ldev</em>, <em>rootmax</em>, <em>rootinit</em>, <em>croptype</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Plant.html#Plant.calc_rootdepth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Plant.Plant.calc_rootdepth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates ‘rootingdepth’ in (m).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>D</strong> (<em>int</em>) – Actual days after sowing (days)</li>
+<li><strong>Lini</strong> (<em>double</em>) – Lenght of initial period (days)</li>
+<li><strong>Ldev</strong> (<em>double</em>) – Lenght of development period (days)</li>
+<li><strong>rootmax</strong> (<em>double</em>) – Maximum rooting depth (m)</li>
+<li><strong>rootinit</strong> (<em>double</em>) – Initial rootign depth (m)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:param croptype : ‘annual’ or ‘perennial’
+:type croptype: str
+:returns: Rooting depth (m)
+:rtype: double</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Plant.Plant.calc_rootgrowth">
+<code class="descname">calc_rootgrowth</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Plant.html#Plant.calc_rootgrowth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Plant.Plant.calc_rootgrowth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates rooting depth and distribution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Plant.Plant.calc_senencence">
+<code class="descname">calc_senencence</code><span class="sig-paren">(</span><em>D</em>, <em>GLAIharv</em>, <em>GLAImax</em>, <em>Dharv</em>, <em>Dmax</em>, <em>dform</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Plant.html#Plant.calc_senencence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Plant.Plant.calc_senencence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates senencence green leaf area index ‘GLAI’ (-) after exponential 
+growh period.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>D</strong> (<em>int</em>) – Actual days after sowing (days)</li>
+<li><strong>GLAI</strong> (<em>double</em>) – Green leaf area index (-)</li>
+<li><strong>GLAImax</strong> (<em>double</em>) – Max green leaf area index (-)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>GLAIharv (double):  green leaf area index at harvest (-)
+:param Dmax: Day at GLAImax (days)
+:type Dmax: int
+:param Dharv: Day at harvest (days)
+:type Dharv: int
+:param dform: Empirical ‘form’ exponent senencence
+:type dform: double
+:returns: GLAI after expontetial growth period (-)
+:rtype: double</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Plant.Plant.calc_wateruptake">
+<code class="descname">calc_wateruptake</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Plant.html#Plant.calc_wateruptake"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Plant.Plant.calc_wateruptake" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates water uptake.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exam.Plant.Plant.compensate">
+<code class="descname">compensate</code><span class="sig-paren">(</span><em>Sh</em>, <em>Sp</em>, <em>pressurehead</em>, <em>alpha</em>, <em>feddes_opt</em>, <em>maxcomp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exam/Plant.html#Plant.compensate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exam.Plant.Plant.compensate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates root water uptake compensation factors (-) for each layer
+in the rootingzone. The compsensation capacity is calculated
+by (Actual uptake-Potential uptake)*maxcom.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>s_p</strong> (<em>list</em>) – Potential water uptake per layer (mm)</li>
+<li><strong>s_h</strong> (<em>list</em>) – Actual water uptake per layer (mm)</li>
+<li><strong>pressurehead</strong> (<em>list</em>) – Pressurehead per layer in (cm)</li>
+<li><strong>alpha</strong> (<em>double</em>) – Water uptake stress factor (0-1) (-)</li>
+<li><strong>alpha</strong> – Maximum compensation capacity factor (-)</li>
+<li><strong>feddes_opt</strong> (<em>double</em>) – Plant pressure head until water uptake can 
+occur without stress in (cm water column)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Plant height (m)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">double</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><strong>Source code</strong></a><ul>
+<li><a class="reference internal" href="#cell">Cell</a><ul>
+<li><a class="reference internal" href="#module-exam.Cmf1d">Cmf1d</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-exam.Plant">Plant</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/sourcecode.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2018, knoell Germany GmbH.
+    </div>
+  </body>
+</html>

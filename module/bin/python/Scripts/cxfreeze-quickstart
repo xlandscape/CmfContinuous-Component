@@ -1,0 +1,5 @@
+#!C:\Winp\bd37\bu\WPy64-3720\python-3.7.2.amd64\python.exe
+from cx_Freeze.setupwriter import main
+
+main()
+

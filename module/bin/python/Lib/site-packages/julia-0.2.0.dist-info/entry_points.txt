@@ -1,0 +1,3 @@
+[console_scripts]
+python-jl = julia.python_jl:main
+

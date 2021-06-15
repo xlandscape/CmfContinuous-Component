@@ -1,0 +1,12 @@
+<data>  
+    <items>
+        <item name="ClimateList">Climate</item>
+        <item name="CellList">Cell</item>
+        <item name="ReachList">Reach</item>
+        <item name="SoilList">Soil</item>
+        <item name="SubstanceList">Substance</item>
+        <item name="CropCoefficientList">CropCoefficient</item>
+        <item name="CropManagementList">CropManagement</item>
+        <item name="CatchmentList">CatchmentList</item>
+</items>
+</data>  

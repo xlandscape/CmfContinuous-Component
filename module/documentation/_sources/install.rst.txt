@@ -1,0 +1,36 @@
+**Installation guide**
+******************************
+
+Get Python
+=========================
+
+* Get the most recent version of Python: https://www.python.org/. Note that this installation comes with the Python core packages others must be added afterwards.
+
+* A common way to install additional packages in Python is using pip: https://pypi.org/project/pip/ 
+
+* Another way is to use a full development environment which ships with a user interface and the most used packages, e.g. WinPython: http://winpython.github.io/ 
+
+Get dependencies
+=========================
+
+
+
+* `shapely <https://pypi.org/project/Shapely/>`_ (required by CMF)
+* `scipy <https://www.scipy.org/>`_ (optional; needed by pre-processing tools)
+* `matplotlib <https://matplotlib.org/>`_ (optional; needed by plotting tools)
+
+Get models
+=========================
+
+* `CMF <https://github.com/philippkraft/cmf>`_ 
+* Regulatory Catchment Model
+
+An installation with pip is recommended:
+
+.. code-block:: bash
+  :linenos:
+
+    pip install cmf
+    pip install LanscapeModel
+ 
+

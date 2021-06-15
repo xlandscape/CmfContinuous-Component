@@ -1,0 +1,3 @@
+Len   NumSeg   WidWatSys   SloSidWatSys DepWatDefPer 
+(m)    (-)       (m)            (-)          (m)         
+100     1        2.50            1            0.1  

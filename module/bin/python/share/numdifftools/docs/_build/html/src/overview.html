@@ -1,0 +1,367 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Introduction to Numdifftools &mdash; numdifftools 0.9.17 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="numdifftools 0.9.17 documentation" href="../index.html"/>
+        <link rel="next" title="Numerical differentiation" href="numerical/main.html"/>
+        <link rel="prev" title="Numdifftools" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> numdifftools
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.17
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Introduction to Numdifftools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">See also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#documentation-and-code">Documentation and code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#unit-tests">Unit tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#acknowledgement">Acknowledgement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numerical/main.html">Numerical differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithmic/main.html">Algorithmic differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../authors.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changes.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">Module reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">numdifftools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>Introduction to Numdifftools</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/src/overview.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <span class="target" id="module-numdifftools.info"></span><div class="section" id="introduction-to-numdifftools">
+<h1>Introduction to Numdifftools<a class="headerlink" href="#introduction-to-numdifftools" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="https://pypi.python.org/pypi/Numdifftools/"><img alt="pkg_img" src="https://badge.fury.io/py/numdifftools.png" /></a> <a class="reference external" href="https://travis-ci.org/pbrod/numdifftools"><img alt="tests_img" src="https://travis-ci.org/pbrod/numdifftools.svg?branch=master" /></a> <a class="reference external" href="https://ci.appveyor.com/project/pbrod/numdifftools"><img alt="tests2_img" src="https://ci.appveyor.com/api/projects/status/qeoegaocw41lkarv/branch/master?svg=true" /></a> <a class="reference external" href="http://numdifftools.readthedocs.org/en/latest/"><img alt="docs_img" src="https://readthedocs.org/projects/pip/badge/?version=latest" /></a> <a class="reference external" href="https://landscape.io/github/pbrod/numdifftools/master"><img alt="Code Health" src="https://landscape.io/github/pbrod/numdifftools/master/landscape.svg?style=flat" /></a> <a class="reference external" href="https://coveralls.io/github/pbrod/numdifftools?branch=master"><img alt="coverage_img" src="https://coveralls.io/repos/pbrod/numdifftools/badge.svg?branch=master" /></a> <a class="reference external" href="https://github.com/pbrod/numdifftools"><img alt="versions_img" src="https://img.shields.io/pypi/pyversions/numdifftools.svg" /></a> <a class="reference external" href="http://depsy.org/package/python/Numdifftools"><img alt="depsy_img" src="http://depsy.org/api/package/pypi/Numdifftools/badge.svg" /></a></p>
+<p>Numdifftools is a suite of tools written in <a class="reference external" href="http://www.python.org/">_Python</a>
+to solve automatic numerical differentiation problems in one or more variables.
+Finite differences are used in an adaptive manner, coupled with a Richardson
+extrapolation methodology to provide a maximally accurate result.
+The user can configure many options like; changing the order of the method or
+the extrapolation, even allowing the user to specify whether complex-step, central,
+forward or backward differences are used.</p>
+<p>The methods provided are:</p>
+<ul class="simple">
+<li><strong>Derivative</strong>: Compute the derivatives of order 1 through 10 on any scalar function.</li>
+<li><strong>directionaldiff</strong>: Compute directional derivative of a function of n variables</li>
+<li><strong>Gradient</strong>: Compute the gradient vector of a scalar function of one or more variables.</li>
+<li><strong>Jacobian</strong>: Compute the Jacobian matrix of a vector valued function of one or more variables.</li>
+<li><strong>Hessian</strong>: Compute the Hessian matrix of all 2nd partial derivatives of a scalar function of one or more variables.</li>
+<li><strong>Hessdiag</strong>: Compute only the diagonal elements of the Hessian matrix</li>
+</ul>
+<p>All of these methods also produce error estimates on the result.</p>
+<p>Numdifftools also provide an easy to use interface to derivatives calculated
+with in <a class="reference external" href="https://pythonhosted.org/algopy/">_AlgoPy</a>. Algopy stands for Algorithmic
+Differentiation in Python.
+The purpose of AlgoPy is the evaluation of higher-order derivatives in the
+<cite>forward</cite> and <cite>reverse</cite> mode of Algorithmic Differentiation (AD) of functions
+that are implemented as Python programs.</p>
+<div class="section" id="getting-started">
+<h2>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
+<p>Visualize high order derivatives of the tanh function</p>
+<blockquote>
+<div><div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numdifftools</span> <span class="kn">as</span> <span class="nn">nd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+<span class="gp">... </span>   <span class="n">df</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Derivative</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+<span class="gp">... </span>   <span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">... </span>   <span class="n">h</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>plt.show()</p>
+</div></blockquote>
+<a class="reference external image-reference" href="https://github.com/pbrod/numdifftools/blob/master/examples/fun.py"><img alt="https://raw.githubusercontent.com/pbrod/numdifftools/master/examples/fun.png" src="https://raw.githubusercontent.com/pbrod/numdifftools/master/examples/fun.png" /></a>
+<p>Compute 1&#8217;st and 2&#8217;nd derivative of exp(x), at x == 1:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Derivative</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">)</span>        <span class="c1"># 1&#39;st derivative</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fdd</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Derivative</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># 2&#39;nd derivative</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">fd</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="mf">2.7182818284590424</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">fdd</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="mf">2.7182818284590424</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Nonlinear least squares:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mf">0.1</span><span class="p">),(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ydata</span> <span class="o">=</span> <span class="mi">1</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">0.75</span><span class="o">*</span><span class="n">xdata</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fun</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">xdata</span><span class="p">)</span> <span class="o">-</span> <span class="n">ydata</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Jfun</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Jacobian</span><span class="p">(</span><span class="n">fun</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Jfun</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mf">0.75</span><span class="p">])),</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># should be numerically zero</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Compute gradient of sum(x**2):</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fun</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dfun</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Gradient</span><span class="p">(</span><span class="n">fun</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dfun</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="go">array([ 2.,  4.,  6.])</span>
+</pre></div>
+</div>
+<p>Compute the same with the easy to use interface to AlgoPy:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numdifftools.nd_algopy</span> <span class="kn">as</span> <span class="nn">nda</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fd</span> <span class="o">=</span> <span class="n">nda</span><span class="o">.</span><span class="n">Derivative</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">)</span>        <span class="c1"># 1&#39;st derivative</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fdd</span> <span class="o">=</span> <span class="n">nda</span><span class="o">.</span><span class="n">Derivative</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># 2&#39;nd derivative</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">fd</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="mf">2.7182818284590424</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">fdd</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="mf">2.7182818284590424</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Nonlinear least squares:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mf">0.1</span><span class="p">),(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ydata</span> <span class="o">=</span> <span class="mi">1</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">0.75</span><span class="o">*</span><span class="n">xdata</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fun</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">xdata</span><span class="p">)</span> <span class="o">-</span> <span class="n">ydata</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Jfun</span> <span class="o">=</span> <span class="n">nda</span><span class="o">.</span><span class="n">Jacobian</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;reverse&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Jfun</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mf">0.75</span><span class="p">])),</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># should be numerically zero</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Compute gradient of sum(x**2):</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fun</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dfun</span> <span class="o">=</span> <span class="n">nda</span><span class="o">.</span><span class="n">Gradient</span><span class="p">(</span><span class="n">fun</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dfun</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="go">array([ 2.,  4.,  6.])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Permalink to this headline">¶</a></h2>
+<p>scipy.misc.derivative</p>
+</div>
+</div>
+<div class="section" id="documentation-and-code">
+<h1>Documentation and code<a class="headerlink" href="#documentation-and-code" title="Permalink to this headline">¶</a></h1>
+<p>Numdifftools works on Python 2.7+ and Python 3.0+.</p>
+<p>Official releases available at: <a class="reference external" href="http://pypi.python.org/pypi/numdifftools">http://pypi.python.org/pypi/numdifftools</a> <a class="reference external" href="https://pypi.python.org/pypi/Numdifftools/"><img alt="pkg_img" src="https://badge.fury.io/py/numdifftools.png" /></a></p>
+<p>Official documentation available at: <a class="reference external" href="http://numdifftools.readthedocs.io/en/latest/">http://numdifftools.readthedocs.io/en/latest/</a> <a class="reference external" href="http://numdifftools.readthedocs.org/en/latest/"><img alt="docs_img" src="https://readthedocs.org/projects/pip/badge/?version=latest" /></a></p>
+<p>Bleeding edge: <a class="reference external" href="https://github.com/pbrod/numdifftools">https://github.com/pbrod/numdifftools</a>.</p>
+</div>
+<div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>If you have pip installed, then simply type:</p>
+<blockquote>
+<div>$ pip install numdifftools</div></blockquote>
+<p>to get the lastest stable version. Using pip also has the advantage that all
+requirements are automatically installed.</p>
+</div>
+<div class="section" id="unit-tests">
+<h1>Unit tests<a class="headerlink" href="#unit-tests" title="Permalink to this headline">¶</a></h1>
+<p>To test if the toolbox is working paste the following in an interactive
+python session:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numdifftools</span> <span class="kn">as</span> <span class="nn">nd</span>
+<span class="n">nd</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">coverage</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doctests</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="acknowledgement">
+<h1>Acknowledgement<a class="headerlink" href="#acknowledgement" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference external" href="http://pypi.python.org/pypi/numdifftools/">numdifftools package</a> for
+<a class="reference external" href="https://www.python.org/">Python</a> was written by Per A. Brodtkorb
+based on the adaptive numerical differentiation toolbox written in
+<a class="reference external" href="http://www.mathworks.com">Matlab</a>  by John D&#8217;Errico <a class="reference internal" href="#derrico2006" id="id2">[DErrico2006]</a>.</p>
+<p>Numdifftools has as of version 0.9 been extended with some of the functionality
+found in the statsmodels.tools.numdiff module written by Josef Perktold
+<a class="reference internal" href="#perktold2014" id="id3">[Perktold2014]</a>.</p>
+</div>
+<div class="section" id="references">
+<h1>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h1>
+<table class="docutils citation" frame="void" id="derrico2006" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[DErrico2006]</a></td><td>D&#8217;Errico, J. R.  (2006),
+Adaptive Robust Numerical Differentiation
+<a class="reference external" href="http://www.mathworks.com/matlabcentral/fileexchange/13490-adaptive-robust-numerical-differentiation">http://www.mathworks.com/matlabcentral/fileexchange/13490-adaptive-robust-numerical-differentiation</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="perktold2014" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[Perktold2014]</a></td><td>Perktold, J (2014), numdiff package
+<a class="reference external" href="http://statsmodels.sourceforge.net/0.6.0/_modules/statsmodels/tools/numdiff.html">http://statsmodels.sourceforge.net/0.6.0/_modules/statsmodels/tools/numdiff.html</a></td></tr>
+</tbody>
+</table>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="numerical/main.html" class="btn btn-neutral float-right" title="Numerical differentiation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../index.html" class="btn btn-neutral" title="Numdifftools" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2009-2015, Per A Brodtkorb, John D&#39;Errico.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.9.17',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

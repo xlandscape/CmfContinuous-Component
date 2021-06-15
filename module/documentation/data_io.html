@@ -1,0 +1,301 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Data I/O &#8212; LanscapeModelingToolbox 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">LanscapeModelingToolbox 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="data-i-o">
+<h1><strong>Data I/O</strong><a class="headerlink" href="#data-i-o" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="formats">
+<h2>Formats<a class="headerlink" href="#formats" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Input data: All input data must be provided as CSV-files, except the data given in the ‘Timeseries’ folder. Data is stored in comma-separated text files.</li>
+<li>Output data: Results and time series can be stored as CSV-file or as HDF5-file as determined in the runlist. HDF5 is strongly recommended for large catchments with many cells and reaches. Data is stored in compressed binary files.</li>
+</ul>
+</div>
+<div class="section" id="data-structure">
+<h2>Data structure<a class="headerlink" href="#data-structure" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="project">
+<h3>Project<a class="headerlink" href="#project" title="Permalink to this headline">¶</a></h3>
+<p>The data structure consists of three hierarchical levels. The “Project List (CSV-file)” holds a list with all “Projects” as a well
+as information regarding simulations period, number of threads and the hydrological modeling concept. “Projects” are grouped in single folders. Each
+folder represents a model run which can be a single agricultural field, a network of river segments or an entire fully distributed catchment. A “Project folder”
+contains all input data files, e.g. climate and soil information, crop management and a list of cells, reaches and other spatial units of the catchment.</p>
+<div class="align-center figure">
+<img alt="_images/project-structure.png" src="_images/project-structure.png" />
+</div>
+</div>
+<div class="section" id="time-series">
+<h3>Time series<a class="headerlink" href="#time-series" title="Permalink to this headline">¶</a></h3>
+<p><strong>Cell:</strong>
+When using the time series option not all data input data is needed, because all flows
+related to single cells (e.g. an agricultural field, forests) are pre-calculated. The time
+series must be provided in a sub-folder of the project for each cell. The records must include
+a value for each time step for groundwater, surface water and drainage flux as well as
+related solute concentrations.</p>
+<div class="align-center figure">
+<img alt="_images/project-structure-timeseries.png" src="_images/project-structure-timeseries.png" />
+</div>
+<p><strong>Reach:</strong>
+When using the in stream option only
+water flow in river segments is simulated and related chemical processes.</p>
+<div class="align-center figure">
+<img alt="_images/project-structure-instream.png" src="_images/project-structure-instream.png" />
+</div>
+</div>
+</div>
+<div class="section" id="input-files">
+<h2>Input files<a class="headerlink" href="#input-files" title="Permalink to this headline">¶</a></h2>
+<p>All model runs must be listed in a ‘runlist.csv’ (or any other filename as defined in the calling scripts), which holds
+information on the file paths, run types, database and solver settings among others. An example of the table is shown below.</p>
+<div class="section" id="runlist">
+<h3>RunList<a class="headerlink" href="#runlist" title="Permalink to this headline">¶</a></h3>
+<div class="align-center figure">
+<img alt="_images/data_input_runlist.png" src="_images/data_input_runlist.png" />
+</div>
+<p>A single model run requires a set of input data, e.g. climate, soil or agricultural management or even observed data for the post-processing methods.
+In total, eight files are needed for model setup and additionally one file for each climate station. Moreover, an observation file is needed for some of
+the post-processing methods. other data may be added as well in relation to coupled models, e.g. in case of drift calculation of SprayDriftList.csv is
+needed.
+The spatial locations and model settings of all spatial entities must be defined for cells (e.g. agricultural field - ‘CellList.csv’),
+reaches (single river segments - ‘ReachList.csv’) and others (e.g. outlets, deep aquifer - ‘CatchmentList.csv’) and described in the following paragraphs.</p>
+</div>
+<div class="section" id="celllist">
+<h3>CellList<a class="headerlink" href="#celllist" title="Permalink to this headline">¶</a></h3>
+<div class="align-center figure">
+<img alt="_images/data_input_CellList.png" src="_images/data_input_CellList.png" />
+</div>
+</div>
+<div class="section" id="reachlist">
+<h3>ReachList<a class="headerlink" href="#reachlist" title="Permalink to this headline">¶</a></h3>
+<div class="align-center figure">
+<img alt="_images/data_input_ReachList.png" src="_images/data_input_ReachList.png" />
+</div>
+</div>
+<div class="section" id="catchmentlist">
+<h3>CatchmentList<a class="headerlink" href="#catchmentlist" title="Permalink to this headline">¶</a></h3>
+<div class="align-center figure">
+<img alt="_images/data_input_CatchmentList.png" src="_images/data_input_CatchmentList.png" />
+</div>
+</div>
+<div class="section" id="soillist">
+<h3>SoilList<a class="headerlink" href="#soillist" title="Permalink to this headline">¶</a></h3>
+<p>Information on soils and climate are defined in the two files ‘SoiList.csv’ and ‘ClimateList.csv’. The latter one is related to a flexible number of climate
+stations which are stored in the project folder as well:</p>
+<div class="align-center figure">
+<img alt="_images/data_input_SoilList.png" src="_images/data_input_SoilList.png" />
+</div>
+</div>
+<div class="section" id="climatelist">
+<h3>ClimateList<a class="headerlink" href="#climatelist" title="Permalink to this headline">¶</a></h3>
+<div class="align-center figure">
+<img alt="_images/data_input_climateList.png" src="_images/data_input_climateList.png" />
+</div>
+</div>
+<div class="section" id="climatestation1">
+<h3>ClimateStation1<a class="headerlink" href="#climatestation1" title="Permalink to this headline">¶</a></h3>
+<div class="align-center figure">
+<img alt="_images/data_input_ClimateStation1.png" src="_images/data_input_ClimateStation1.png" />
+</div>
+</div>
+<div class="section" id="cropmangementlist">
+<h3>CropMangementList<a class="headerlink" href="#cropmangementlist" title="Permalink to this headline">¶</a></h3>
+<p>The management of cells is defined in the ‘CropManagementList.csv’. Currently two takes are supported, namely sowing and pesticide application:</p>
+<div class="align-center figure">
+<img alt="_images/data_input_CropManagementList.png" src="_images/data_input_CropManagementList.png" />
+</div>
+</div>
+<div class="section" id="cropcoefficientlist">
+<h3>CropCoefficientList<a class="headerlink" href="#cropcoefficientlist" title="Permalink to this headline">¶</a></h3>
+<p>When using one of the plant growth model options (cmf or macro) a straight forward crop water balance is assessed related
+to the approach and parameterisation of ‘FOCUS MARCO5.2 &lt;<a class="reference external" href="https://esdac.jrc.ec.europa.eu/projects/macro-0">https://esdac.jrc.ec.europa.eu/projects/macro-0</a>&gt;`_. Coefficients are available for all FOCUS scenarios:</p>
+<div class="align-center figure">
+<img alt="_images/data_input_CropCoefficientList.png" src="_images/data_input_CropCoefficientList.png" />
+</div>
+<p>All information on applied substances is stored in the ‘SubstanceList.csv’:</p>
+</div>
+<div class="section" id="substancelist">
+<h3>SubstanceList<a class="headerlink" href="#substancelist" title="Permalink to this headline">¶</a></h3>
+<div class="align-center figure">
+<img alt="_images/data_input_SubstanceList.png" src="_images/data_input_SubstanceList.png" />
+</div>
+<p>When using the model option “xDrift” the drift data must be provided as table:</p>
+</div>
+<div class="section" id="spraydriftlist">
+<h3>SprayDriftList<a class="headerlink" href="#spraydriftlist" title="Permalink to this headline">¶</a></h3>
+<div class="align-center figure">
+<img alt="_images/data_input_SprayDriftList.png" src="_images/data_input_SprayDriftList.png" />
+</div>
+</div>
+<div class="section" id="observation">
+<h3>Observation<a class="headerlink" href="#observation" title="Permalink to this headline">¶</a></h3>
+<p>Observed data can be used for pre-processing (when creating an areayieldCatchment model) or for post-processing, e.g. to assess performance parameter such as r-square:</p>
+<div class="align-center figure">
+<img alt="_images/data_input_Observation.png" src="_images/data_input_Observation.png" />
+</div>
+</div>
+<div class="section" id="reach-timeseries">
+<h3>Reach timeseries<a class="headerlink" href="#reach-timeseries" title="Permalink to this headline">¶</a></h3>
+<div class="align-center figure">
+<img alt="_images/data_input_TimeseriesReach.png" src="_images/data_input_TimeseriesReach.png" />
+</div>
+</div>
+<div class="section" id="cell-timeseries">
+<h3>Cell timeseries<a class="headerlink" href="#cell-timeseries" title="Permalink to this headline">¶</a></h3>
+<div class="align-center figure">
+<img alt="_images/data_input_TimeseriesCell.png" src="_images/data_input_TimeseriesCell.png" />
+</div>
+</div>
+</div>
+<div class="section" id="output-files">
+<h2>Output files<a class="headerlink" href="#output-files" title="Permalink to this headline">¶</a></h2>
+<p>The results of a simulation are stored in five files with the project ID and an underscore as prefix. The files can be stored as CSV-File or as HDF5-File.
+The files are related to an environmental component</p>
+<div class="align-center figure">
+<img alt="_images/data_output_files.png" src="_images/data_output_files.png" />
+</div>
+<div class="section" id="projectxy-cells">
+<h3>projectXY_cells<a class="headerlink" href="#projectxy-cells" title="Permalink to this headline">¶</a></h3>
+<div class="align-center figure">
+<img alt="_images/data_output_cells.png" src="_images/data_output_cells.png" />
+</div>
+</div>
+<div class="section" id="projectxy-reaches-csv">
+<h3>projectXY_reaches.csv<a class="headerlink" href="#projectxy-reaches-csv" title="Permalink to this headline">¶</a></h3>
+<div class="align-center figure">
+<img alt="_images/data_output_reach.png" src="_images/data_output_reach.png" />
+</div>
+</div>
+<div class="section" id="projectxy-plants">
+<h3>projectXY_plants<a class="headerlink" href="#projectxy-plants" title="Permalink to this headline">¶</a></h3>
+<div class="align-center figure">
+<img alt="_images/data_output_plants.png" src="_images/data_output_plants.png" />
+</div>
+</div>
+<div class="section" id="projectxy-outlets">
+<h3>projectXY_outlets<a class="headerlink" href="#projectxy-outlets" title="Permalink to this headline">¶</a></h3>
+<div class="align-center figure">
+<img alt="_images/data_output_outlet.png" src="_images/data_output_outlet.png" />
+</div>
+</div>
+<div class="section" id="projectxy-gws">
+<h3>projectXY_gws<a class="headerlink" href="#projectxy-gws" title="Permalink to this headline">¶</a></h3>
+<div class="align-center figure">
+<img alt="_images/data_output_gw.png" src="_images/data_output_gw.png" />
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><strong>Data I/O</strong></a><ul>
+<li><a class="reference internal" href="#formats">Formats</a></li>
+<li><a class="reference internal" href="#data-structure">Data structure</a><ul>
+<li><a class="reference internal" href="#project">Project</a></li>
+<li><a class="reference internal" href="#time-series">Time series</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#input-files">Input files</a><ul>
+<li><a class="reference internal" href="#runlist">RunList</a></li>
+<li><a class="reference internal" href="#celllist">CellList</a></li>
+<li><a class="reference internal" href="#reachlist">ReachList</a></li>
+<li><a class="reference internal" href="#catchmentlist">CatchmentList</a></li>
+<li><a class="reference internal" href="#soillist">SoilList</a></li>
+<li><a class="reference internal" href="#climatelist">ClimateList</a></li>
+<li><a class="reference internal" href="#climatestation1">ClimateStation1</a></li>
+<li><a class="reference internal" href="#cropmangementlist">CropMangementList</a></li>
+<li><a class="reference internal" href="#cropcoefficientlist">CropCoefficientList</a></li>
+<li><a class="reference internal" href="#substancelist">SubstanceList</a></li>
+<li><a class="reference internal" href="#spraydriftlist">SprayDriftList</a></li>
+<li><a class="reference internal" href="#observation">Observation</a></li>
+<li><a class="reference internal" href="#reach-timeseries">Reach timeseries</a></li>
+<li><a class="reference internal" href="#cell-timeseries">Cell timeseries</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#output-files">Output files</a><ul>
+<li><a class="reference internal" href="#projectxy-cells">projectXY_cells</a></li>
+<li><a class="reference internal" href="#projectxy-reaches-csv">projectXY_reaches.csv</a></li>
+<li><a class="reference internal" href="#projectxy-plants">projectXY_plants</a></li>
+<li><a class="reference internal" href="#projectxy-outlets">projectXY_outlets</a></li>
+<li><a class="reference internal" href="#projectxy-gws">projectXY_gws</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/data_io.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2018, knoell Germany GmbH.
+    </div>
+  </body>
+</html>

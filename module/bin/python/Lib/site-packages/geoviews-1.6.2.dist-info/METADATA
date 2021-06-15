@@ -1,0 +1,216 @@
+Metadata-Version: 2.1
+Name: geoviews
+Version: 1.6.2
+Summary: GeoViews is a Python library that makes it easy to explore and visualize geographical, meteorological, and oceanographic datasets, such as those used in weather, climate, and remote sensing research.
+Home-page: http://geoviews.org
+License: BSD 3-Clause
+Platform: Windows
+Platform: Mac OS X
+Platform: Linux
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Operating System :: OS Independent
+Classifier: Intended Audience :: Science/Research
+Classifier: Intended Audience :: Developers
+Classifier: Natural Language :: English
+Classifier: Topic :: Scientific/Engineering
+Classifier: Topic :: Software Development :: Libraries
+Requires-Python: >=2.7
+Description-Content-Type: text/markdown
+Requires-Dist: bokeh (>=1.0.0)
+Requires-Dist: cartopy (>=0.16.0)
+Requires-Dist: holoviews (>=1.11.1)
+Requires-Dist: numpy (>=1.0)
+Requires-Dist: param (>=1.6.1)
+Provides-Extra: all
+Requires-Dist: coveralls ; extra == 'all'
+Requires-Dist: datashader ; extra == 'all'
+Requires-Dist: filelock ; extra == 'all'
+Requires-Dist: flake8 ; extra == 'all'
+Requires-Dist: gdal ; extra == 'all'
+Requires-Dist: geopandas ; extra == 'all'
+Requires-Dist: iris ; extra == 'all'
+Requires-Dist: jupyter ; extra == 'all'
+Requires-Dist: matplotlib (>2.2) ; extra == 'all'
+Requires-Dist: mock ; extra == 'all'
+Requires-Dist: nbsite ; extra == 'all'
+Requires-Dist: nbsmoke (>=0.2.0) ; extra == 'all'
+Requires-Dist: netcdf4 ; extra == 'all'
+Requires-Dist: nose ; extra == 'all'
+Requires-Dist: pandas ; extra == 'all'
+Requires-Dist: pyct ; extra == 'all'
+Requires-Dist: pytest ; extra == 'all'
+Requires-Dist: scipy ; extra == 'all'
+Requires-Dist: shapely ; extra == 'all'
+Requires-Dist: sphinx-ioam-theme ; extra == 'all'
+Requires-Dist: xarray ; extra == 'all'
+Requires-Dist: xesmf ; extra == 'all'
+Provides-Extra: build
+Requires-Dist: param (>=1.6.1) ; extra == 'build'
+Requires-Dist: setuptools ; extra == 'build'
+Provides-Extra: doc
+Requires-Dist: datashader ; extra == 'doc'
+Requires-Dist: geopandas ; extra == 'doc'
+Requires-Dist: gdal ; extra == 'doc'
+Requires-Dist: netcdf4 ; extra == 'doc'
+Requires-Dist: jupyter ; extra == 'doc'
+Requires-Dist: matplotlib (>2.2) ; extra == 'doc'
+Requires-Dist: pandas ; extra == 'doc'
+Requires-Dist: pyct ; extra == 'doc'
+Requires-Dist: scipy ; extra == 'doc'
+Requires-Dist: shapely ; extra == 'doc'
+Requires-Dist: xarray ; extra == 'doc'
+Requires-Dist: iris ; extra == 'doc'
+Requires-Dist: xesmf ; extra == 'doc'
+Requires-Dist: filelock ; extra == 'doc'
+Requires-Dist: mock ; extra == 'doc'
+Requires-Dist: nbsite ; extra == 'doc'
+Requires-Dist: sphinx-ioam-theme ; extra == 'doc'
+Provides-Extra: examples_extra
+Requires-Dist: datashader ; extra == 'examples_extra'
+Requires-Dist: geopandas ; extra == 'examples_extra'
+Requires-Dist: gdal ; extra == 'examples_extra'
+Requires-Dist: netcdf4 ; extra == 'examples_extra'
+Requires-Dist: jupyter ; extra == 'examples_extra'
+Requires-Dist: matplotlib (>2.2) ; extra == 'examples_extra'
+Requires-Dist: pandas ; extra == 'examples_extra'
+Requires-Dist: pyct ; extra == 'examples_extra'
+Requires-Dist: scipy ; extra == 'examples_extra'
+Requires-Dist: shapely ; extra == 'examples_extra'
+Requires-Dist: xarray ; extra == 'examples_extra'
+Requires-Dist: iris ; extra == 'examples_extra'
+Requires-Dist: xesmf ; extra == 'examples_extra'
+Requires-Dist: filelock ; extra == 'examples_extra'
+Requires-Dist: mock ; extra == 'examples_extra'
+Provides-Extra: recommended
+Requires-Dist: datashader ; extra == 'recommended'
+Requires-Dist: geopandas ; extra == 'recommended'
+Requires-Dist: gdal ; extra == 'recommended'
+Requires-Dist: netcdf4 ; extra == 'recommended'
+Requires-Dist: jupyter ; extra == 'recommended'
+Requires-Dist: matplotlib (>2.2) ; extra == 'recommended'
+Requires-Dist: pandas ; extra == 'recommended'
+Requires-Dist: pyct ; extra == 'recommended'
+Requires-Dist: scipy ; extra == 'recommended'
+Requires-Dist: shapely ; extra == 'recommended'
+Requires-Dist: xarray ; extra == 'recommended'
+Provides-Extra: tests
+Requires-Dist: coveralls ; extra == 'tests'
+Requires-Dist: flake8 ; extra == 'tests'
+Requires-Dist: nbsmoke (>=0.2.0) ; extra == 'tests'
+Requires-Dist: nose ; extra == 'tests'
+Requires-Dist: pytest ; extra == 'tests'
+
+[![Travis](https://api.travis-ci.org/pyviz/geoviews.svg?branch=master)](https://travis-ci.org/pyviz/geoviews)
+[![Windows build status](https://ci.appveyor.com/api/projects/status/4yl8w4kie2m0xu1q/branch/master?svg=true)](https://ci.appveyor.com/project/pyviz/geoviews/branch/master)
+
+<h1>
+GeoViews <img src="/doc/_static/geoviews-logo.png" width="50" height="50">
+</h1>
+
+GeoViews is a Python library that makes it easy to explore and
+visualize any data that includes geographic locations.  It has
+particularly powerful support for multidimensional meteorological
+and oceanographic datasets, such as those used in weather, climate,
+and remote sensing research, but is useful for almost anything
+that you would want to plot on a map!  You can see lots of example 
+notebooks at [geo.holoviews.org](http://geo.holoviews.org), and a good 
+overview is in our [blog post announcement](https://www.continuum.io/blog/developer-blog/introducing-geoviews).
+
+GeoViews is built on the [HoloViews](http://holoviews.org) library for
+building flexible visualizations of multidimensional data.  GeoViews
+adds a family of geographic plot types based on the
+[Cartopy](http://scitools.org.uk/cartopy) library, plotted using
+either the [Matplotlib](http://matplotlib.org) or
+[Bokeh](http://bokeh.pydata.org) packages.
+
+Each of the new GeoElement plot types is a new HoloViews Element that
+has an associated geographic projection based on ``cartopy.crs``. The
+GeoElements currently include ``Feature``, ``WMTS``, ``Tiles``,
+``Points``, ``Contours``, ``Image``, ``QuadMesh``, ``TriMesh``,
+``RGB``, ``HSV``, ``Labels``, ``Graph``, ``HexTiles``, ``VectorField``
+and ``Text`` objects, each of which can easily be overlaid in the same
+plots. E.g. an object with temperature data can be overlaid with
+coastline data using an expression like ``gv.Image(temperature) *
+gv.Feature(cartopy.feature.COASTLINE)``. Each GeoElement can also be
+freely combined in layouts with any other HoloViews Element , making
+it simple to make even complex multi-figure layouts of overlaid
+objects.
+
+## Installation
+
+You can install GeoViews and its dependencies using conda:
+
+```
+conda install -c pyviz geoviews
+```
+
+Alternatively you can also install the geoviews-core package, which
+only installs the minimal dependencies required to run geoviews:
+
+```
+conda install -c pyviz geoviews-core
+```
+
+Once installed you can copy the examples into the current directory
+using the ``geoviews`` command and run them using the Jupyter
+notebook:
+
+```
+geoviews examples 
+cd geoviews-examples
+jupyter notebook
+```
+
+(Here `geoviews examples` is a shorthand for `geoviews copy-examples
+--path geoviews-examples && geoviews fetch-data --path
+geoviews-examples`.)
+
+To work with JupyterLab you will also need the PyViz JupyterLab
+extension:
+
+```
+conda install -c conda-forge jupyterlab
+jupyter labextension install @pyviz/jupyterlab_pyviz
+```
+
+Once you have installed JupyterLab and the extension launch it with:
+
+```
+jupyter-lab
+```
+
+If you want to try out the latest features between releases, you can
+get the latest dev release by specifying `-c pyviz/label/dev` in place
+of `-c pyviz`.
+
+### Additional dependencies
+
+If you need to install libraries only available from conda-forge, such
+as Iris (to use data stored in Iris cubes) or xesmf, you should
+install from conda-forge:
+
+```
+conda create -n env-name -c pyviz -c conda-forge geoviews iris xesmf
+conda activate env-name
+```
+
+**Note -- Do not mix conda-forge and defaults.** I.e., do not install
+packages from conda-forge into a GeoViews environment created with
+defaults. If you are using the base environment of mini/anaconda, or
+an environment created without specifying conda-forge before defaults,
+and you then install from conda-forge, you will very likely have
+incompatibilities in underlying, low-level dependencies. These binary
+(ABI) incompatibilities can lead to segfaults because of differences
+in how non-Python packages are built between conda-forge and defaults.
+
+-----
+
+GeoViews itself is also installable using `pip`, but to do that you
+will first need to have installed the [dependencies of cartopy](http://scitools.org.uk/cartopy/docs/v0.15/installing.html#requirements),
+or else have set up your system to be able to build them.
+
+

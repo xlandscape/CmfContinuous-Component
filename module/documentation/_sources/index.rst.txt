@@ -1,0 +1,266 @@
+.. model documentation master file, created by
+   sphinx-quickstart on Tue May 29 16:01:42 2018.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive. 
+
+.. figure:: /_static/jlu_knoell_bayer.png
+	:width: 425px
+	:height: 100px
+	:figclass: align-right
+	
+.. figure:: /_static/cropprotection.png
+	:width: 200px
+	:height: 200px
+	:scale: 75 %
+	:alt: alternate text
+	:align: right
+
+**Regulatory Catchment Model**
+******************************
+
+Modern agriculture often relies on the use of pesticides in order to
+maintain a high production level. However, a fraction of the pesticide
+amount applied to agricultural fields can reach surface waters and
+groundwater via a number of different pathways and can cause harmful
+effects to the environment. Computer simulations are being frequently applied
+in the authorization procedure of pesticides in order to evaluate the 
+risk for the environment or in the frame of water stewardship projects. 
+
+Catchment modelling is a higher tier option for ecological risk assessment as stated in the `FOCUS Landscape & Mitigation guidance (2002) <https://esdac.jrc.ec.europa.eu/projects/focus-landscape-mitigation>`_.
+The EFSA Guidance Document on Aquatic Risk Assessment `(EFSA, 2013) <http://www.efsa.europa.eu/de/efsajournal/pub/3290>`_ indicates a 
+key role for effect modelling in future aquatic risk characterization in a tiered risk assessment framework. 
+Such approaches require correspondingly adapted exposure tools and scenarios ranging from simple edge-of-field
+to spatio-temporally explicit landscape-scale catchment models. These approaches should be sufficiently flexible 
+and transparent in order to design lower- and higher-tiers of consistent protection levels.
+
+The newly developed catchment model is a modular, flexible and scalable (in time and space) toolbox in order to provide 
+solutions for future regulatory requirements and refinement options in aquatic risk assessment of plant protection products.
+The toolbox allows for stepwise adaption of model complexity to address tiered risk assessments. 
+The approach is based on the open-source hydrological programming library `CMF (Kraft et al., 2011) <https://philippkraft.github.io/cmf/>`_ . 
+The unique advantages of the newly developed approach are as follows:
+
+**Adapting the hydrological model structure within a consistent geospatial catchment discretisation**:
+The user has then the oppertunity to select from three different option for running the whole catchment and one option 
+to simulate only single cells. This is an unique future of the model, because it provides flexibility in terms of hydrological 
+detail and spatial representation of the catchment.
+
+**Integrating 1d models into fully connected catchment scale flow regimes**:
+The model allows for the utilisation of timeseries from established 1d models of `FOCUS risk assessment <https://esdac.jrc.ec.europa.eu/projects/surface-water>`_, 
+e.g. `MACRO <https://esdac.jrc.ec.europa.eu/projects/macro-0>`_, `PEARL <https://esdac.jrc.ec.europa.eu/projects/pearl>`_ or `PRZM <https://esdac.jrc.ec.europa.eu/projects/przmsw>`_, and to connect them in a spatial manner in order to simulate water and solute transport across entire catchments.
+
+**Grouping single areas in catchments on the basis of unique combinations of natural properties**:
+In larger catchments environmental data is often similar for single fields (e.g. climate x soil x management). Such fields can be summarized as unique combinations, 
+which can be simulated one time by using the '1dField' option and afterwards related to localised cells using within the 'timeseriesCatchment' option.
+This approach can save a lot of simulation time, because the complexity of individual setups is reduced, but the spatial discretisation stays in place. 
+
+**Handling data efficient and transparent**:
+The user can select between the two formats `CSV <https://en.wikipedia.org/wiki/Comma-separated_values>`_ and `HDF5 <https://en.wikipedia.org/wiki/Hierarchical_Data_Format>`_. 
+CSV gives the user easy access to modelling data by using a text editor or MS Excel, which is a good choice for small scale / short term analysis. When simulating
+larger areas for long time periods disk space and data transfer time could be a limiting factor. HDF provides the ability to create compressed binary files, which reduce
+the required disk space in a high extent and can be accessed and processed by specific libraries of scripting programming languages such 
+as R (`h5 <https://cran.r-project.org/web/packages/h5/vignettes/h5-Intro.html>`_) or Python (`h5py <https://www.h5py.org/>`_).
+
+The model is implemented following an object-oriented programming approach using `Python3 <https://www.python.org/>`_. Natural entities and their relation
+to each other are defined by a `has-a-relationship <https://en.wikipedia.org/wiki/Has-a>`_. The numerical calculations are done by the CMF library which
+is implemented in C++ and makes use of the `CVODE solver <https://computation.llnl.gov/projects/sundials>`_. Model documentation is done by using
+`sphinx <http://www.sphinx-doc.org/en/master/>`_ and model versions are managed by `TortoiseSVN <https://tortoisesvn.net/index.de.html>`_.
+When programming the model a focus was on using well established open-source Python packages with a widespread use by science, authorities and industry as 
+well as by other third party software in the field of geoanalysis (e.g. `ESRI ArcPy <http://desktop.arcgis.com/de/arcmap/10.3/analyze/arcpy/what-is-arcpy-.htm>`_): 
+
+* Multi-dimensional array processing with `numpy <https://www.numpy.org/>`_, 
+* Statistics with `scipy <https://docs.scipy.org/doc/scipy/reference/>`_ and  `pandas <https://pandas.pydata.org/>`_,
+* spatial oeprations with `scipy.spatial <https://docs.scipy.org/doc/scipy/reference/spatial.html>`_ and `shapely <https://pypi.org/project/Shapely/>`_ as well as
+* plotting with `matplotlib <https://matplotlib.org/>`_.
+
+The following paragraphs hold a brief overview about the model. Details can be found in the respective pages:
+
+* :doc:`Concept </concept>`
+* :doc:`Step-by-step user guide </usermanual>`
+* :doc:`Data I/O </data_io>`
+* :doc:`Install </install>
+* :doc:`Source code </sourcecode>``
+
+
+Example
+==================
+
+Drift from agricultural fields to aquatic systems related to plant protection product application is a major 
+issue to be addressed in aquatic risk assessment. Using the newly developed catchment model 
+the regulatory relevant concentrations in sediment and water assessed. The spatial 
+(i.e. size and number of single river segments)  and temporal resolution (hourly) are set by the user 
+to match the relevant scale for consecutive aquatic ecotoxicolocial risk assessment. 
+
+The example shows a large scale catchment (ca. 1600 river segments which sum up to 150km) in Belgium with a 
+dense river network and an intensive cultivation of pome fruits (purple areas). The case study shows the predicted 
+environmental concentration in surface water (PECsw) after an application of a fungicide to all pome fields 
+at the beginning of May. The video covers a period of eight days after the application.
+
+.. figure:: /_static/rummen_short.apng
+.. figure:: /_static/legend_all.png
+	:align: left
+.. figure:: /_static/legend.png
+
+Modelling concept
+==================
+
+The catchment with all its components, i.e. forests, fields, rivers and urban areas, is divided into a set of cells and river segments which
+are represented by a set of natural properties and biophysical processes. The information on the spatial location, extent and land use must 
+be obtained from land use cover data from public available resources (e.g. `CORINE Land Cover <https://land.copernicus.eu/pan-european/corine-land-cover>`_ ,
+`European catchments and Rivers network system <https://www.eea.europa.eu/data-and-maps/data/european-catchments-and-rivers-network>`_) or 
+local authorities.
+
+The modelling process starts with an automated connection of cells and river segments (:doc:`Step-by-step user guide </usermanual>`, Flow connections).
+Optionally, the catchment can be discretised in smaller units (:doc:`Step-by-step user guide </usermanual>`, Spatial discretisation). The user has then
+the opportunity to select from three different option for running the whole catchment and one option to simulate only single cells. This is an unique future 
+of the model, because it provides flexibility in terms of hydrological detail and spatial representation of the catchment.
+
+.. figure:: /_static/concept_uml_catchment.png
+    :align: center
+    :figclass: align-center
+
+Options (a)-(c) provide the same output for each river segment in the catchment, but differ in the calculation 
+method of water flow across land areas:
+
+(a) **completeCatchment:** The entire flow network of the catchment is simulating including river segments and cells. All fluxes are simulated by CMF
+on the basis of climate and soil data.
+
+(b) **timeseriesCatchment:** The entire flow network of the catchment is simulating including river segments and cells. The fluxes from single cells
+must be provided as time series for surface runoff, drainage flow and groundwater flow. Theses flows can be calculated using the ***1dField** option or by any other 
+1D field scale model such as MACRO or PEARL.
+
+(c) **areayieldCatchment:** Only the stream network is simulated. In order to simulate the inflow into each reach, the area weighted inflow
+is calculated by multiplying the related catchment area by observed flow. The catchment
+area is calculated on the basis on the cumulative areas of cells which are connected to directly or indirectly to the reach.
+
+
+The last options differs from previous ones:
+
+(d) **1dField:** Only single fields are simulated with a 1D simulation approach. The soil is divided into several layers as well as holds a 
+surface, drainage and groundwater flow. This approach is equal to the field representation of completeCatchment, 
+but without connecting the cells across the catchment.
+
+The background for using different options is as follows. In larger catchments environmental data is often similar for single fields (e.g. climate x soil x management). 
+Such fields can be summarized as unique combinations which can be simulated one time (using '1dField' option and afterwards related to localised cells
+using the 'timeserisCatchment' option. This approach can save a lot of simulation time, because the complexity of individual setups is reduced, but
+the spatial discretisation stays in place. Moreover, the timeseriesCatchment option allows the utilisation of time series from established 1d models
+of FOCUS risk assessment, e.g. MACRO, PEARL or PRZM.
+
+**Further details**:
+:doc:`Concept </concept>`
+
+Quick user guide
+==================
+
+Data structure
+-------------------
+
+The data structure consists of three hierarchical levels. The 'runlist' holds a list with all 'projects' as a well
+as information regarding simulations period, number of threads and the hydrolocial modelign option. Projects are grouped in single folders. Each
+folder represents a model run which can be a single agricultural field, a network of river segments or an entire fully distributed catchment. The folder
+contains all input data files, e.g. climate and soil information, crop management and a list of cells, reaches and other spatial units of the catchment.
+
+.. figure:: /_static/project-structure.png
+    :align: center
+    :figclass: align-center 
+
+**Further details:**
+:doc:`Data I/O </data_io>`
+
+Pre-processing
+-------------------
+
+A set of pre-processing tools are available, e.g. to create a flow network between single cells and river segments.
+The algorithm calculates Thiessen-Polygons between all cells in the first step. Adjacent
+cells are connected via surface water, drainage and groundwater flow to each other. An iterative adaption
+procedure simplifies the number of connections in order to reduce the complexity of the flow network.
+
+.. code-block:: python
+  :linenos:
+
+  import LandscapeModel as LM
+  from scipy.spatial import Voronoi
+  import shapely.geometry
+  if __name__ == "__main__":
+    # connect fields and river segments
+    fieldcon = LM.FieldConnector(fpath="c:/ExampleCatchment/",
+                   simplify_connections=4,connection_type="RO_GW")
+    fieldcon.makePlot("ExampleCatchment.png",resX=100,resY=100,
+                    plotVoroni=False,plotElevation=True,plot_simplified=True)
+	   
+.. figure:: /_static/preprocessing_1.png
+    :align: center
+    :figclass: align-center
+
+**Further details:**
+:doc:`Step-by-step user guide </usermanual>`, Pre-processing
+					   
+Simulation
+------------------
+
+The model can be executed by using a Python script and calling the related functions:
+
+.. code-block:: python
+  :linenos:
+
+  import LandscapeModel
+
+  if __name__ == "__main__":
+    # read runlist
+    runFactory = LandscapeModel.utils.RunFactory("C:/",fname= "runlist.csv")
+    # make simulation
+    runFactory("ExampleProject1" )
+    
+... or by using a batchfile which will execute all simulations as defined in the 'runlist':
+
+.. code-block:: bash
+  :linenos:
+
+  @echo off
+  set list=runlist
+  set key=None
+  set python=%cd%/bin/python37/python.exe
+  set script=%cd%/bin/main.py
+  call %python% %script% %list% %key%
+  pause
+
+**Further details:**
+:doc:`Step-by-step user guide </usermanual>`, completeCatchment, timeseriesCatchment, areaYieldCatchment, 1dField
+
+Post-processing
+----------------------------
+
+Various functions are available to prepare graphs and summaries of the simulation:
+
+.. figure:: /_static/plot1.png
+    :align: center
+    :figclass: align-center
+
+The water and solute balance of single river segments can be evaluated in detail:
+
+.. figure:: /_static/plot2.png
+    :align: center
+    :figclass: align-center
+	
+PEC values of several consecutive river segments can be evaluated over space and time:
+
+.. figure:: /_static/plot3.png
+    :align: center
+    :figclass: align-center
+
+**Further details:**
+:doc:`Step-by-step user guide </usermanual>`, Post-processing
+
+
+About
+==================
+
+The tool is a joint development within a project by Bayer AG, knoell Germany GmbH 
+and University Giessen.
+
+Sebastian Multsch :sup:`1` , Florian Krebs :sup:`1` , Stefan Reichenberger :sup:`1` , Philipp Kraft :sup:`2` , Lutz Breuer :sup:`2` , Thorsten Schad :sup:`3` 
+
+:sup:`1` `knoell Germany GmbH <https://www.knoellconsult.com/enf>`_ 
+
+:sup:`2` `Chair of Landscape, Water and Biogeochemical Cycles, Justus Liebig University Giessen  <http://www.uni-giessen.de/faculties/f09/institutes/ilr/hydro>`_ 
+
+:sup:`3` `Bayer AG, Research & Development, Crop Science <https://www.cropscience.bayer.de/>`_ 

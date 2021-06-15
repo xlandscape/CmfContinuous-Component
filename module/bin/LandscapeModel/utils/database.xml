@@ -1,0 +1,9 @@
+<data>  
+    <items>
+        <item key="reaches" save="True" names="key,time,depth,conc,load,artificialflux,volume,flow,area,MASS_SED,MASS_SED_DEEP,MASS_SW,PEC_SW,PEC_SED" types="U10,U16,f4,f4,f4,f4,f4,f4,f4,f4,f4,f4,f4,f4">reaches</item>
+        <item key="cells" save="True" names="key,time,qperc,qsurf,qdrain,qgw_river,qgw_gw,Vsw,Vgw,Vdr,rain,concgw,concsw,concdrainage" types="U10,U16,f4,f4,f4,f4,f4,f4,f4,f4,f4,f4,f4,f4">cells</item>
+        <item key="plants" save="True" names="key,time,das,rootdepth,height,LAI,GLAI,Epot,Eact,Tpot,Tact,waterabstraction,rootwateruptake,evaporation,rootdistribution" types="U10,U16,f4,f4,f4,f4,f4,f4,f4,f4,f4,f4,f4,f4">plants</item>
+        <item key="gws" save="True" names="key,time,volume,conc,load,flow" types="U10,U16,f4,f4,f4,f4">gws</item>
+        <item key="outlets" save="True" names="key,time,volume,conc,load,flow" types="U10,U16,f4,f4,f4,f4">outlets</item>
+</items>
+</data>  

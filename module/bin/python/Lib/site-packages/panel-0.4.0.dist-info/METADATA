@@ -1,0 +1,118 @@
+Metadata-Version: 2.1
+Name: panel
+Version: 0.4.0
+Summary: A high level dashboarding library for python visualization libraries.
+Home-page: http://pyviz.org
+Author: PyViz developers
+Author-email: developers@pyviz.org
+Maintainer: PyViz
+Maintainer-email: developers@pyviz.org
+License: BSD
+Platform: Windows
+Platform: Mac OS X
+Platform: Linux
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3.3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Operating System :: OS Independent
+Classifier: Intended Audience :: Science/Research
+Classifier: Intended Audience :: Developers
+Classifier: Natural Language :: English
+Classifier: Topic :: Scientific/Engineering
+Classifier: Topic :: Software Development :: Libraries
+Requires-Python: >=2.7
+Description-Content-Type: text/markdown
+Requires-Dist: bokeh (>=1.0.0)
+Requires-Dist: param (>=1.8.2)
+Requires-Dist: pyviz-comms (>=0.7.0)
+Requires-Dist: markdown
+Requires-Dist: pyct (>=0.4.4)
+Requires-Dist: testpath (<0.4)
+Provides-Extra: all
+Requires-Dist: altair ; extra == 'all'
+Requires-Dist: coveralls ; extra == 'all'
+Requires-Dist: flake8 ; extra == 'all'
+Requires-Dist: holoviews (>=1.11.0) ; extra == 'all'
+Requires-Dist: hvplot ; extra == 'all'
+Requires-Dist: matplotlib ; extra == 'all'
+Requires-Dist: nbsite ; extra == 'all'
+Requires-Dist: nbsmoke (>=0.2.0) ; extra == 'all'
+Requires-Dist: nose ; extra == 'all'
+Requires-Dist: notebook (>=5.4) ; extra == 'all'
+Requires-Dist: parameterized ; extra == 'all'
+Requires-Dist: pillow ; extra == 'all'
+Requires-Dist: plotly ; extra == 'all'
+Requires-Dist: pytest ; extra == 'all'
+Requires-Dist: pytest-cov ; extra == 'all'
+Requires-Dist: scipy ; extra == 'all'
+Requires-Dist: sphinx-ioam-theme ; extra == 'all'
+Requires-Dist: vega-datasets ; extra == 'all'
+Provides-Extra: build
+Requires-Dist: param (>=1.7.0) ; extra == 'build'
+Requires-Dist: pyct (>=0.4.4) ; extra == 'build'
+Requires-Dist: setuptools (>=30.3.0) ; extra == 'build'
+Requires-Dist: bokeh (>=1.0.0) ; extra == 'build'
+Requires-Dist: pyviz-comms (>=0.6.0) ; extra == 'build'
+Provides-Extra: doc
+Requires-Dist: notebook (>=5.4) ; extra == 'doc'
+Requires-Dist: holoviews (>=1.11.0) ; extra == 'doc'
+Requires-Dist: matplotlib ; extra == 'doc'
+Requires-Dist: pillow ; extra == 'doc'
+Requires-Dist: plotly ; extra == 'doc'
+Requires-Dist: nbsite ; extra == 'doc'
+Requires-Dist: sphinx-ioam-theme ; extra == 'doc'
+Provides-Extra: recommended
+Requires-Dist: notebook (>=5.4) ; extra == 'recommended'
+Requires-Dist: holoviews (>=1.11.0) ; extra == 'recommended'
+Requires-Dist: matplotlib ; extra == 'recommended'
+Requires-Dist: pillow ; extra == 'recommended'
+Requires-Dist: plotly ; extra == 'recommended'
+Provides-Extra: tests
+Requires-Dist: coveralls ; extra == 'tests'
+Requires-Dist: nose ; extra == 'tests'
+Requires-Dist: flake8 ; extra == 'tests'
+Requires-Dist: parameterized ; extra == 'tests'
+Requires-Dist: pytest ; extra == 'tests'
+Requires-Dist: scipy ; extra == 'tests'
+Requires-Dist: nbsmoke (>=0.2.0) ; extra == 'tests'
+Requires-Dist: pytest-cov ; extra == 'tests'
+Requires-Dist: hvplot ; extra == 'tests'
+Requires-Dist: plotly ; extra == 'tests'
+Requires-Dist: altair ; extra == 'tests'
+Requires-Dist: vega-datasets ; extra == 'tests'
+
+[![Linux Build Status](https://travis-ci.org/pyviz/panel.svg?branch=master)](https://travis-ci.org/pyviz/panel)
+[![codecov](https://codecov.io/gh/pyviz/panel/branch/master/graph/badge.svg)](https://codecov.io/gh/pyviz/panel)
+
+<img src="https://github.com/pyviz/panel/raw/master/doc/_static/logo_stacked.png" data-canonical-src="https://github.com/pyviz/panel/raw/master/doc/_static/logo_stacked.png" width="200"/>
+
+Panel provides tools for easily composing widgets, plots, tables, and other viewable objects and controls into control panels, apps, and dashboards. Panel works with visualizations from [Bokeh](http://bokeh.pydata.org), [Matplotlib](matplotlib.org), [HoloViews](http://holoviews.org), and other Python plotting libraries, making them instantly viewable either individually or when combined with interactive widgets that control them.  Panel works equally well in [Jupyter Notebooks](http://jupyter.org), for creating quick data-exploration tools, or as standalone deployed apps and dashboards, and allows you to easily switch between those contexts as needed.
+
+Panel makes it simple to make:
+
+- Plots with user-defined controls
+- Property sheets for editing parameters of objects in a workflow
+- Control panels for simulations or experiments
+- Custom data-exploration tools
+- Dashboards reporting key performance indicators (KPIs) and trends
+- Data-rich Python-backed web servers
+- and anything in between
+
+Panel objects are reactive, immediately updating to reflect changes to their state, which makes it simple to compose viewable objects and link them into simple, one-off apps to do a specific exploratory task.  The same objects can then be reused in more complex combinations to build more ambitious apps, while always sharing the same code that works well on its own.
+
+   <table>
+     <tr>
+       <td border=1><a href="https://anaconda.org/jbednar/datashadercliffordinteract"><b>Interact</b></a><br><a href="https://mybinder.org/v2/gh/panel-demos/clifford-interact/master?urlpath=/proxy/5006/app"><img src="https://github.com/pyviz/panel/raw/master/doc/_static/collage/interact.png" /></a></td>
+       <td border=1><a href="https://anaconda.org/jbednar/panel_gapminders"><b>Gapminders</b></a><br><a href="https://mybinder.org/v2/gh/panel-demos/gapminder/master?urlpath=/proxy/5006/app"><img src="https://github.com/pyviz/panel/raw/master/doc/_static/collage/gapminders.png" /></a></td>
+       <td border=1><a href="https://anaconda.org/jbednar/nyc_taxi_panel"><b>NYC Taxi</b></a><br><a href="https://mybinder.org/v2/gh/panel-demos/nyc_taxi/master?urlpath=/proxy/5006/app"><img src="https://github.com/pyviz/panel/raw/master/doc/_static/collage/nyc_taxi.png" /></a></td>
+       <td border=1><a href="https://anaconda.org/jbednar/glaciers"><b>Glaciers</b></a><br><a href="https://mybinder.org/v2/gh/panel-demos/glaciers/master?urlpath=/proxy/5006/app"><img src="https://github.com/pyviz/panel/raw/master/doc/_static/collage/glaciers.png" /></a></td>
+     <tr>
+   </table>
+
+## Using Panel for declarative, reactive programming
+
+Panel can also be used with the separate [Param](http://param.pyviz.org) project to create interactively configurable objects with or without associated visualizations, in a fully declarative way. With this approach, you declare your configurable object using the pure-Python, zero-dependency `param` library, annotating your code with parameter ranges, documentation, and dependencies between parameters and your code.  Using this information, you can make all of your domain-specific code be optionally configurable in a GUI, with optional visual displays and debugging information if you like, all with just a few lines of declarations. With this approach, you don't ever have to commit to whether your code will be used in a notebook, in a GUI app, or completely behind the scenes in batch processing or reports -- the same code can support all of these cases equally well, once you declare the associated parameters and constraints. This approach lets you completely separate your domain-specific code from anything to do with web browsers, GUI toolkits, or other volatile technologies that would otherwise make your hard work become obsolete as they change over time.
+
+

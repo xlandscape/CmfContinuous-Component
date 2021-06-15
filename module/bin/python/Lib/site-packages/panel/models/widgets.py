@@ -1,0 +1,63 @@
+import os
+
+from bokeh.core.properties import Int, Float, Override, Enum, Any, Bool
+from bokeh.models import Widget
+
+from ..util import CUSTOM_MODELS
+
+
+class Player(Widget):
+    """
+    The Player widget provides controls to play through a number of frames.
+    """
+
+    __implementation__ = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'player.ts')
+
+    start = Int(help="Lower bound of the Player slider")
+
+    end = Int(help="Upper bound of the Player slider")
+
+    value = Int(0, help="Current value of the player app")
+
+    step = Int(1, help="Number of steps to advance the player by.")
+
+    interval = Int(500, help="Interval between updates")
+
+    direction = Int(0, help="""
+        Current play direction of the Player (-1: playing in reverse,
+        0: paused, 1: playing)""")
+
+    loop_policy = Enum('once', 'reflect', 'loop', default='once')
+
+    height = Override(default=250)
+
+
+class FileInput(Widget):
+
+    __implementation__ = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'fileinput.ts')
+
+    value = Any(help="Encoded file data")
+
+
+class Audio(Widget):
+
+    __implementation__ = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'audio.ts')
+
+    loop = Bool(False, help="""Whether the audio should loop""")
+
+    paused = Bool(False, help="""Whether the audio is paused""")
+
+    time = Float(0, help="""
+        The current time stamp of the audio playback""")
+
+    throttle = Int(250, help="""
+        The frequency at which the time value is updated in milliseconds.""")
+
+    value = Any(help="Encoded file data")
+
+    volume = Int(0, help="""The volume of the audio player.""")
+
+
+CUSTOM_MODELS['panel.models.widgets.Player'] = Player
+CUSTOM_MODELS['panel.models.widgets.FileInput'] = FileInput
+CUSTOM_MODELS['panel.models.widgets.Audio'] = Audio

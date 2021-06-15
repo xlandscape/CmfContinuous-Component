@@ -1,0 +1,715 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>numdifftools.nd_algopy &mdash; numdifftools 0.9.17 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="numdifftools 0.9.17 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> numdifftools
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.17
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html">Introduction to Numdifftools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#documentation-and-code">Documentation and code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#unit-tests">Unit tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#acknowledgement">Acknowledgement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/numerical/main.html">Numerical differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/algorithmic/main.html">Algorithmic differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../authors.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">Module reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">numdifftools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>numdifftools.nd_algopy</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for numdifftools.nd_algopy</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Numdifftools.nd_algopy</span>
+<span class="sd">======================</span>
+<span class="sd">This module provide an easy to use interface to derivatives calculated with</span>
+<span class="sd">AlgoPy. Algopy stands for Algorithmic Differentiation in Python.</span>
+
+<span class="sd">The purpose of AlgoPy is the evaluation of higher-order derivatives in the</span>
+<span class="sd">forward and reverse mode of Algorithmic Differentiation (AD) of functions that</span>
+<span class="sd">are implemented as Python programs. Particular focus are functions that contain</span>
+<span class="sd">numerical linear algebra functions as they often appear in statistically</span>
+<span class="sd">motivated functions. The intended use of AlgoPy is for easy prototyping at</span>
+<span class="sd">reasonable execution speeds. More precisely, for a typical program a</span>
+<span class="sd">directional derivative takes order 10 times as much time as time as the</span>
+<span class="sd">function evaluation. This is approximately also true for the gradient.</span>
+
+
+<span class="sd">Algoritmic differentiation</span>
+<span class="sd">==========================</span>
+
+<span class="sd">Algorithmic differentiation (AD) is a set of techniques to numerically</span>
+<span class="sd">evaluate the derivative of a function specified by a computer program. AD</span>
+<span class="sd">exploits the fact that every computer program, no matter how complicated,</span>
+<span class="sd">executes a sequence of elementary arithmetic operations (addition,</span>
+<span class="sd">subtraction, multiplication, division, etc.) and elementary functions</span>
+<span class="sd">(exp, log, sin, cos, etc.). By applying the chain rule repeatedly to these</span>
+<span class="sd">operations, derivatives of arbitrary order can be computed automatically,</span>
+<span class="sd">accurately to working precision, and using at most a small constant factor</span>
+<span class="sd">more arithmetic operations than the original program.</span>
+
+<span class="sd">Algorithmic differentiation is not:</span>
+
+<span class="sd">Symbolic differentiation, nor Numerical differentiation (the method of</span>
+<span class="sd">finite differences). These classical methods run into problems:</span>
+<span class="sd">symbolic differentiation leads to inefficient code (unless carefully done)</span>
+<span class="sd">and faces the difficulty of converting a computer program into a single</span>
+<span class="sd">expression, while numerical differentiation can introduce round-off errors</span>
+<span class="sd">in the discretization process and cancellation. Both classical methods have</span>
+<span class="sd">problems with calculating higher derivatives, where the complexity and</span>
+<span class="sd">errors increase. Finally, both classical methods are slow at computing the</span>
+<span class="sd">partial derivatives of a function with respect to many inputs, as is needed</span>
+<span class="sd">for gradient-based optimization algorithms. Algoritmic differentiation</span>
+<span class="sd">solves all of these problems.</span>
+
+<span class="sd">Reference</span>
+<span class="sd">---------</span>
+<span class="sd">Sebastian F. Walter and Lutz Lehmann 2013,</span>
+<span class="sd">&quot;Algorithmic differentiation in Python with AlgoPy&quot;,</span>
+<span class="sd">in Journal of Computational Science, vol 4, no 5, pp 334 - 344,</span>
+<span class="sd">http://www.sciencedirect.com/science/article/pii/S1877750311001013</span>
+
+<span class="sd">https://en.wikipedia.org/wiki/Automatic_differentiation</span>
+
+<span class="sd">https://pythonhosted.org/algopy/index.html</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">misc</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">algopy</span>
+    <span class="kn">from</span> <span class="nn">algopy</span> <span class="kn">import</span> <span class="n">UTPM</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">algopy</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="n">EPS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">MachAr</span><span class="p">()</span><span class="o">.</span><span class="n">eps</span>
+
+<span class="n">_cmn_doc</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Calculate </span><span class="si">%(derivative)s</span><span class="s2"> with Algorithmic Differentiation method</span>
+
+<span class="s2">    Parameters</span>
+<span class="s2">    ----------</span>
+<span class="s2">    f : function</span>
+<span class="s2">        function of one array f(x, `*args`, `**kwds`)</span><span class="si">%(extra_parameter)s</span><span class="s2"></span>
+<span class="s2">    method : string, optional {&#39;forward&#39;, &#39;reverse&#39;}</span>
+<span class="s2">        defines method used in the approximation</span>
+<span class="s2">    </span><span class="si">%(returns)s</span><span class="s2"></span>
+<span class="s2">    Notes</span>
+<span class="s2">    -----</span>
+<span class="s2">    Algorithmic differentiation is a set of techniques to numerically</span>
+<span class="s2">    evaluate the derivative of a function specified by a computer program. AD</span>
+<span class="s2">    exploits the fact that every computer program, no matter how complicated,</span>
+<span class="s2">    executes a sequence of elementary arithmetic operations (addition,</span>
+<span class="s2">    subtraction, multiplication, division, etc.) and elementary functions</span>
+<span class="s2">    (exp, log, sin, cos, etc.). By applying the chain rule repeatedly to these</span>
+<span class="s2">    operations, derivatives of arbitrary order can be computed automatically,</span>
+<span class="s2">    accurately to working precision, and using at most a small constant factor</span>
+<span class="s2">    more arithmetic operations than the original program.</span>
+<span class="s2">    </span><span class="si">%(extra_note)s</span><span class="s2"></span>
+<span class="s2">    Reference</span>
+<span class="s2">    ---------</span>
+<span class="s2">    Sebastian F. Walter and Lutz Lehmann 2013,</span>
+<span class="s2">    &quot;Algorithmic differentiation in Python with AlgoPy&quot;,</span>
+<span class="s2">    in Journal of Computational Science, vol 4, no 5, pp 334 - 344,</span>
+<span class="s2">    http://www.sciencedirect.com/science/article/pii/S1877750311001013</span>
+
+<span class="s2">    https://en.wikipedia.org/wiki/Automatic_differentiation</span>
+
+<span class="s2">    </span><span class="si">%(example)s</span><span class="s2"></span>
+<span class="s2">    </span><span class="si">%(see_also)s</span><span class="s2"></span>
+<span class="s2">    &quot;&quot;&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">_Derivative</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Base class&quot;&quot;&quot;</span>
+
+    <span class="n">info</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;info&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;error_estimate&#39;</span><span class="p">,</span> <span class="s1">&#39;final_step&#39;</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="n">full_output</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">full_output</span> <span class="o">=</span> <span class="n">full_output</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_f</span>
+
+    <span class="nd">@f.setter</span>
+    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_f</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_computational_graph</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">computational_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_computational_graph</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># STEP 1: trace the function evaluation</span>
+            <span class="n">cg</span> <span class="o">=</span> <span class="n">algopy</span><span class="o">.</span><span class="n">CGraph</span><span class="p">()</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">algopy</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+            <span class="n">cg</span><span class="o">.</span><span class="n">trace_off</span><span class="p">()</span>
+            <span class="n">cg</span><span class="o">.</span><span class="n">independentFunctionList</span> <span class="o">=</span> <span class="p">[</span><span class="n">tmp</span><span class="p">]</span>
+            <span class="n">cg</span><span class="o">.</span><span class="n">dependentFunctionList</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_computational_graph</span> <span class="o">=</span> <span class="n">cg</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_computational_graph</span>
+
+    <span class="k">def</span> <span class="nf">_get_function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">dict</span><span class="p">(</span><span class="n">backward</span><span class="o">=</span><span class="s1">&#39;reverse&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">fun</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_function</span><span class="p">()</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_output</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mi">10</span><span class="o">*</span><span class="n">EPS</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">df</span><span class="p">),</span> <span class="n">EPS</span><span class="p">),</span> <span class="n">EPS</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span>
+
+<div class="viewcode-block" id="Derivative"><a class="viewcode-back" href="../../api/generated/numdifftools.nd_algopy.Derivative.html#numdifftools.nd_algopy.Derivative">[docs]</a><span class="k">class</span> <span class="nc">Derivative</span><span class="p">(</span><span class="n">_Derivative</span><span class="p">):</span>
+
+    <span class="n">__doc__</span> <span class="o">=</span> <span class="n">_cmn_doc</span> <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">derivative</span><span class="o">=</span><span class="s1">&#39;n-th derivative&#39;</span><span class="p">,</span>
+        <span class="n">extra_parameter</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    n : int, optional</span>
+<span class="s2">        Order of the derivative.&quot;&quot;&quot;</span><span class="p">,</span>
+        <span class="n">extra_note</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">returns</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Returns</span>
+<span class="s2">    -------</span>
+<span class="s2">    der : ndarray</span>
+<span class="s2">       array of derivatives</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">example</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Example</span>
+<span class="s2">    -------</span>
+<span class="s2">    # 1&#39;st and 2&#39;nd derivative of exp(x), at x == 1</span>
+
+<span class="s2">    &gt;&gt;&gt; import numpy as np</span>
+<span class="s2">    &gt;&gt;&gt; import numdifftools.nd_algopy as nda</span>
+<span class="s2">    &gt;&gt;&gt; fd = nda.Derivative(np.exp)              # 1&#39;st derivative</span>
+<span class="s2">    &gt;&gt;&gt; np.allclose(fd(1), 2.718281828459045)</span>
+<span class="s2">    True</span>
+<span class="s2">    &gt;&gt;&gt; fd5 = nda.Derivative(np.exp, n=5)         # 5&#39;th derivative</span>
+<span class="s2">    &gt;&gt;&gt; np.allclose(fd5(1), 2.718281828459045)</span>
+<span class="s2">    True</span>
+
+<span class="s2">    # 1&#39;st derivative of x^3+x^4, at x = [0,1]</span>
+
+<span class="s2">    &gt;&gt;&gt; f = lambda x: x**3 + x**4</span>
+<span class="s2">    &gt;&gt;&gt; fd3 = nda.Derivative(f)</span>
+<span class="s2">    &gt;&gt;&gt; np.allclose(fd3([0,1]), [ 0.,  7.])</span>
+<span class="s2">    True</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">see_also</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    See also</span>
+<span class="s2">    --------</span>
+<span class="s2">    Gradient,</span>
+<span class="s2">    Hessdiag,</span>
+<span class="s2">    Hessian,</span>
+<span class="s2">    Jacobian</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">x0</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">UTPM</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">P</span><span class="p">)</span> <span class="o">+</span> <span class="n">shape</span><span class="p">))</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x0</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">UTPM</span><span class="o">.</span><span class="n">as_utpm</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">y</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">misc</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Derivative reverse not implemented&#39;</span>
+                                      <span class="s1">&#39; for n&gt;1&#39;</span><span class="p">)</span>
+
+        <span class="n">c_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">computational_graph</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="n">shape0</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">c_graph</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span> <span class="k">for</span> <span class="n">xi</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">ravel</span><span class="p">()])</span>
+        <span class="k">return</span> <span class="n">y</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Gradient"><a class="viewcode-back" href="../../api/generated/numdifftools.nd_algopy.Gradient.html#numdifftools.nd_algopy.Gradient">[docs]</a><span class="k">class</span> <span class="nc">Gradient</span><span class="p">(</span><span class="n">_Derivative</span><span class="p">):</span>
+
+    <span class="n">__doc__</span> <span class="o">=</span> <span class="n">_cmn_doc</span> <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">derivative</span><span class="o">=</span><span class="s1">&#39;Gradient&#39;</span><span class="p">,</span>
+        <span class="n">extra_parameter</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">extra_note</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">returns</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Returns</span>
+<span class="s2">    -------</span>
+<span class="s2">    grad : array</span>
+<span class="s2">        gradient</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">example</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Example</span>
+<span class="s2">    -------</span>
+<span class="s2">    &gt;&gt;&gt; import numdifftools.nd_algopy as nda</span>
+<span class="s2">    &gt;&gt;&gt; f = lambda x: np.sum(x**2)</span>
+<span class="s2">    &gt;&gt;&gt; df = nda.Gradient(f, method=&#39;reverse&#39;)</span>
+<span class="s2">    &gt;&gt;&gt; df([1,2,3])</span>
+<span class="s2">    array([ 2.,  4.,  6.])</span>
+
+<span class="s2">    #At [x,y] = [1,1], compute the numerical gradient</span>
+<span class="s2">    #of the function sin(x-y) + y*exp(x)</span>
+
+<span class="s2">    &gt;&gt;&gt; sin = np.sin; exp = np.exp</span>
+<span class="s2">    &gt;&gt;&gt; z = lambda xy: sin(xy[0]-xy[1]) + xy[1]*exp(xy[0])</span>
+<span class="s2">    &gt;&gt;&gt; dz = nda.Gradient(z)</span>
+<span class="s2">    &gt;&gt;&gt; grad2 = dz([1, 1])</span>
+<span class="s2">    &gt;&gt;&gt; grad2</span>
+<span class="s2">    array([ 3.71828183,  1.71828183])</span>
+
+<span class="s2">    #At the global minimizer (1,1) of the Rosenbrock function,</span>
+<span class="s2">    #compute the gradient. It should be essentially zero.</span>
+
+<span class="s2">    &gt;&gt;&gt; rosen = lambda x : (1-x[0])**2 + 105.*(x[1]-x[0]**2)**2</span>
+<span class="s2">    &gt;&gt;&gt; rd = nda.Gradient(rosen)</span>
+<span class="s2">    &gt;&gt;&gt; grad3 = rd([1,1])</span>
+<span class="s2">    &gt;&gt;&gt; grad3==np.array([ 0.,  0.])</span>
+<span class="s2">    array([ True,  True], dtype=bool)</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">see_also</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    See also</span>
+<span class="s2">    --------</span>
+<span class="s2">    Derivative</span>
+<span class="s2">    Jacobian,</span>
+<span class="s2">    Hessdiag,</span>
+<span class="s2">    Hessian,</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="c1"># forward mode without building the computational graph</span>
+
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">algopy</span><span class="o">.</span><span class="n">UTPM</span><span class="o">.</span><span class="n">init_jacobian</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">algopy</span><span class="o">.</span><span class="n">UTPM</span><span class="o">.</span><span class="n">extract_jacobian</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+
+        <span class="n">c_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">computational_graph</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">c_graph</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Jacobian"><a class="viewcode-back" href="../../api/generated/numdifftools.nd_algopy.Jacobian.html#numdifftools.nd_algopy.Jacobian">[docs]</a><span class="k">class</span> <span class="nc">Jacobian</span><span class="p">(</span><span class="n">Gradient</span><span class="p">):</span>
+
+    <span class="n">__doc__</span> <span class="o">=</span> <span class="n">_cmn_doc</span> <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">derivative</span><span class="o">=</span><span class="s1">&#39;Jacobian&#39;</span><span class="p">,</span>
+        <span class="n">extra_parameter</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">extra_note</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">returns</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Returns</span>
+<span class="s2">    -------</span>
+<span class="s2">    jacob : array</span>
+<span class="s2">        Jacobian</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">example</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Example</span>
+<span class="s2">    -------</span>
+<span class="s2">    &gt;&gt;&gt; import numdifftools.nd_algopy as nda</span>
+
+<span class="s2">    #(nonlinear least squares)</span>
+
+<span class="s2">    &gt;&gt;&gt; xdata = np.reshape(np.arange(0,1,0.1),(-1,1))</span>
+<span class="s2">    &gt;&gt;&gt; ydata = 1+2*np.exp(0.75*xdata)</span>
+<span class="s2">    &gt;&gt;&gt; f = lambda c: (c[0]+c[1]*np.exp(c[2]*xdata) - ydata)**2</span>
+
+<span class="s2">    Jfun = nda.Jacobian(f) # Todo: This does not work</span>
+<span class="s2">    Jfun([1,2,0.75]).T # should be numerically zero</span>
+<span class="s2">    array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],</span>
+<span class="s2">           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],</span>
+<span class="s2">           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])</span>
+
+<span class="s2">    &gt;&gt;&gt; Jfun2 = nda.Jacobian(f, method=&#39;reverse&#39;)</span>
+<span class="s2">    &gt;&gt;&gt; Jfun2([1,2,0.75]).T # should be numerically zero</span>
+<span class="s2">    array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],</span>
+<span class="s2">           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],</span>
+<span class="s2">           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])</span>
+
+<span class="s2">    &gt;&gt;&gt; f2 = lambda x : x[0]*x[1]*x[2] + np.exp(x[0])*x[1]</span>
+<span class="s2">    &gt;&gt;&gt; Jfun3 = nda.Jacobian(f2)</span>
+<span class="s2">    &gt;&gt;&gt; Jfun3([3.,5.,7.])</span>
+<span class="s2">    array([[ 135.42768462,   41.08553692,   15.        ]])</span>
+
+<span class="s2">    &gt;&gt;&gt; Jfun4 = nda.Jacobian(f2, method=&#39;reverse&#39;)</span>
+<span class="s2">    &gt;&gt;&gt; Jfun4([3,5,7])</span>
+<span class="s2">    array([[ 135.42768462,   41.08553692,   15.        ]])</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">see_also</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    See also</span>
+<span class="s2">    --------</span>
+<span class="s2">    Derivative</span>
+<span class="s2">    Gradient,</span>
+<span class="s2">    Hessdiag,</span>
+<span class="s2">    Hessian,</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="nb">super</span><span class="p">(</span><span class="n">Jacobian</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_forward</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">c_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">computational_graph</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">c_graph</span><span class="o">.</span><span class="n">jacobian</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Hessian"><a class="viewcode-back" href="../../api/generated/numdifftools.nd_algopy.Hessian.html#numdifftools.nd_algopy.Hessian">[docs]</a><span class="k">class</span> <span class="nc">Hessian</span><span class="p">(</span><span class="n">_Derivative</span><span class="p">):</span>
+
+    <span class="n">__doc__</span> <span class="o">=</span> <span class="n">_cmn_doc</span> <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">derivative</span><span class="o">=</span><span class="s1">&#39;Hessian&#39;</span><span class="p">,</span>
+        <span class="n">extra_parameter</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">returns</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Returns</span>
+<span class="s2">    -------</span>
+<span class="s2">    hess : ndarray</span>
+<span class="s2">       array of partial second derivatives, Hessian</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">extra_note</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">example</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Example</span>
+<span class="s2">    -------</span>
+<span class="s2">    &gt;&gt;&gt; import numdifftools.nd_algopy as nda</span>
+
+<span class="s2">    # Rosenbrock function, minimized at [1,1]</span>
+
+<span class="s2">    &gt;&gt;&gt; rosen = lambda x : (1.-x[0])**2 + 105*(x[1]-x[0]**2)**2</span>
+<span class="s2">    &gt;&gt;&gt; Hf = nda.Hessian(rosen)</span>
+<span class="s2">    &gt;&gt;&gt; h = Hf([1, 1]) #  h =[ 842 -420; -420, 210];</span>
+<span class="s2">    &gt;&gt;&gt; h</span>
+<span class="s2">    array([[ 842., -420.],</span>
+<span class="s2">           [-420.,  210.]])</span>
+
+<span class="s2">    # cos(x-y), at (0,0)</span>
+
+<span class="s2">    &gt;&gt;&gt; cos = np.cos</span>
+<span class="s2">    &gt;&gt;&gt; f = lambda xy : cos(xy[0]-xy[1])</span>
+<span class="s2">    &gt;&gt;&gt; Hfun2 = nda.Hessian(f)</span>
+<span class="s2">    &gt;&gt;&gt; h2 = Hfun2([0, 0]) # h2 = [-1 1; 1 -1]</span>
+<span class="s2">    &gt;&gt;&gt; h2</span>
+<span class="s2">    array([[-1.,  1.],</span>
+<span class="s2">           [ 1., -1.]])</span>
+
+<span class="s2">    &gt;&gt;&gt; Hfun3 = nda.Hessian(f, method=&#39;reverse&#39;)</span>
+<span class="s2">    &gt;&gt;&gt; h3 = Hfun3([0, 0]) # h2 = [-1, 1; 1, -1];</span>
+<span class="s2">    &gt;&gt;&gt; h3</span>
+<span class="s2">    array([[-1.,  1.],</span>
+<span class="s2">           [ 1., -1.]])</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">see_also</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    See also</span>
+<span class="s2">    --------</span>
+<span class="s2">    Derivative</span>
+<span class="s2">    Gradient,</span>
+<span class="s2">    Jacobian,</span>
+<span class="s2">    Hessdiag,</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Hessian.__init__"><a class="viewcode-back" href="../../api/generated/numdifftools.nd_algopy.Hessian.html#numdifftools.nd_algopy.Hessian.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="n">full_output</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Hessian</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+                                      <span class="n">full_output</span><span class="o">=</span><span class="n">full_output</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">algopy</span><span class="o">.</span><span class="n">UTPM</span><span class="o">.</span><span class="n">init_hessian</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">algopy</span><span class="o">.</span><span class="n">UTPM</span><span class="o">.</span><span class="n">extract_hessian</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">y</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
+        <span class="n">c_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">computational_graph</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">c_graph</span><span class="o">.</span><span class="n">hessian</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Hessdiag"><a class="viewcode-back" href="../../api/generated/numdifftools.nd_algopy.Hessdiag.html#numdifftools.nd_algopy.Hessdiag">[docs]</a><span class="k">class</span> <span class="nc">Hessdiag</span><span class="p">(</span><span class="n">Hessian</span><span class="p">):</span>
+
+    <span class="n">__doc__</span> <span class="o">=</span> <span class="n">_cmn_doc</span> <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">derivative</span><span class="o">=</span><span class="s1">&#39;Hessian diagonal&#39;</span><span class="p">,</span>
+        <span class="n">extra_parameter</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">returns</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Returns</span>
+<span class="s2">    -------</span>
+<span class="s2">    hessdiag : ndarray</span>
+<span class="s2">       Hessian diagonal array of partial second order derivatives.</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">extra_note</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">example</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Example</span>
+<span class="s2">    -------</span>
+<span class="s2">    &gt;&gt;&gt; import numdifftools.nd_algopy as nda</span>
+
+<span class="s2">    # Rosenbrock function, minimized at [1,1]</span>
+
+<span class="s2">    &gt;&gt;&gt; rosen = lambda x : (1.-x[0])**2 + 105*(x[1]-x[0]**2)**2</span>
+<span class="s2">    &gt;&gt;&gt; Hfun = nda.Hessdiag(rosen)</span>
+<span class="s2">    &gt;&gt;&gt; h = Hfun([1, 1]) #  h =[ 842, 210]</span>
+<span class="s2">    &gt;&gt;&gt; h</span>
+<span class="s2">    array([ 842.,  210.])</span>
+
+<span class="s2">    # cos(x-y), at (0,0)</span>
+
+<span class="s2">    &gt;&gt;&gt; cos = np.cos</span>
+<span class="s2">    &gt;&gt;&gt; f = lambda xy : cos(xy[0]-xy[1])</span>
+<span class="s2">    &gt;&gt;&gt; Hfun2 = nda.Hessdiag(f)</span>
+<span class="s2">    &gt;&gt;&gt; h2 = Hfun2([0, 0]) # h2 = [-1, -1]</span>
+<span class="s2">    &gt;&gt;&gt; h2</span>
+<span class="s2">    array([-1., -1.])</span>
+
+<span class="s2">    &gt;&gt;&gt; Hfun3 = nda.Hessdiag(f, method=&#39;reverse&#39;)</span>
+<span class="s2">    &gt;&gt;&gt; h3 = Hfun3([0, 0]) # h2 = [-1, -1];</span>
+<span class="s2">    &gt;&gt;&gt; h3</span>
+<span class="s2">    array([-1., -1.])</span>
+
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">see_also</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    See also</span>
+<span class="s2">    --------</span>
+<span class="s2">    Derivative</span>
+<span class="s2">    Gradient,</span>
+<span class="s2">    Jacobian,</span>
+<span class="s2">    Hessian,</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">d</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">UTPM</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">d</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">)))</span>
+
+        <span class="n">y</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="n">y</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">z0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">UTPM</span><span class="o">.</span><span class="n">as_utpm</span><span class="p">(</span><span class="n">z0</span><span class="p">)</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">H</span>
+
+    <span class="k">def</span> <span class="nf">_reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="nb">super</span><span class="p">(</span><span class="n">Hessdiag</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_reverse</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="directionaldiff"><a class="viewcode-back" href="../../api/generated/numdifftools.nd_algopy.directionaldiff.html#numdifftools.nd_algopy.directionaldiff">[docs]</a><span class="k">def</span> <span class="nf">directionaldiff</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">vec</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return directional derivative of a function of n variables</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    f: function</span>
+<span class="sd">        analytical function to differentiate.</span>
+<span class="sd">    x0: array</span>
+<span class="sd">        vector location at which to differentiate f. If x0 is an nxm array,</span>
+<span class="sd">        then fun is assumed to be a function of n*m variables.</span>
+<span class="sd">    vec: array</span>
+<span class="sd">        vector defining the line along which to take the derivative. It should</span>
+<span class="sd">        be the same size as x0, but need not be a vector of unit length.</span>
+<span class="sd">    **options:</span>
+<span class="sd">        optional arguments to pass on to Derivative.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dder:  scalar</span>
+<span class="sd">        estimate of the first derivative of f in the specified direction.</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    At the global minimizer (1,1) of the Rosenbrock function,</span>
+<span class="sd">    compute the directional derivative in the direction [1 2]</span>
+
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; import numdifftools as nd</span>
+<span class="sd">    &gt;&gt;&gt; vec = np.r_[1, 2]</span>
+<span class="sd">    &gt;&gt;&gt; rosen = lambda x: (1-x[0])**2 + 105*(x[1]-x[0]**2)**2</span>
+<span class="sd">    &gt;&gt;&gt; dd, info = nd.directionaldiff(rosen, [1, 1], vec, full_output=True)</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(dd, 0)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; np.abs(info.error_estimate)&lt;1e-14</span>
+<span class="sd">    True</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    Derivative,</span>
+<span class="sd">    Gradient</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">x0</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">vec</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;vec and x0 must be the same shapes&#39;</span><span class="p">)</span>
+
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">vec</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">ravel</span><span class="p">()),</span> <span class="n">x0</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Derivative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">f</span><span class="p">(</span><span class="n">x0</span><span class="o">+</span><span class="n">t</span><span class="o">*</span><span class="n">vec</span><span class="p">),</span> <span class="o">**</span><span class="n">options</span><span class="p">)(</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">numdifftools.testing</span> <span class="kn">import</span> <span class="n">test_docstrings</span>
+    <span class="n">test_docstrings</span><span class="p">()</span>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2009-2015, Per A Brodtkorb, John D&#39;Errico.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.9.17',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

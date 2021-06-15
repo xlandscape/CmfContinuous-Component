@@ -1,0 +1,219 @@
+**Data I/O**
+******************************
+
+Formats
+=========================
+
+* Input data: All input data must be provided as CSV-files, except the data given in the 'Timeseries' folder. Data is stored in comma-separated text files.
+* Output data: Results and time series can be stored as CSV-file or as HDF5-file as determined in the runlist. HDF5 is strongly recommended for large catchments with many cells and reaches. Data is stored in compressed binary files.
+
+Data structure
+=========================
+
+Project
+-----------------
+
+The data structure consists of three hierarchical levels. The "Project List (CSV-file)" holds a list with all "Projects" as a well
+as information regarding simulations period, number of threads and the hydrological modeling concept. "Projects" are grouped in single folders. Each
+folder represents a model run which can be a single agricultural field, a network of river segments or an entire fully distributed catchment. A "Project folder"
+contains all input data files, e.g. climate and soil information, crop management and a list of cells, reaches and other spatial units of the catchment.
+
+.. figure:: /_static/project-structure.png
+    :align: center
+    :figclass: align-center 
+	
+Time series
+--------------
+
+**Cell:**
+When using the time series option not all data input data is needed, because all flows 
+related to single cells (e.g. an agricultural field, forests) are pre-calculated. The time 
+series must be provided in a sub-folder of the project for each cell. The records must include
+a value for each time step for groundwater, surface water and drainage flux as well as 
+related solute concentrations.
+
+.. figure:: /_static/project-structure-timeseries.png
+    :align: center
+    :figclass: align-center 
+
+**Reach:**
+When using the in stream option only 
+water flow in river segments is simulated and related chemical processes. 
+
+.. figure:: /_static/project-structure-instream.png
+    :align: center
+    :figclass: align-center 
+
+Input files
+=========================
+
+All model runs must be listed in a 'runlist.csv' (or any other filename as defined in the calling scripts), which holds 
+information on the file paths, run types, database and solver settings among others. An example of the table is shown below.
+
+RunList
+-------------------------------
+
+.. figure:: /_static/data_input_runlist.png
+    :align: center
+    :figclass: align-center 
+
+A single model run requires a set of input data, e.g. climate, soil or agricultural management or even observed data for the post-processing methods. 
+In total, eight files are needed for model setup and additionally one file for each climate station. Moreover, an observation file is needed for some of 
+the post-processing methods. other data may be added as well in relation to coupled models, e.g. in case of drift calculation of SprayDriftList.csv is 
+needed.
+The spatial locations and model settings of all spatial entities must be defined for cells (e.g. agricultural field - 'CellList.csv'),
+reaches (single river segments - 'ReachList.csv') and others (e.g. outlets, deep aquifer - 'CatchmentList.csv') and described in the following paragraphs.
+
+CellList
+-------------------------------
+
+.. figure:: /_static/data_input_CellList.png
+    :align: center
+    :figclass: align-center 
+
+ReachList
+-------------------------------
+
+.. figure:: /_static/data_input_ReachList.png
+    :align: center
+    :figclass: align-center 
+
+CatchmentList
+-------------------------------
+
+.. figure:: /_static/data_input_CatchmentList.png
+    :align: center
+    :figclass: align-center 
+
+SoilList
+-------------------------------
+
+Information on soils and climate are defined in the two files 'SoiList.csv' and 'ClimateList.csv'. The latter one is related to a flexible number of climate
+stations which are stored in the project folder as well:
+
+.. figure:: /_static/data_input_SoilList.png
+    :align: center
+    :figclass: align-center 
+
+ClimateList
+-------------------------------
+
+.. figure:: /_static/data_input_climateList.png
+    :align: center
+    :figclass: align-center 
+
+ClimateStation1
+-------------------------------
+
+.. figure:: /_static/data_input_ClimateStation1.png
+    :align: center
+    :figclass: align-center
+
+CropMangementList
+-------------------------------
+
+The management of cells is defined in the 'CropManagementList.csv'. Currently two takes are supported, namely sowing and pesticide application:
+
+.. figure:: /_static/data_input_CropManagementList.png
+    :align: center
+    :figclass: align-center 
+
+CropCoefficientList
+-------------------------------
+
+When using one of the plant growth model options (cmf or macro) a straight forward crop water balance is assessed related
+to the approach and parameterisation of 'FOCUS MARCO5.2 <https://esdac.jrc.ec.europa.eu/projects/macro-0>`_. Coefficients are available for all FOCUS scenarios:
+
+.. figure:: /_static/data_input_CropCoefficientList.png
+    :align: center
+    :figclass: align-center 
+
+All information on applied substances is stored in the 'SubstanceList.csv':
+
+SubstanceList
+-------------------------------
+
+.. figure:: /_static/data_input_SubstanceList.png
+    :align: center
+    :figclass: align-center 
+
+
+When using the model option "xDrift" the drift data must be provided as table:
+
+SprayDriftList
+-------------------------------
+
+.. figure:: /_static/data_input_SprayDriftList.png
+    :align: center
+    :figclass: align-center 
+
+Observation
+-------------------------------
+
+Observed data can be used for pre-processing (when creating an areayieldCatchment model) or for post-processing, e.g. to assess performance parameter such as r-square:
+
+.. figure:: /_static/data_input_Observation.png
+    :align: center
+    :figclass: align-center 
+
+
+Reach timeseries
+-------------------------------
+
+.. figure:: /_static/data_input_TimeseriesReach.png
+    :align: center
+    :figclass: align-center 
+
+
+Cell timeseries
+-------------------------------
+
+.. figure:: /_static/data_input_TimeseriesCell.png
+    :align: center
+    :figclass: align-center 
+
+	
+Output files
+=========================
+
+The results of a simulation are stored in five files with the project ID and an underscore as prefix. The files can be stored as CSV-File or as HDF5-File.
+The files are related to an environmental component
+
+.. figure:: /_static/data_output_files.png
+    :align: center
+    :figclass: align-center 
+
+projectXY_cells
+-------------------------------
+
+.. figure:: /_static/data_output_cells.png
+    :align: center
+    :figclass: align-center 
+	
+projectXY_reaches.csv
+-------------------------------
+
+.. figure:: /_static/data_output_reach.png
+    :align: center
+    :figclass: align-center 
+
+projectXY_plants
+-------------------------------
+
+.. figure:: /_static/data_output_plants.png
+    :align: center
+    :figclass: align-center 
+		
+projectXY_outlets
+-------------------------------
+
+.. figure:: /_static/data_output_outlet.png
+    :align: center
+    :figclass: align-center 
+
+projectXY_gws
+-------------------------------
+
+.. figure:: /_static/data_output_gw.png
+    :align: center
+    :figclass: align-center 
