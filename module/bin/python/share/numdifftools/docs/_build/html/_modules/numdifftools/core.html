@@ -1,0 +1,1198 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>numdifftools.core &mdash; numdifftools 0.9.17 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="numdifftools 0.9.17 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> numdifftools
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.17
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html">Introduction to Numdifftools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#documentation-and-code">Documentation and code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#unit-tests">Unit tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#acknowledgement">Acknowledgement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/numerical/main.html">Numerical differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/algorithmic/main.html">Algorithmic differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../authors.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">Module reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">numdifftools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>numdifftools.core</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for numdifftools.core</h1><div class="highlight"><pre>
+<span></span><span class="c1"># !/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;numerical differentiation functions:</span>
+
+<span class="sd">Derivative, Gradient, Jacobian, and Hessian</span>
+
+<span class="sd">Author:      Per A. Brodtkorb</span>
+<span class="sd">Created:     01.08.2008</span>
+<span class="sd">Copyright:   (c) pab 2008</span>
+<span class="sd">Licence:     New BSD</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numdifftools.multicomplex</span> <span class="kn">import</span> <span class="n">Bicomplex</span>
+<span class="kn">from</span> <span class="nn">numdifftools.extrapolation</span> <span class="kn">import</span> <span class="n">Richardson</span><span class="p">,</span> <span class="n">dea3</span><span class="p">,</span> <span class="n">convolve</span>
+<span class="kn">from</span> <span class="nn">numdifftools.step_generators</span> <span class="kn">import</span> <span class="n">MaxStepGenerator</span><span class="p">,</span> <span class="n">MinStepGenerator</span>
+<span class="kn">from</span> <span class="nn">numdifftools.limits</span> <span class="kn">import</span> <span class="n">_Limit</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">linalg</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">misc</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;dea3&#39;</span><span class="p">,</span> <span class="s1">&#39;Derivative&#39;</span><span class="p">,</span> <span class="s1">&#39;Jacobian&#39;</span><span class="p">,</span> <span class="s1">&#39;Gradient&#39;</span><span class="p">,</span> <span class="s1">&#39;Hessian&#39;</span><span class="p">,</span> <span class="s1">&#39;Hessdiag&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;MinStepGenerator&#39;</span><span class="p">,</span> <span class="s1">&#39;MaxStepGenerator&#39;</span><span class="p">,</span> <span class="s1">&#39;Richardson&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;directionaldiff&#39;</span><span class="p">)</span>
+<span class="n">_TINY</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">tiny</span>
+<span class="n">_EPS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+<span class="n">EPS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">MachAr</span><span class="p">()</span><span class="o">.</span><span class="n">eps</span>
+<span class="n">_SQRT_J</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1j</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>  <span class="c1"># = 1j**0.5</span>
+
+<span class="n">_cmn_doc</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Calculate </span><span class="si">%(derivative)s</span><span class="s2"> with finite difference approximation</span>
+
+<span class="s2">    Parameters</span>
+<span class="s2">    ----------</span>
+<span class="s2">    f : function</span>
+<span class="s2">       function of one array f(x, `*args`, `**kwds`)</span>
+<span class="s2">    step : float, array-like or StepGenerator object, optional</span>
+<span class="s2">       Defines the spacing used in the approximation.</span>
+<span class="s2">       Default is MinStepGenerator(base_step=step, step_ratio=None,</span>
+<span class="s2">                                   num_extrap=0, **step_options)</span>
+<span class="s2">       if step or method in in [&#39;complex&#39;, &#39;multicomplex&#39;],</span>
+<span class="s2">       otherwise</span>
+<span class="s2">           MaxStepGenerator(step_ratio=None, num_extrap=14, **step_options)</span>
+<span class="s2">       The results are extrapolated if the StepGenerator generate more than 3</span>
+<span class="s2">       steps.</span>
+<span class="s2">    method : {&#39;central&#39;, &#39;complex&#39;, &#39;multicomplex&#39;, &#39;forward&#39;, &#39;backward&#39;}</span>
+<span class="s2">        defines the method used in the approximation</span><span class="si">%(extra_parameter)s</span><span class="s2"></span>
+<span class="s2">    full_output : bool, optional</span>
+<span class="s2">        If `full_output` is False, only the derivative is returned.</span>
+<span class="s2">        If `full_output` is True, then (der, r) is returned `der` is the</span>
+<span class="s2">        derivative, and `r` is a Results object.</span>
+<span class="s2">    **step_options:</span>
+<span class="s2">        options to pass on to the XXXStepGenerator used.</span>
+
+<span class="s2">    Call Parameters</span>
+<span class="s2">    ---------------</span>
+<span class="s2">    x : array_like</span>
+<span class="s2">       value at which function derivative is evaluated</span>
+<span class="s2">    args : tuple</span>
+<span class="s2">        Arguments for function `f`.</span>
+<span class="s2">    kwds : dict</span>
+<span class="s2">        Keyword arguments for function `f`.</span>
+<span class="s2">    </span><span class="si">%(returns)s</span><span class="s2"></span>
+<span class="s2">    Notes</span>
+<span class="s2">    -----</span>
+<span class="s2">    Complex methods are usually the most accurate provided the function to</span>
+<span class="s2">    differentiate is analytic. The complex-step methods also requires fewer</span>
+<span class="s2">    steps than the other methods and can work very close to the support of</span>
+<span class="s2">    a function.</span>
+<span class="s2">    The complex-step derivative has truncation error O(steps**2) for `n=1` and</span>
+<span class="s2">    O(steps**4) for `n` larger, so truncation error can be eliminated by</span>
+<span class="s2">    choosing steps to be very small.</span>
+<span class="s2">    Especially the first order complex-step derivative avoids the problem of</span>
+<span class="s2">    round-off error with small steps because there is no subtraction. However,</span>
+<span class="s2">    this method fails if f(x) does not support complex numbers or involves</span>
+<span class="s2">    non-analytic functions such as e.g.: abs, max, min.</span>
+<span class="s2">    Central difference methods are almost as accurate and has no restriction on</span>
+<span class="s2">    type of function. For this reason the &#39;central&#39; method is the default</span>
+<span class="s2">    method, but sometimes one can only allow evaluation in forward or backward</span>
+<span class="s2">    direction.</span>
+
+<span class="s2">    For all methods one should be careful in decreasing the step size too much</span>
+<span class="s2">    due to round-off errors.</span>
+<span class="s2">    </span><span class="si">%(extra_note)s</span><span class="s2"></span>
+<span class="s2">    Reference</span>
+<span class="s2">    ---------</span>
+<span class="s2">    Ridout, M.S. (2009) Statistical applications of the complex-step method</span>
+<span class="s2">        of numerical differentiation. The American Statistician, 63, 66-74</span>
+
+<span class="s2">    K.-L. Lai, J.L. Crassidis, Y. Cheng, J. Kim (2005), New complex step</span>
+<span class="s2">        derivative approximations with application to second-order</span>
+<span class="s2">        kalman filtering, AIAA Guidance, Navigation and Control Conference,</span>
+<span class="s2">        San Francisco, California, August 2005, AIAA-2005-5944.</span>
+
+<span class="s2">    Lyness, J. M., Moler, C. B. (1966). Vandermonde Systems and Numerical</span>
+<span class="s2">                     Differentiation. *Numerische Mathematik*.</span>
+
+<span class="s2">    Lyness, J. M., Moler, C. B. (1969). Generalized Romberg Methods for</span>
+<span class="s2">                     Integrals of Derivatives. *Numerische Mathematik*.</span>
+<span class="s2">    </span><span class="si">%(example)s</span><span class="s2"></span>
+<span class="s2">    </span><span class="si">%(see_also)s</span><span class="s2"></span>
+<span class="s2">    &quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="Derivative"><a class="viewcode-back" href="../../api/generated/numdifftools.core.Derivative.html#numdifftools.core.Derivative">[docs]</a><span class="k">class</span> <span class="nc">Derivative</span><span class="p">(</span><span class="n">_Limit</span><span class="p">):</span>
+
+    <span class="n">__doc__</span> <span class="o">=</span> <span class="n">_cmn_doc</span> <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">derivative</span><span class="o">=</span><span class="s1">&#39;n-th derivative&#39;</span><span class="p">,</span>
+        <span class="n">extra_parameter</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    order : int, optional</span>
+<span class="s2">        defines the order of the error term in the Taylor approximation used.</span>
+<span class="s2">        For &#39;central&#39; and &#39;complex&#39; methods, it must be an even number.</span>
+<span class="s2">    n : int, optional</span>
+<span class="s2">        Order of the derivative.&quot;&quot;&quot;</span><span class="p">,</span>
+        <span class="n">extra_note</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Higher order approximation methods will generally be more accurate, but may</span>
+<span class="s2">    also suffer more from numerical problems. First order methods is usually</span>
+<span class="s2">    not recommended.</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">returns</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Returns</span>
+<span class="s2">    -------</span>
+<span class="s2">    der : ndarray</span>
+<span class="s2">       array of derivatives</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">example</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Example</span>
+<span class="s2">    -------</span>
+<span class="s2">    &gt;&gt;&gt; import numpy as np</span>
+<span class="s2">    &gt;&gt;&gt; import numdifftools as nd</span>
+
+<span class="s2">    # 1&#39;st derivative of exp(x), at x == 1</span>
+
+<span class="s2">    &gt;&gt;&gt; fd = nd.Derivative(np.exp)</span>
+<span class="s2">    &gt;&gt;&gt; np.allclose(fd(1), 2.71828183)</span>
+<span class="s2">    True</span>
+
+<span class="s2">    &gt;&gt;&gt; d2 = fd([1, 2])</span>
+<span class="s2">    &gt;&gt;&gt; np.allclose(d2, [ 2.71828183,  7.3890561 ])</span>
+<span class="s2">    True</span>
+
+<span class="s2">    &gt;&gt;&gt; def f(x):</span>
+<span class="s2">    ...     return x**3 + x**2</span>
+
+<span class="s2">    &gt;&gt;&gt; df = nd.Derivative(f)</span>
+<span class="s2">    &gt;&gt;&gt; np.allclose(df(1), 5)</span>
+<span class="s2">    True</span>
+<span class="s2">    &gt;&gt;&gt; ddf = nd.Derivative(f, n=2)</span>
+<span class="s2">    &gt;&gt;&gt; np.allclose(ddf(1), 8)</span>
+<span class="s2">    True</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">see_also</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    See also</span>
+<span class="s2">    --------</span>
+<span class="s2">    Gradient,</span>
+<span class="s2">    Hessian</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Derivative.__init__"><a class="viewcode-back" href="../../api/generated/numdifftools.core.Derivative.html#numdifftools.core.Derivative.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;central&#39;</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">full_output</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">step_options</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">richardson_terms</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Derivative</span><span class="p">,</span>
+              <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
+                             <span class="n">full_output</span><span class="o">=</span><span class="n">full_output</span><span class="p">,</span> <span class="o">**</span><span class="n">step_options</span><span class="p">)</span></div>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cls</span><span class="p">:</span> <span class="n">cls</span><span class="o">.</span><span class="n">_n</span><span class="p">,</span>
+                 <span class="n">fset</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cls</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="p">(</span><span class="nb">setattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s1">&#39;_n&#39;</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span>
+                                      <span class="n">cls</span><span class="o">.</span><span class="n">_set_derivative</span><span class="p">()))</span>
+
+    <span class="k">def</span> <span class="nf">_set_derivative</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_derivative</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_derivative_zero_order</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_derivative</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_derivative_nonzero_order</span>
+
+    <span class="k">def</span> <span class="nf">_derivative_zero_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwds</span><span class="p">):</span>
+        <span class="n">steps</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">xi</span><span class="p">)]</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_richardson_rule</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vstack</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_derivative_nonzero_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwds</span><span class="p">):</span>
+        <span class="n">diff</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_functions</span><span class="p">()</span>
+        <span class="n">steps</span><span class="p">,</span> <span class="n">step_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_steps</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span>
+        <span class="n">fxi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eval_first</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">diff</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fxi</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_richardson_rule</span><span class="p">(</span><span class="n">step_ratio</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">richardson_terms</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_fd_rule</span><span class="p">(</span><span class="n">step_ratio</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">step_options</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="s1">&#39;__call__&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">step</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">step_ratio</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">num_extrap</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">step</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;complex&#39;</span><span class="p">,</span> <span class="s1">&#39;multicomplex&#39;</span><span class="p">]:</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">step_options</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">MaxStepGenerator</span><span class="p">(</span><span class="o">**</span><span class="n">options</span><span class="p">)</span>
+        <span class="n">options</span><span class="p">[</span><span class="s1">&#39;num_extrap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">step_options</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">MinStepGenerator</span><span class="p">(</span><span class="n">base_step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_method_order</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_richardson_step</span><span class="p">()</span>
+        <span class="c1"># Make sure it is even and at least 2 or 4</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">//</span> <span class="n">step</span><span class="p">)</span> <span class="o">*</span> <span class="n">step</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">order</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_complex_high_order</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;complex&#39;</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_richardson_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">complex_step</span> <span class="o">=</span> <span class="mi">4</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_complex_high_order</span> <span class="k">else</span> <span class="mi">2</span>
+
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">central</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">central2</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="nb">complex</span><span class="o">=</span><span class="n">complex_step</span><span class="p">,</span>
+                    <span class="n">multicomplex</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set_richardson_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_ratio</span><span class="p">,</span> <span class="n">num_terms</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_method_order</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_richardson_step</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">richardson</span> <span class="o">=</span> <span class="n">Richardson</span><span class="p">(</span><span class="n">step_ratio</span><span class="o">=</span><span class="n">step_ratio</span><span class="p">,</span>
+                                     <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
+                                     <span class="n">num_terms</span><span class="o">=</span><span class="n">num_terms</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_multicomplex_middle_name_or_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;multicomplex&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Multicomplex method only support first &#39;</span>
+                                 <span class="s1">&#39;and second order derivatives.&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s1">&#39;2&#39;</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_get_middle_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_even_derivative</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;central&#39;</span><span class="p">,</span> <span class="s1">&#39;complex&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s1">&#39;_even&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_complex_high_order</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_odd_derivative</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;_odd&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multicomplex_middle_name_or_empty</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_get_last_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">last</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;complex&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_derivative_mod_four_is_zero</span> <span class="ow">or</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_complex_high_order</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_derivative_mod_four_is_three</span><span class="p">):</span>
+            <span class="n">last</span> <span class="o">=</span> <span class="s1">&#39;_higher&#39;</span>
+        <span class="k">return</span> <span class="n">last</span>
+
+    <span class="k">def</span> <span class="nf">_get_function_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="s1">&#39;_{0!s}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">)</span>
+        <span class="n">middle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_middle_name</span><span class="p">()</span>
+        <span class="n">last</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_last_name</span><span class="p">()</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="n">first</span> <span class="o">+</span> <span class="n">middle</span> <span class="o">+</span> <span class="n">last</span>
+        <span class="k">return</span> <span class="n">name</span>
+
+    <span class="k">def</span> <span class="nf">_get_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_function_name</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span>
+
+    <span class="k">def</span> <span class="nf">_get_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xi</span><span class="p">):</span>
+        <span class="n">method</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_method_order</span>
+        <span class="n">step_gen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="o">.</span><span class="n">step_generator_function</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">step</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">step_gen</span><span class="p">()],</span> <span class="n">step_gen</span><span class="o">.</span><span class="n">step_ratio</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_odd_derivative</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_even_derivative</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_derivative_mod_four_is_three</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">==</span> <span class="mi">3</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_derivative_mod_four_is_zero</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">==</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">_eval_first_condition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">even_derivative</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_even_derivative</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">even_derivative</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;central&#39;</span><span class="p">,</span> <span class="s1">&#39;central2&#39;</span><span class="p">))</span> <span class="ow">or</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="s1">&#39;backward&#39;</span><span class="p">]</span> <span class="ow">or</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;complex&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_derivative_mod_four_is_zero</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_eval_first</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eval_first_condition</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">xi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_derivative</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwds</span><span class="p">)</span>
+        <span class="n">derivative</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extrapolate</span><span class="p">(</span><span class="o">*</span><span class="n">results</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_output</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">derivative</span><span class="p">,</span> <span class="n">info</span>
+        <span class="k">return</span> <span class="n">derivative</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_fd_matrix</span><span class="p">(</span><span class="n">step_ratio</span><span class="p">,</span> <span class="n">parity</span><span class="p">,</span> <span class="n">nterms</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return matrix for finite difference and complex step derivation.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        step_ratio : real scalar</span>
+<span class="sd">            ratio between steps in unequally spaced difference rule.</span>
+<span class="sd">        parity : scalar, integer</span>
+<span class="sd">            0 (one sided, all terms included but zeroth order)</span>
+<span class="sd">            1 (only odd terms included)</span>
+<span class="sd">            2 (only even terms included)</span>
+<span class="sd">            3 (only every 4&#39;th order terms included starting from order 2)</span>
+<span class="sd">            4 (only every 4&#39;th order terms included starting from order 4)</span>
+<span class="sd">            5 (only every 4&#39;th order terms included starting from order 1)</span>
+<span class="sd">            6 (only every 4&#39;th order terms included starting from order 3)</span>
+<span class="sd">        nterms : scalar, integer</span>
+<span class="sd">            number of terms</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">][</span><span class="n">parity</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;{0!s}. Parity must be 0, 1, 2, 3, 4, 5 or 6! ({1:d})&#39;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">parity</span><span class="p">))</span>
+        <span class="n">inv_sr</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">step_ratio</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">][</span><span class="n">parity</span><span class="p">]</span>
+        <span class="n">c0</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">24.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">][</span><span class="n">parity</span><span class="p">]</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">c0</span> <span class="o">/</span> \
+            <span class="n">misc</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">step</span> <span class="o">*</span> <span class="n">nterms</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">step</span><span class="p">))</span>
+        <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ogrid</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">nterms</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="n">nterms</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">inv_sr</span> <span class="o">**</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="n">step</span> <span class="o">*</span> <span class="n">j</span> <span class="o">+</span> <span class="n">offset</span><span class="p">)))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_flip_fd_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span>
+        <span class="k">return</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_even_derivative</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;backward&#39;</span><span class="p">))</span> <span class="ow">or</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;complex&#39;</span> <span class="ow">and</span> <span class="p">(</span><span class="n">n</span> <span class="o">%</span> <span class="mi">8</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">])))</span>
+
+    <span class="k">def</span> <span class="nf">_parity_complex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">method_order</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">method_order</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">order</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_odd_derivative</span><span class="p">)</span> <span class="o">+</span>
+                <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_derivative_mod_four_is_three</span><span class="p">)</span> <span class="o">+</span>
+                <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_derivative_mod_four_is_zero</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_parity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">method_order</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;central&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">order</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;complex&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parity_complex</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">method_order</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">_get_finite_difference_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_ratio</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate finite differencing rule in advance.</span>
+
+<span class="sd">        The rule is for a nominal unit step size, and will</span>
+<span class="sd">        be scaled later to reflect the local step size.</span>
+
+<span class="sd">        Member methods used</span>
+<span class="sd">        -------------------</span>
+<span class="sd">        _fd_matrix</span>
+
+<span class="sd">        Member variables used</span>
+<span class="sd">        ---------------------</span>
+<span class="sd">        n</span>
+<span class="sd">        order</span>
+<span class="sd">        method</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;multicomplex&#39;</span><span class="p">,</span> <span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,))</span>
+
+        <span class="n">order</span><span class="p">,</span> <span class="n">method_order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_method_order</span>
+        <span class="n">parity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parity</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">method_order</span><span class="p">)</span>
+
+        <span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_richardson_step</span><span class="p">()</span>
+        <span class="n">num_terms</span><span class="p">,</span> <span class="n">ix</span> <span class="o">=</span> <span class="p">(</span><span class="n">order</span> <span class="o">+</span> <span class="n">method_order</span><span class="p">)</span> <span class="o">//</span> <span class="n">step</span><span class="p">,</span> <span class="n">order</span> <span class="o">//</span> <span class="n">step</span>
+        <span class="n">fd_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fd_matrix</span><span class="p">(</span><span class="n">step_ratio</span><span class="p">,</span> <span class="n">parity</span><span class="p">,</span> <span class="n">num_terms</span><span class="p">)</span>
+        <span class="n">fd_rule</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">fd_mat</span><span class="p">)[</span><span class="n">ix</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flip_fd_rule</span><span class="p">:</span>
+            <span class="n">fd_rule</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">return</span> <span class="n">fd_rule</span>
+
+    <span class="k">def</span> <span class="nf">_apply_fd_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_ratio</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">steps</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return derivative estimates of f at x0 for a sequence of stepsizes h</span>
+
+<span class="sd">        Member variables used</span>
+<span class="sd">        ---------------------</span>
+<span class="sd">        n</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">f_del</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">original_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vstack</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
+        <span class="n">fd_rule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_finite_difference_rule</span><span class="p">(</span><span class="n">step_ratio</span><span class="p">)</span>
+        <span class="n">ne</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">ne</span> <span class="o">&lt;</span> <span class="n">fd_rule</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;num_steps ({0:d}) must  be larger than &#39;</span>
+                             <span class="s1">&#39;({1:d}) n + order - 1 = {2:d} + {3:d} -1&#39;</span>
+                             <span class="s1">&#39; ({4:s})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ne</span><span class="p">,</span> <span class="n">fd_rule</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span>
+                                               <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">)</span>
+                             <span class="p">)</span>
+        <span class="n">nr</span> <span class="o">=</span> <span class="n">fd_rule</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">f_diff</span> <span class="o">=</span> <span class="n">convolve</span><span class="p">(</span><span class="n">f_del</span><span class="p">,</span> <span class="n">fd_rule</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="n">nr</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">der_init</span> <span class="o">=</span> <span class="n">f_diff</span> <span class="o">/</span> <span class="p">(</span><span class="n">h</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">ne</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">ne</span> <span class="o">-</span> <span class="n">nr</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">der_init</span><span class="p">[:</span><span class="n">ne</span><span class="p">],</span> <span class="n">h</span><span class="p">[:</span><span class="n">ne</span><span class="p">],</span> <span class="n">original_shape</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_central_even</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">f_x0i</span><span class="p">,</span> <span class="n">x0i</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x0i</span> <span class="o">+</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">f</span><span class="p">(</span><span class="n">x0i</span> <span class="o">-</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">-</span> <span class="n">f_x0i</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_central</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">f_x0i</span><span class="p">,</span> <span class="n">x0i</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x0i</span> <span class="o">+</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">-</span>
+                <span class="n">f</span><span class="p">(</span><span class="n">x0i</span> <span class="o">-</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.0</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_forward</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">f_x0i</span><span class="p">,</span> <span class="n">x0i</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">x0i</span> <span class="o">+</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">-</span> <span class="n">f_x0i</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_backward</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">f_x0i</span><span class="p">,</span> <span class="n">x0i</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">f_x0i</span> <span class="o">-</span> <span class="n">f</span><span class="p">(</span><span class="n">x0i</span> <span class="o">-</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_complex</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span><span class="o">.</span><span class="n">imag</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_complex_odd</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">ih</span> <span class="o">=</span> <span class="n">h</span> <span class="o">*</span> <span class="n">_SQRT_J</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">_SQRT_J</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">ih</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">-</span>
+                                  <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">ih</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)))</span><span class="o">.</span><span class="n">imag</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_complex_odd_higher</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">ih</span> <span class="o">=</span> <span class="n">h</span> <span class="o">*</span> <span class="n">_SQRT_J</span>
+        <span class="k">return</span> <span class="p">((</span><span class="mi">3</span> <span class="o">*</span> <span class="n">_SQRT_J</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">ih</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">-</span>
+                                 <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">ih</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)))</span><span class="o">.</span><span class="n">real</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_complex_even</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">ih</span> <span class="o">=</span> <span class="n">h</span> <span class="o">*</span> <span class="n">_SQRT_J</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">ih</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">ih</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">))</span><span class="o">.</span><span class="n">imag</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_complex_even_higher</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">ih</span> <span class="o">=</span> <span class="n">h</span> <span class="o">*</span> <span class="n">_SQRT_J</span>
+        <span class="k">return</span> <span class="mf">12.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">ih</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">+</span>
+                       <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">ih</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">fx</span><span class="p">)</span><span class="o">.</span><span class="n">real</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_multicomplex</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">h</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span><span class="o">.</span><span class="n">imag</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_multicomplex2</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">h</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span><span class="o">.</span><span class="n">imag12</span></div>
+
+
+<div class="viewcode-block" id="directionaldiff"><a class="viewcode-back" href="../../api/generated/numdifftools.core.directionaldiff.html#numdifftools.core.directionaldiff">[docs]</a><span class="k">def</span> <span class="nf">directionaldiff</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">vec</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return directional derivative of a function of n variables</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    f: function</span>
+<span class="sd">        analytical function to differentiate.</span>
+<span class="sd">    x0: array</span>
+<span class="sd">        vector location at which to differentiate f. If x0 is an nxm array,</span>
+<span class="sd">        then f is assumed to be a function of n*m variables.</span>
+<span class="sd">    vec: array</span>
+<span class="sd">        vector defining the line along which to take the derivative. It should</span>
+<span class="sd">        be the same size as x0, but need not be a vector of unit length.</span>
+<span class="sd">    **options:</span>
+<span class="sd">        optional arguments to pass on to Derivative.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dder:  scalar</span>
+<span class="sd">        estimate of the first derivative of f in the specified direction.</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    At the global minimizer (1,1) of the Rosenbrock function,</span>
+<span class="sd">    compute the directional derivative in the direction [1 2]</span>
+
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; import numdifftools as nd</span>
+<span class="sd">    &gt;&gt;&gt; vec = np.r_[1, 2]</span>
+<span class="sd">    &gt;&gt;&gt; rosen = lambda x: (1-x[0])**2 + 105*(x[1]-x[0]**2)**2</span>
+<span class="sd">    &gt;&gt;&gt; dd, info = nd.directionaldiff(rosen, [1, 1], vec, full_output=True)</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(dd, 0)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; np.abs(info.error_estimate)&lt;1e-14</span>
+<span class="sd">    True</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    Derivative,</span>
+<span class="sd">    Gradient</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">x0</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">vec</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;vec and x0 must be the same shapes&#39;</span><span class="p">)</span>
+
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">vec</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">ravel</span><span class="p">()),</span> <span class="n">x0</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Derivative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">f</span><span class="p">(</span><span class="n">x0</span> <span class="o">+</span> <span class="n">t</span> <span class="o">*</span> <span class="n">vec</span><span class="p">),</span> <span class="o">**</span><span class="n">options</span><span class="p">)(</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Jacobian"><a class="viewcode-back" href="../../api/generated/numdifftools.core.Jacobian.html#numdifftools.core.Jacobian">[docs]</a><span class="k">class</span> <span class="nc">Jacobian</span><span class="p">(</span><span class="n">Derivative</span><span class="p">):</span>
+
+    <span class="n">__doc__</span> <span class="o">=</span> <span class="n">_cmn_doc</span> <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">derivative</span><span class="o">=</span><span class="s1">&#39;Jacobian&#39;</span><span class="p">,</span>
+        <span class="n">extra_parameter</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    order : int, optional</span>
+<span class="s2">        defines the order of the error term in the Taylor approximation used.</span>
+<span class="s2">        For &#39;central&#39; and &#39;complex&#39; methods, it must be an even number.&quot;&quot;&quot;</span><span class="p">,</span>
+        <span class="n">returns</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Returns</span>
+<span class="s2">    -------</span>
+<span class="s2">    jacob : array</span>
+<span class="s2">        Jacobian</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">extra_note</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Higher order approximation methods will generally be more accurate, but may</span>
+<span class="s2">    also suffer more from numerical problems. First order methods is usually</span>
+<span class="s2">    not recommended.</span>
+
+<span class="s2">    If f returns a 1d array, it returns a Jacobian. If a 2d array is returned</span>
+<span class="s2">    by f (e.g., with a value for each observation), it returns a 3d array</span>
+<span class="s2">    with the Jacobian of each observation with shape xk x nobs x xk. I.e.,</span>
+<span class="s2">    the Jacobian of the first observation would be [:, 0, :]</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">example</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Example</span>
+<span class="s2">    -------</span>
+<span class="s2">    &gt;&gt;&gt; import numdifftools as nd</span>
+
+<span class="s2">    #(nonlinear least squares)</span>
+
+<span class="s2">    &gt;&gt;&gt; xdata = np.reshape(np.arange(0,1,0.1),(-1,1))</span>
+<span class="s2">    &gt;&gt;&gt; ydata = 1+2*np.exp(0.75*xdata)</span>
+<span class="s2">    &gt;&gt;&gt; fun = lambda c: (c[0]+c[1]*np.exp(c[2]*xdata) - ydata)**2</span>
+
+<span class="s2">    &gt;&gt;&gt; Jfun = nd.Jacobian(fun)</span>
+<span class="s2">    &gt;&gt;&gt; val = Jfun([1,2,0.75])</span>
+<span class="s2">    &gt;&gt;&gt; np.allclose(val, np.zeros((10,3)))</span>
+<span class="s2">    True</span>
+
+<span class="s2">    &gt;&gt;&gt; fun2 = lambda x : x[0]*x[1]*x[2] + np.exp(x[0])*x[1]</span>
+<span class="s2">    &gt;&gt;&gt; Jfun3 = nd.Jacobian(fun2)</span>
+<span class="s2">    &gt;&gt;&gt; Jfun3([3.,5.,7.])</span>
+<span class="s2">    array([[ 135.42768462,   41.08553692,   15.        ]])</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">see_also</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    See also</span>
+<span class="s2">    --------</span>
+<span class="s2">    Derivative, Hessian, Gradient</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cls</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="n">fset</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cls</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span> <span class="n">cls</span><span class="o">.</span><span class="n">_set_derivative</span><span class="p">())</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_check_equal_size</span><span class="p">(</span><span class="n">f_del</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">f_del</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">h</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;fun did not return data of correct size &#39;</span> <span class="o">+</span>
+                             <span class="s1">&#39;(it must be vectorized)&#39;</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_atleast_2d</span><span class="p">(</span><span class="n">original_shape</span><span class="p">,</span> <span class="n">ndim</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">original_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">original_shape</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">original_shape</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_vstack_steps</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">original_shape</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="n">h_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">step</span><span class="p">)</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">h_shape</span><span class="p">)</span>
+             <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">]</span>
+        <span class="n">one</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">original_shape</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">h_shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([(</span><span class="n">one</span> <span class="o">*</span> <span class="n">hi</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()]</span> <span class="k">for</span> <span class="n">hi</span> <span class="ow">in</span> <span class="n">h</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([(</span><span class="n">one</span> <span class="o">*</span> <span class="n">hi</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">axes</span><span class="p">))</span><span class="o">.</span><span class="n">ravel</span><span class="p">()]</span>
+                          <span class="k">for</span> <span class="n">hi</span> <span class="ow">in</span> <span class="n">h</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">h</span>
+
+    <span class="k">def</span> <span class="nf">_vstack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">steps</span><span class="p">):</span>
+        <span class="n">original_shape</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">sequence</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">())))</span>
+        <span class="n">ndim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">original_shape</span><span class="p">)</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">][:</span><span class="n">ndim</span><span class="p">]</span>
+        <span class="n">axes</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">original_shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">ndim</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">original_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">f_del</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">squeeze</span><span class="p">())</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()]</span>
+                          <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">sequence</span><span class="p">)</span>
+
+        <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vstack_steps</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">original_shape</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_equal_size</span><span class="p">(</span><span class="n">f_del</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">f_del</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atleast_2d</span><span class="p">(</span><span class="n">original_shape</span><span class="p">,</span> <span class="n">ndim</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_identity</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span> <span class="o">**</span> <span class="mi">3</span><span class="p">,</span> <span class="n">n</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">m</span>
+
+    <span class="k">def</span> <span class="nf">_increments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_identity</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">h</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_central</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">increments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_increments</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+        <span class="n">partials</span> <span class="o">=</span> <span class="p">[(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">hi</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">-</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">hi</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.0</span>
+                    <span class="k">for</span> <span class="n">hi</span> <span class="ow">in</span> <span class="n">increments</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">partials</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_backward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">increments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_increments</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+        <span class="n">partials</span> <span class="o">=</span> <span class="p">[</span><span class="n">fx</span> <span class="o">-</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">hi</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="k">for</span> <span class="n">hi</span> <span class="ow">in</span> <span class="n">increments</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">partials</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">increments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_increments</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+        <span class="n">partials</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">hi</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">-</span> <span class="n">fx</span> <span class="k">for</span> <span class="n">hi</span> <span class="ow">in</span> <span class="n">increments</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">partials</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_complex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">increments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_increments</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">h</span><span class="p">)</span>
+        <span class="n">partials</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">ih</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span><span class="o">.</span><span class="n">imag</span> <span class="k">for</span> <span class="n">ih</span> <span class="ow">in</span> <span class="n">increments</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">partials</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_complex_odd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">increments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_increments</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">_SQRT_J</span> <span class="o">*</span> <span class="n">h</span><span class="p">)</span>
+        <span class="n">partials</span> <span class="o">=</span> <span class="p">[((</span><span class="n">_SQRT_J</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">ih</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">-</span>
+                                       <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">ih</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)))</span><span class="o">.</span><span class="n">imag</span>
+                    <span class="k">for</span> <span class="n">ih</span> <span class="ow">in</span> <span class="n">increments</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">partials</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_multicomplex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">increments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_increments</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">h</span><span class="p">)</span>
+        <span class="n">partials</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="p">(</span><span class="n">Bicomplex</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">hi</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span><span class="o">.</span><span class="n">imag</span>
+                    <span class="k">for</span> <span class="n">hi</span> <span class="ow">in</span> <span class="n">increments</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">partials</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Jacobian</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">vals</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">hj</span><span class="p">)</span> <span class="k">for</span> <span class="n">hj</span> <span class="ow">in</span> <span class="n">hi</span><span class="p">])</span>
+                             <span class="k">for</span> <span class="n">hi</span> <span class="ow">in</span> <span class="n">vals</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">vals</span></div>
+
+
+<div class="viewcode-block" id="Gradient"><a class="viewcode-back" href="../../api/generated/numdifftools.core.Gradient.html#numdifftools.core.Gradient">[docs]</a><span class="k">class</span> <span class="nc">Gradient</span><span class="p">(</span><span class="n">Jacobian</span><span class="p">):</span>
+
+    <span class="n">__doc__</span> <span class="o">=</span> <span class="n">_cmn_doc</span> <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">derivative</span><span class="o">=</span><span class="s1">&#39;Gradient&#39;</span><span class="p">,</span>
+        <span class="n">extra_parameter</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    order : int, optional</span>
+<span class="s2">        defines the order of the error term in the Taylor approximation used.</span>
+<span class="s2">        For &#39;central&#39; and &#39;complex&#39; methods, it must be an even number.&quot;&quot;&quot;</span><span class="p">,</span>
+        <span class="n">returns</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Returns</span>
+<span class="s2">    -------</span>
+<span class="s2">    grad : array</span>
+<span class="s2">        gradient</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">extra_note</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Higher order approximation methods will generally be more accurate, but may</span>
+<span class="s2">    also suffer more from numerical problems. First order methods is usually</span>
+<span class="s2">    not recommended.</span>
+
+<span class="s2">    If x0 is an nxm array, then f is assumed to be a function of n*m variables.</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">example</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Example</span>
+<span class="s2">    -------</span>
+<span class="s2">    &gt;&gt;&gt; import numpy as np</span>
+<span class="s2">    &gt;&gt;&gt; import numdifftools as nd</span>
+<span class="s2">    &gt;&gt;&gt; fun = lambda x: np.sum(x**2)</span>
+<span class="s2">    &gt;&gt;&gt; dfun = nd.Gradient(fun)</span>
+<span class="s2">    &gt;&gt;&gt; dfun([1,2,3])</span>
+<span class="s2">    array([ 2.,  4.,  6.])</span>
+
+<span class="s2">    # At [x,y] = [1,1], compute the numerical gradient</span>
+<span class="s2">    # of the function sin(x-y) + y*exp(x)</span>
+
+<span class="s2">    &gt;&gt;&gt; sin = np.sin; exp = np.exp</span>
+<span class="s2">    &gt;&gt;&gt; z = lambda xy: sin(xy[0]-xy[1]) + xy[1]*exp(xy[0])</span>
+<span class="s2">    &gt;&gt;&gt; dz = nd.Gradient(z)</span>
+<span class="s2">    &gt;&gt;&gt; grad2 = dz([1, 1])</span>
+<span class="s2">    &gt;&gt;&gt; grad2</span>
+<span class="s2">    array([ 3.71828183,  1.71828183])</span>
+
+<span class="s2">    # At the global minimizer (1,1) of the Rosenbrock function,</span>
+<span class="s2">    # compute the gradient. It should be essentially zero.</span>
+
+<span class="s2">    &gt;&gt;&gt; rosen = lambda x : (1-x[0])**2 + 105.*(x[1]-x[0]**2)**2</span>
+<span class="s2">    &gt;&gt;&gt; rd = nd.Gradient(rosen)</span>
+<span class="s2">    &gt;&gt;&gt; grad3 = rd([1,1])</span>
+<span class="s2">    &gt;&gt;&gt; np.allclose(grad3,[0, 0])</span>
+<span class="s2">    True&quot;&quot;&quot;</span><span class="p">,</span> <span class="n">see_also</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    See also</span>
+<span class="s2">    --------</span>
+<span class="s2">    Derivative, Hessian, Jacobian</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Gradient</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span>
+                                              <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Hessdiag"><a class="viewcode-back" href="../../api/generated/numdifftools.core.Hessdiag.html#numdifftools.core.Hessdiag">[docs]</a><span class="k">class</span> <span class="nc">Hessdiag</span><span class="p">(</span><span class="n">Derivative</span><span class="p">):</span>
+
+    <span class="n">__doc__</span> <span class="o">=</span> <span class="n">_cmn_doc</span> <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">derivative</span><span class="o">=</span><span class="s1">&#39;Hessian diagonal&#39;</span><span class="p">,</span>
+        <span class="n">extra_parameter</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;order : int, optional</span>
+<span class="s2">        defines the order of the error term in the Taylor approximation used.</span>
+<span class="s2">        For &#39;central&#39; and &#39;complex&#39; methods, it must be an even number.&quot;&quot;&quot;</span><span class="p">,</span>
+        <span class="n">returns</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Returns</span>
+<span class="s2">    -------</span>
+<span class="s2">    hessdiag : array</span>
+<span class="s2">        hessian diagonal</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">extra_note</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Higher order approximation methods will generally be more accurate, but may</span>
+<span class="s2">    also suffer more from numerical problems. First order methods is usually</span>
+<span class="s2">    not recommended.</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">example</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Example</span>
+<span class="s2">    -------</span>
+<span class="s2">    &gt;&gt;&gt; import numpy as np</span>
+<span class="s2">    &gt;&gt;&gt; import numdifftools as nd</span>
+<span class="s2">    &gt;&gt;&gt; fun = lambda x : x[0] + x[1]**2 + x[2]**3</span>
+<span class="s2">    &gt;&gt;&gt; Hfun = nd.Hessdiag(fun, full_output=True)</span>
+<span class="s2">    &gt;&gt;&gt; hd, info = Hfun([1,2,3])</span>
+<span class="s2">    &gt;&gt;&gt; np.allclose(hd, [  0.,   2.,  18.])</span>
+<span class="s2">    True</span>
+
+<span class="s2">    &gt;&gt;&gt; info.error_estimate &lt; 1e-11</span>
+<span class="s2">    array([ True,  True,  True], dtype=bool)</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">see_also</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    See also</span>
+<span class="s2">    --------</span>
+<span class="s2">    Derivative, Hessian, Jacobian, Gradient</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Hessdiag.__init__"><a class="viewcode-back" href="../../api/generated/numdifftools.core.Hessdiag.html#numdifftools.core.Hessdiag.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;central&#39;</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                 <span class="n">full_output</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">step_options</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Hessdiag</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                                       <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">full_output</span><span class="o">=</span><span class="n">full_output</span><span class="p">,</span>
+                                       <span class="o">**</span><span class="n">step_options</span><span class="p">)</span></div>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cls</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                 <span class="n">fset</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cls</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="n">cls</span><span class="o">.</span><span class="n">_set_derivative</span><span class="p">())</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_central2</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Eq. 8&quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">increments</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">h</span>
+        <span class="n">partials</span> <span class="o">=</span> <span class="p">[(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">hi</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">+</span>
+                     <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">hi</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">fx</span> <span class="o">-</span>
+                     <span class="mi">2</span> <span class="o">*</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">hi</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">-</span>
+                     <span class="mi">2</span> <span class="o">*</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">hi</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">))</span> <span class="o">/</span> <span class="mf">4.0</span>
+                    <span class="k">for</span> <span class="n">hi</span> <span class="ow">in</span> <span class="n">increments</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">partials</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_central_even</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Eq. 9&quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">increments</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">h</span>
+        <span class="n">partials</span> <span class="o">=</span> <span class="p">[(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">hi</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">+</span>
+                     <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">hi</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">-</span> <span class="n">fx</span>
+                    <span class="k">for</span> <span class="n">hi</span> <span class="ow">in</span> <span class="n">increments</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">partials</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_backward</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">increments</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">h</span>
+        <span class="n">partials</span> <span class="o">=</span> <span class="p">[</span><span class="n">fx</span> <span class="o">-</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">hi</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="k">for</span> <span class="n">hi</span> <span class="ow">in</span> <span class="n">increments</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">partials</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_forward</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">increments</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">h</span>
+        <span class="n">partials</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">hi</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">-</span> <span class="n">fx</span> <span class="k">for</span> <span class="n">hi</span> <span class="ow">in</span> <span class="n">increments</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">partials</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_multicomplex2</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">increments</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">h</span>
+        <span class="n">partials</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="p">(</span><span class="n">Bicomplex</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">hi</span><span class="p">,</span> <span class="n">hi</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span><span class="o">.</span><span class="n">imag12</span>
+                    <span class="k">for</span> <span class="n">hi</span> <span class="ow">in</span> <span class="n">increments</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">partials</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_complex_even</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">increments</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">h</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">partials</span> <span class="o">=</span> <span class="p">[(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">hi</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">+</span>
+                     <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">hi</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span><span class="o">.</span><span class="n">imag</span>
+                    <span class="k">for</span> <span class="n">hi</span> <span class="ow">in</span> <span class="n">increments</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">partials</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Hessdiag</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Hessian"><a class="viewcode-back" href="../../api/generated/numdifftools.core.Hessian.html#numdifftools.core.Hessian">[docs]</a><span class="k">class</span> <span class="nc">Hessian</span><span class="p">(</span><span class="n">Hessdiag</span><span class="p">):</span>
+
+    <span class="n">__doc__</span> <span class="o">=</span> <span class="n">_cmn_doc</span> <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">derivative</span><span class="o">=</span><span class="s1">&#39;Hessian&#39;</span><span class="p">,</span>
+        <span class="n">extra_parameter</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">returns</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Returns</span>
+<span class="s2">    -------</span>
+<span class="s2">    hess : ndarray</span>
+<span class="s2">       array of partial second derivatives, Hessian</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">extra_note</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Computes the Hessian according to method as:</span>
+<span class="s2">    &#39;forward&#39; :eq:`7`, &#39;central&#39; :eq:`9` and &#39;complex&#39; :eq:`10`:</span>
+
+<span class="s2">    .. math::</span>
+<span class="s2">        \quad ((f(x + d_j e_j + d_k e_k) - f(x + d_j e_j))) / (d_j d_k)</span>
+<span class="s2">        :label: 7</span>
+
+<span class="s2">    .. math::</span>
+<span class="s2">        \quad  ((f(x + d_j e_j + d_k e_k) - f(x + d_j e_j - d_k e_k)) -</span>
+<span class="s2">                (f(x - d_j e_j + d_k e_k) - f(x - d_j e_j - d_k e_k)) /</span>
+<span class="s2">                (4 d_j d_k)</span>
+<span class="s2">        :label: 9</span>
+
+<span class="s2">    .. math::</span>
+<span class="s2">        imag(f(x + i d_j e_j + d_k e_k) - f(x + i d_j e_j - d_k e_k)) /</span>
+<span class="s2">            (2 d_j d_k)</span>
+<span class="s2">        :label: 10</span>
+
+<span class="s2">    where :math:`e_j` is a vector with element :math:`j` is one and the rest</span>
+<span class="s2">    are zero and :math:`d_j` is a scalar spacing :math:`steps_j`.</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="n">example</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Example</span>
+<span class="s2">    -------</span>
+<span class="s2">    &gt;&gt;&gt; import numpy as np</span>
+<span class="s2">    &gt;&gt;&gt; import numdifftools as nd</span>
+
+<span class="s2">    # Rosenbrock function, minimized at [1,1]</span>
+
+<span class="s2">    &gt;&gt;&gt; rosen = lambda x : (1.-x[0])**2 + 105*(x[1]-x[0]**2)**2</span>
+<span class="s2">    &gt;&gt;&gt; Hfun = nd.Hessian(rosen)</span>
+<span class="s2">    &gt;&gt;&gt; h = Hfun([1, 1])</span>
+<span class="s2">    &gt;&gt;&gt; h</span>
+<span class="s2">    array([[ 842., -420.],</span>
+<span class="s2">           [-420.,  210.]])</span>
+
+<span class="s2">    # cos(x-y), at (0,0)</span>
+
+<span class="s2">    &gt;&gt;&gt; cos = np.cos</span>
+<span class="s2">    &gt;&gt;&gt; fun = lambda xy : cos(xy[0]-xy[1])</span>
+<span class="s2">    &gt;&gt;&gt; Hfun2 = nd.Hessian(fun)</span>
+<span class="s2">    &gt;&gt;&gt; h2 = Hfun2([0, 0])</span>
+<span class="s2">    &gt;&gt;&gt; h2</span>
+<span class="s2">    array([[-1.,  1.],</span>
+<span class="s2">           [ 1., -1.]])&quot;&quot;&quot;</span><span class="p">,</span> <span class="n">see_also</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    See also</span>
+<span class="s2">    --------</span>
+<span class="s2">    Derivative, Hessian</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">order</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cls</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">backward</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">forward</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                           <span class="nb">complex</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                     <span class="n">fset</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cls</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="bp">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_apply_fd_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_ratio</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">steps</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return derivative estimates of f at x0 for a sequence of stepsizes h</span>
+
+<span class="sd">        Here the difference rule is already applied. Just return result.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vstack</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_complex_high_order</span><span class="p">():</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_complex_even</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate Hessian with complex-step derivative approximation</span>
+
+<span class="sd">        The stepsize is the same for the complex and the finite difference part</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">ee</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+        <span class="n">hess</span> <span class="o">=</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+                <span class="n">hess</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">ee</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">ee</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-</span>
+                             <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">ee</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">ee</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                             <span class="p">)</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="n">hess</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+                <span class="n">hess</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">hess</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">hess</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_multicomplex2</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate Hessian with Bicomplex-step derivative approximation&quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">ee</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+        <span class="n">hess</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+                <span class="n">zph</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">ee</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">ee</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:])</span>
+                <span class="n">hess</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">zph</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span><span class="o">.</span><span class="n">imag12</span> <span class="o">/</span> <span class="n">hess</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+                <span class="n">hess</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">hess</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">hess</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_central_even</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Eq 9.&quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">ee</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+        <span class="n">hess</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">hess</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ee</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">fx</span> <span class="o">+</span>
+                          <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ee</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                          <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">4.</span> <span class="o">*</span> <span class="n">hess</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+                <span class="n">hess</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">ee</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">ee</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-</span>
+                              <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">ee</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">ee</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-</span>
+                              <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">ee</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">ee</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">+</span>
+                              <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">ee</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">ee</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                              <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">4.</span> <span class="o">*</span> <span class="n">hess</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span>
+                <span class="n">hess</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">hess</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">hess</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_central2</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Eq. 8&quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">ee</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">result_type</span><span class="p">(</span><span class="n">fx</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">gg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">ee</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">gg</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">ee</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">hess</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">hess</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+                <span class="n">hess</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">ee</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">ee</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-</span>
+                              <span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">g</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">fx</span> <span class="o">+</span>
+                              <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">ee</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">ee</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-</span>
+                              <span class="n">gg</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">gg</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">fx</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">hess</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span>
+                <span class="n">hess</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">hess</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">hess</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_forward</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Eq. 7&quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">ee</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">result_type</span><span class="p">(</span><span class="n">fx</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">ee</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">hess</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">hess</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+                <span class="n">hess</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">ee</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">ee</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-</span>
+                              <span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">g</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">fx</span><span class="p">)</span> <span class="o">/</span> <span class="n">hess</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+                <span class="n">hess</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">hess</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">hess</span>
+
+    <span class="k">def</span> <span class="nf">_backward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2009-2015, Per A Brodtkorb, John D&#39;Errico.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.9.17',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

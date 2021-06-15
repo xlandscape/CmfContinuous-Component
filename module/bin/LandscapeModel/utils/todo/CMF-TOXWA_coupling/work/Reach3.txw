@@ -1,0 +1,413 @@
+*-----------------------------------------------------------------------------------------------
+* Input file for TOXSWA
+* 
+* This file is intended to be used by expert users.
+* 
+* E-mail: toxswa@pesticidemodels.nl
+* 
+* (c) Wageningen University & Research
+*-----------------------------------------------------------------------------------------------
+
+* Section 0: Run identification
+* Section 1: Control 
+* Section 2: Waterbody 
+* Section 3: Hydrology 
+* Section 4: Sediment 
+* Section 5: Weather 
+* Section 6: Temperature 
+* Section 7: Substance 
+* Section 8: Loadings
+* Section 9: Initial and boundary conditions for mass balance equations
+* Section 10: Output control
+
+*-----------------------------------------------------------------------------------------------
+*-----------------------------------------------------------------------------------------------
+* Section 0: Run identification
+*-----------------------------------------------------------------------------------------------
+
+Melsterbeek Location          ! Name of the location [1|25 characters]
+1           WaterbodyID       ! ID of the water body [1|25 characters]  
+FOCUS       SedimentTypeID    ! Name of sediment type [1|25 characters]
+Dmtr        SubstanceName     ! Name of parent substance [1|15 characters]
+Xplcit      ApplicationScheme ! Name of the applicaton scheme [1|25 characters]
+
+
+*-----------------------------------------------------------------------------------------------
+*-----------------------------------------------------------------------------------------------
+* Section 1: Control
+* 
+*-----------------------------------------------------------------------------------------------
+
+CASCADE     CallingProgram        ! Release type of scenario [NL98, DRAINBOW, GEM, FOCUS, CHINA, CASCADE]
+1           CallingProgramVersion ! Version numbers for model, interface and database,
+                                  ! respectively
+
+01-Jan-1986 TimStart   ! Starting time of simulation [01-Jan-1900|31-Dec-9999]
+31-Dec-1986 TimEnd     ! End time of simulation [01-Jan-1900|31-Dec-9999]
+
+Hourly      OptInp     ! Option for hourly or daily input data of lateral entries [Hourly, Daily]
+
+* OptHyd: options for hydrology simulation
+* Only      Simulate only hydrology
+* OnLine    Simulate hydrology and substance
+* OffLine   Assumption hydrology has been simulated, runID.hyd file must be present         
+* Automatic TOXSWA checks if hydrology file (runID.hyd) exists; so, hydrology 
+*           simulation is skipped
+* ExtModel  Hydrology file present, simulated by external model
+ExtModel    OptHyd     ! Option selected for hydrology simulation
+                       ! [Only, OnLine, OffLine, Automatic, ExtModel]
+
+* OptTem: options for temperature simulation
+* Only      Simulate only temperature
+* OnLine    Simulate temperature and substance
+* OffLine   Assumption temperature has been simulated, runID.tem file must be present         
+* Automatic TOXSWA checks if the temperature file (runID.tem) exists; so, temperature 
+*           simulation is skipped
+OnLine     OptTem     ! Option selected for temperature simulation
+                       ! [Only, OnLine, OffLine, Automatic]
+
+Calc        OptTimStp  ! Option for time step in mass balance calculation [Input, Calc]
+Yes         OptCalcStabilityWater    ! Option for check of stability of the numerical solution for 
+                                     ! the water layer
+Yes         OptCalcStabilitySediment ! Option for check of stability of the numerical solution for 
+                                     ! the sediment [Yes, No]
+                                     ! Yes = Full check on stability
+                                     ! No = Check on positivity
+         
+    * If OptTimStp is 'Calc' then specify 
+    3600        MaxTimStpWat (s) ! Maximum calculation time step in water layer [0.001|3600] 
+    3600        MaxTimStpSed (s) ! Maximum calculation time step in sediment [0.001|3600] 
+
+    * IOMode: options for screen output control, for use for grid computing
+    * IOMode_Std    standard screen
+    * IOMode_Full   full screen
+    IOMode_Full    IOMode        ! Option selected for screen output [IOMode_Std, IOMode_Full]
+
+*-----------------------------------------------------------------------------------------------
+*-----------------------------------------------------------------------------------------------
+* Section 2: Waterbody
+* 
+*-----------------------------------------------------------------------------------------------
+
+* WaterBody table: description of waterbody
+* Len           Length [0.05|]
+* NumSeg        Number of segments [1|] 
+* WidWatSys     Width of the bottom of water system [0.05|100]
+* SloSidWatSys  Side slope  of the water system [0|10]
+* DepWatDefPer  Water depth defining perimeter for exchange between water layer
+*               and sediment [0|lowest water depth]
+table WaterBody     
+Len   NumSeg   WidWatSys   SloSidWatSys DepWatDefPer 
+(m)    (-)       (m)            (-)          (m)         
+100     1        2.50            1            0.1  
+end_table     
+ 
+11         ConSus (g.m-3)       ! Concentration of suspended solids [0|100000]
+0.09       CntOmSusSol (g.g-1)  ! Mass ratio of organic matter in suspended solids [0|1]
+0          AmaMphWatLay (g.m-2) ! Dry mass of macrophyte biomass per m2 bottom [0|1000]
+
+*-----------------------------------------------------------------------------------------------
+*-----------------------------------------------------------------------------------------------
+* Section 3: Hydrology:
+*   Section 3a: General 
+*-----------------------------------------------------------------------------------------------
+
+SimpleDitch OptFloWat           ! Water flow type [Constant|SimpleDitch| Transient|InfiltrationPond]
+WaterCourse OptWaterSystemType  ! Water system type [Pond, WaterCourse]
+
+    * If OptWaterSystemType is 'WaterCourse' then specify 
+    Fischer     OptDis          ! Dispersion calculation method [Input, Fischer]
+
+*-----------------------------------------------------------------------------------------------
+*-----------------------------------------------------------------------------------------------
+* Section 4: Sediment
+*
+*-----------------------------------------------------------------------------------------------
+
+* SedimentProfile table: thickness and number of layers in horizon
+* ThiHor  Thickness of horizon [0.0001|-]
+* NumLay  Number of layers in horizon [1|500]
+table SedimentProfile
+ThiHor NumLay
+(m)
+0.004    4
+0.006    3
+0.01     2
+0.03     3
+0.02     1
+0.03     1
+end_table
+
+Input      OptSedProperties   ! Sediment properties for ThetaSat and CofDifRel [Input, Calc]
+
+* SedimentProperties table: properties for each horizon:
+* Nr        Number horizon [1|500]
+* Rho       Bulk density [10|3000]    
+* CntOm     Organic matter mass content [0|1]
+* If OptSedProperties 'Input' then specify ThetaSat and CofDifRel
+* ThetaSat  Saturated water content [0.001|0.999]
+* CofDifRel Relative diffusion coefficient [0|1]
+table  horizon SedimentProperties
+Nr     Rho        CntOm     ThetaSat   CofDifRel
+       (kg.m-3)   (kg.kg-1)  (m3.m-3)   (-)
+1      800        0.09       0.68       0.56  
+2      800        0.09       0.68       0.56  
+3      800        0.09       0.68       0.56  
+4      800        0.09       0.68       0.56  
+5      800        0.09       0.68       0.56  
+6      800        0.09       0.68       0.56  
+end_table
+
+0.      FlwWatSpg (m3.m-2.d-1) ! Percolation rate through the sediment [-0.01|0.01]
+             
+* DispersionLength table: dispersion length for each horizon
+* Nr            Horizon number [1|500]
+* LenDisSedLiq  Dispersion length of solute in liquid phase (m) [0.01|1]
+table horizon DispersionLength   
+Nr     LenDisSedLiq 
+         (m)
+1      0.015
+2      0.015
+3      0.015
+4      0.015
+5      0.015
+6      0.015
+end_table
+
+                                                       
+*-----------------------------------------------------------------------------------------------
+*-----------------------------------------------------------------------------------------------
+* Section 5: Weather
+*
+*-----------------------------------------------------------------------------------------------
+
+Melsterbeek MeteoStation       ! Name of file with meteo data (*.met or *.meth file)
+Monthly     OptMetInp          ! Input data [Hourly, Monthly]
+
+ 
+*-----------------------------------------------------------------------------------------------
+*-----------------------------------------------------------------------------------------------
+* Section 6: Temperature
+* If OptMetInp is 'Hourly'
+*-----------------------------------------------------------------------------------------------
+
+*-----------------------------------------------------------------------------------------------
+*-----------------------------------------------------------------------------------------------
+* Section 7: Substance
+*   Section 7a: general
+*-----------------------------------------------------------------------------------------------
+
+* Compounds table: first entry is parent, next entries are metabolites [1|15 characters] 
+table compounds                         
+Dmtr                         
+end_table
+
+* FraPrtDauWat table: parent-daughter relationships transformation in water 
+* Column 1: fraction formed from parent into daughter [0|]
+* Column 2: name of parent
+* Column 3: name of daughter
+table FraPrtDauWat (mol.mol-1)
+end_table
+
+* FraPrtDauSed table: parent-daughter relationships transformation in sediment 
+* Column 1: fraction formed from parent into daughter [0|]
+* Column 2: name of parent
+* Column 3: name of daughter
+table FraPrtDauSed (mol.mol-1)          
+end_table                        
+
+*-----------------------------------------------------------------------------------------------
+* Section 7b: Substance properties for parent 'Dmtr'
+* (note extension of parameter name is substance code)
+*-----------------------------------------------------------------------------------------------
+
+200        MolMas_Dmtr (g.mol-1)       ! Molar mass [10|10000]
+
+* Volatilization from water layer
+4.E-10     PreVapRef_Dmtr (Pa)         ! Saturated vapour pressure of substance [0|2e5]
+20         TemRefVap_Dmtr (C)          ! Reference temperature for saturated vapour pressure
+                                       ! [0|40] 
+95.        MolEntVap_Dmtr (kJ.mol-1)   ! Molar enthalpy of vaporization [-200|200]
+100        SlbWatRef_Dmtr (mg.L-1)     ! Water solubility of substance [0.001|1e6]
+20         TemRefSlb_Dmtr (C)          ! Reference temperature for water solubility [0|40]
+27         MolEntSlb_Dmtr (kJ.mol-1)   ! Molar enthalpy of dissolution  [-200|200] 
+
+* Diffusion in liquid and gas phases
+4.3E-5     CofDifWatRef_Dmtr (m2.d-1)  ! Reference diffusion coefficient in water [0|2E-3] 
+20         TemRefDif_Dmtr (C)          ! Reference temperature for diffusion [0|35]
+
+    * If OptVol is 'Jacobs' then specify
+    0.43       CofDifAirRef_Dmtr (m2.d-1)  ! Reference diffusion coefficient in air [0|200]
+
+* Sorption
+131        KomSed_Dmtr (L.kg-1)        ! Freundlich coefficient of  equilibrium sorption for
+                                       ! sediment [0|1e7]
+1          ConLiqRefSed_Dmtr (mg.L-1)  ! Reference concentration in liquid phase for
+                                       ! Freundlich coefficient for sediment [0.001|100]
+0.8        ExpFreSed_Dmtr (-)          ! Freundlich exponent  in sediment [0.1|1.5]
+131        KomSusSol_Dmtr (L.kg-1)     ! Freundlich coefficient of  equilibrium sorption 
+                                       ! for suspended solids [0|1e7]
+1          ConLiqRefSusSol_Dmtr (mg.L-1) ! Reference concentration in liquid phase 
+                                       ! for Freundlich sorption coefficient for
+                                       ! suspended solids [0.001|100]
+0.8        ExpFreSusSol_Dmtr (-)       ! Freundlich exponent suspended solids [0.1|1.5]
+0          CofSorMph_Dmtr (L.kg-1)     ! Coefficient for linear sorption on 
+                                       ! macrophytes [0|1e7]
+
+* Transformation in water
+
+1000       DT50WatRef_Dmtr (d)         ! Half-life transformation in water at reference 
+                                       ! temperature [0.1|1e5]
+20         TemRefTraWat_Dmtr (C)       ! Reference temperature for half-life measured in water
+                                       ! [5|30]
+75         MolEntTraWat_Dmtr (kJ.mol-1) ! Molar activation enthalpy of transformation in water 
+                                       ! [0|200]
+
+                                           ! transformation in water [0|200]
+
+* Transformation in sediment
+1000       DT50SedRef_Dmtr (d)          ! Half-life transformation in sediment at reference
+                                        ! temperature [0.1|1e5]
+20         TemRefTraSed_Dmtr (C)        ! Reference temperature for half-life in sediment [5|30] 
+65.4       MolEntTraSed_Dmtr (kJ.mol-1) ! Molar activation enthalpy of transformation in sedment 
+                                        ! [0|200]
+ 
+*-----------------------------------------------------------------------------------------------
+*-----------------------------------------------------------------------------------------------
+* Section 8: Loadings
+*
+*-----------------------------------------------------------------------------------------------
+
+* OptLoa options for loading type 
+* DriftOnly  spray drift only entry route
+* PEARL      drainage calculated by PEARL
+* MACRO      drainage calculated by MACRO
+* PRZM       runoff and erosion calculated by PRZM
+* GEM        greenhouse discharge calculated by GEM
+* MFU        mass from upstream reach calculated by TOXSWA
+MFU      OptLoa   ! Loading option [DriftOnly|PEARL|MACRO| PRZM|GEM|MFU]
+
+* Loadings table: details on spray drift, and stretch for all loading types
+* Column 1  Date and time of application, relevant if OptLoa is 'DriftOnly', otherwise
+*           the date is a dummy value 
+* Column 2  Type of loading [Drift]    
+* Column 3  Drift deposition (mg.m-2) [0|]
+* Column 4  Start of stretch of watercourse loaded by all loading types (m) [0|1e4]
+* Column 5  End of stretch of watercourse loaded by all loading types (m) [0|1e4]
+table Loadings
+01-May-1986-09h00  Drift  0.0476  0  100
+08-May-1986-09h00  Drift  0.0476  0  100
+01-May-1986-09h00  Drift  0.0476  0  100
+15-May-1986-09h00  Drift  0.0476  0  100
+end_table                             !  
+
+
+*-----------------------------------------------------------------------------------------------
+*-----------------------------------------------------------------------------------------------
+* Section 9: Initial and boundary conditions for mass balance equations
+*
+*-----------------------------------------------------------------------------------------------
+
+* Initial conditions
+
+0          ConSysWatIni (g.m-3) ! Initial total concentration in water layer [0|-]
+
+* CntSysSedIni table: initial total substance content in sediment 
+* If metabolites are included then initail contents for these substances are set tot zero
+* Column 1  Depth in sediment (m) [0|-]
+* Column 2  Substance content (mg.kg-1) [0|-]
+table interpolate CntSysSedIni (mg.kg-1)
+end_table
+
+* Boundary conditions
+
+0          ConAir (g.m-3)        ! Concentration  in air [0|-]
+
+0          ConWatSpg (g.m-3)     ! Concentration in incoming seepage water [0|-]                 
+ 
+
+*-----------------------------------------------------------------------------------------------
+*-----------------------------------------------------------------------------------------------
+* Section 10: Output control
+*   Section 10a: General
+*-----------------------------------------------------------------------------------------------
+
+No        OptDelOutFiles   ! Remove *.out file after simulation [Yes, No]
+
+* DateFormat: options for format of date and time in the output file
+* DaysFromSta   Print number of days since start of simulation
+* DaysFrom1900  Print number of days since 1900
+* Years         Print years
+DaysFromSta  DateFormat [DaysFromSta| DaysFrom1900|Years]
+
+* RealFormat: format of the ordinary output - use FORTRAN notation:
+* e is scientific notation, g  is general notation,
+* then the number of positions, then the number of digits
+e14.6     RealFormat       ! Format of ordinary output
+
+* OptDelTimPrn: options for output time step  
+* Hour,Day,Decade,Month,Year  Time step for output
+* Automatic                   Length of simulation period
+* Other                       User defined
+Hour      OptDelTimPrn     ! Output time step [Hour, Day, Decade, Month, Year, Automatic, Other] 
+
+    * If OptDelTimPrn is 'Other' then specify
+    5         DelTimPrn (d)    ! Output time step [1|length simulation period] 
+                               ! Integer value required
+
+No        PrintMasStrTgt   ! Print additional mass balance of specified stretch in 
+   			   ! watercourse [Yes, No] 
+
+0.05      ThiLayTgt (m)    ! Depth defining the thickness of the target sediment layer
+                           ! for output of (averaged) content [1e-5|1] 
+
+All        OptOutputDistances ! Options for distances of water layer grid points at which
+                              ! output can be obtained [None, All, table]
+
+None       OptOutputDepths    ! Options for depths of sediment grid poinst at which
+                              ! output can be obtained [None, All, table]
+
+
+* Specify dates for output of additional profiles; options set via OptOutputDistances and
+* OptOutputDepths are used
+* HorVertProfiles table: profiles in horizontal direction for water layer and in vertical 
+* direction for sediment are given; values given are:  
+* Water layer: output distance, water depth, total and dissolved concentration,
+* Sediment: output node water layer, output depth, pore volume, total and dissolved
+* concentration.
+table HorVertProfiles  
+end_table
+
+* Specify type of summary report
+DutchRegistration              OptReport   ! [DutchRegistration, FOCUS]
+Yes        ExposureReport       ! Exposure report [Yes, No]
+
+* Specify warming-up period
+0             InitYears (-)    ! Length of warming-up period in years [0|]
+ 
+
+*-----------------------------------------------------------------------------------------------
+* Section 10c: Print variables in *.out file
+* State variables, fluxes and rates given as momentary values. 
+* Volume,energy and mass changes given as cumulative values.   
+*-----------------------------------------------------------------------------------------------
+
+* Specify for all print variables whether output is wanted [Yes|No]
+* When print variable is not in file; TOXSWA assumes 'No'
+
+
+* PrintCumulatives: options for printing cumulatives of volume, energy and mass fluxes
+* Yes   : cumulative terms have been summed up from start of simulation and have been
+*         allocated to the last moment of the period considered 
+* No    : cumulative terms have been summed up from start of user defined output time step
+*         OptDelTimPrn and have been allocated to the last moment of the period
+*         considered 
+No        PrintCumulatives      ! [Yes|No]
+
+Yes       print_ConLiqWatTgtAvg ! Concentration dissolved in water, average over
+                                ! target stretch (g.m-3)
+No        print_CntSorSedTgt   ! Content sorbed in target layer sediment (mg.kg-1)
+No        print_DepWat   
+No        print_VelWatFlw
+No        print_QBou
+Yes       print_MasDwnWatLay

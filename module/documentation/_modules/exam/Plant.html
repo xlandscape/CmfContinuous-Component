@@ -1,0 +1,817 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>exam.Plant &#8212; LanscapeModelingToolbox 0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="../../_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">LanscapeModelingToolbox 0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for exam.Plant</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. module:: Plant</span>
+<span class="sd">   :synopsis: Module to calculate plant development and water uptake.</span>
+
+<span class="sd">.. moduleauthor:: Sebastian Multsch &lt;smultschw@gmail.com&gt;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="Plant"><a class="viewcode-back" href="../../sourcecode.html#exam.Plant.Plant">[docs]</a><span class="k">class</span> <span class="nc">Plant</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>   
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates plant development, leaf area index, evapotranspiration, </span>
+<span class="sd">    root distribution and wateruptake from soil according to the waterflow and </span>
+<span class="sd">    solute transport model MACRO 5.0 (Larbo and Jarvis,2003)</span>
+
+<span class="sd">    Plant developement is calculated based on Julian days. Development is</span>
+<span class="sd">    divided into a linear and exponential growth phase of the leaf area inde as</span>
+<span class="sd">    well as a decreasing phase after maturity.</span>
+<span class="sd">    </span>
+<span class="sd">    The leaf area index is calculated based on the crop development and fixed </span>
+<span class="sd">    shape parameter.</span>
+<span class="sd">    </span>
+<span class="sd">    Roots are allocated along the entire rootign depth with a</span>
+<span class="sd">    decreasing exponential function. </span>
+
+<span class="sd">    Potential evapotranspiration is calculated according to Hargreaves-Samani </span>
+<span class="sd">    method. Evaporation and transpiration are separated by the leaf area index.</span>
+<span class="sd">    </span>
+<span class="sd">    Actual transpiration is calculated based on root water uptake. The latter one</span>
+<span class="sd">    is calculated related to the root distribution and the soil water content.</span>
+<span class="sd">    Water stress is calcualted accordign to Feddes (1976). If no sufficient </span>
+<span class="sd">    water content is available for water uptake, compensation takes place.</span>
+
+<span class="sd">    Actual evaporation is calculated from the potential evaporation rate and</span>
+<span class="sd">    the water content in the upper soil layer.       </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">af</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">GLAImax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">GLAImin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">GLAIharv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">Dstart</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Dmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Dmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">Dharv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">cform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">dform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">rootinit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">rootmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">heightinit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">heightmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">rpin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">soil_delta_z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">soil_zm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">soil_evap_depth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">feddes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">croptype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">altitude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">latitude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">maxcomp</span><span class="o">=</span><span class="mf">2.</span><span class="p">,</span><span class="n">a_f</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span><span class="n">wintercrop</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        :param af: Agricultural field which holds plant</span>
+<span class="sd">        :type af: AgriculturalField</span>
+<span class="sd">        :param name: Name of plant.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param GLAI: Green leaf area index (-)</span>
+<span class="sd">        :type GLAI: double</span>
+<span class="sd">        :param GLAImax: Max green leaf area index (-)</span>
+<span class="sd">        :type GLAImax: double</span>
+<span class="sd">        :param GLAImin: Min green leaf area index (-)</span>
+<span class="sd">        :type GLAImin: double</span>
+<span class="sd">        :param GLAIharv: Green leaf area index at harvest (-)</span>
+<span class="sd">        :type GLAIharv: double</span>
+<span class="sd">        :param Dstart: Day at emergence (days)</span>
+<span class="sd">        :type Dstart: int</span>
+<span class="sd">        :param Dmin: Day at GLAImin (days)</span>
+<span class="sd">        :type Dmin: int</span>
+<span class="sd">        :param Dmax: Day at GLAImax (days)</span>
+<span class="sd">        :type Dmax: int</span>
+<span class="sd">        :param Dharv: Day at harvest (days)</span>
+<span class="sd">        :type Dharv: int</span>
+<span class="sd">        :param cform: Empirical &#39;form&#39; exponent development</span>
+<span class="sd">        :type cform: double</span>
+<span class="sd">        :param dform: Empirical &#39;form&#39; exponent senencence</span>
+<span class="sd">        :type dform: double</span>
+<span class="sd">        :param rootinit: Rootdepth at Dmin (m)</span>
+<span class="sd">        :type rootinit: double</span>
+<span class="sd">        :param rootmax: Max root depth (m)</span>
+<span class="sd">        :type rootmax: double</span>
+<span class="sd">        :param heightinit: Height at Dmin (m)</span>
+<span class="sd">        :type heightinit: double</span>
+<span class="sd">        :param heightmax: Max height (m)</span>
+<span class="sd">        :type heightmax: double</span>
+<span class="sd">        :param rpin: Emprical root distribution parameter</span>
+<span class="sd">        :type rpin: double</span>
+<span class="sd">        :param soil_delta_z: Thickness of each soil layer (m) </span>
+<span class="sd">        :type soil_delta_z: list</span>
+<span class="sd">        :param soil_zm: Midpoint of each soil layer (m)</span>
+<span class="sd">        :type soil_zm: list</span>
+<span class="sd">        :param soil_evap_depth: Indicates if soil layer contributes to</span>
+<span class="sd">                                evaporation (1=yes; 0=no)</span>
+<span class="sd">        :type soil_evap_depth: list</span>
+<span class="sd">        :param feddes: Four water stress parameter in cm water column</span>
+<span class="sd">        :type feddes: list</span>
+<span class="sd">        :param croptype: &#39;annual&#39; or &#39;perennial&#39;</span>
+<span class="sd">        :type croptype: str</span>
+<span class="sd">        :param altitude: Altitude (m)</span>
+<span class="sd">        :type altitude: double</span>
+<span class="sd">        :param latitude: Latitude in (decimal degree)</span>
+<span class="sd">        :type latitude: double</span>
+<span class="sd">        :param maxcomp: Maximum water uptake compensation factor (-)</span>
+<span class="sd">        :type maxcomp: double</span>
+<span class="sd">        :param a_f: Radiation attenuationfacotr</span>
+<span class="sd">        :type a_f: double</span>
+<span class="sd">        :param wintercrop: Indicates if plant is a winter crop</span>
+<span class="sd">        :type wintercrop: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1">#field</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">af</span> <span class="o">=</span> <span class="n">af</span>
+        
+        <span class="c1"># input variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__name</span>  <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__GLAImax</span> <span class="o">=</span> <span class="n">GLAImax</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__GLAImin</span> <span class="o">=</span> <span class="n">GLAImin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__GLAIharv</span> <span class="o">=</span> <span class="n">GLAIharv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Dmax</span> <span class="o">=</span> <span class="n">Dmax</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Dmin</span> <span class="o">=</span> <span class="n">Dmin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Dstart</span> <span class="o">=</span> <span class="n">Dstart</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Dharv</span> <span class="o">=</span> <span class="n">Dharv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cform</span> <span class="o">=</span> <span class="n">cform</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dform</span> <span class="o">=</span> <span class="n">dform</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__GLAI</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__LAI</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__croptype</span> <span class="o">=</span> <span class="n">croptype</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__a_f</span> <span class="o">=</span> <span class="n">a_f</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rootinit</span> <span class="o">=</span> <span class="n">rootinit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rootmax</span> <span class="o">=</span> <span class="n">rootmax</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rpin</span> <span class="o">=</span> <span class="n">rpin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__soil_delta_z</span> <span class="o">=</span> <span class="n">soil_delta_z</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__soil_zm</span> <span class="o">=</span> <span class="n">soil_zm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__soil_evap_depth</span> <span class="o">=</span> <span class="n">soil_evap_depth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__feddes_waterstress</span> <span class="o">=</span> <span class="n">feddes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__maxcomp</span> <span class="o">=</span> <span class="n">maxcomp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__altitude</span> <span class="o">=</span> <span class="n">altitude</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__latitude</span> <span class="o">=</span> <span class="n">latitude</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__heightmax</span><span class="o">=</span><span class="n">heightmax</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__heightinit</span><span class="o">=</span><span class="n">heightinit</span>
+        
+        <span class="c1"># calculated during initialisation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__harvest</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># day of harvest in days after soiwng (DAS)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Lini</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># lenght of initial growth period in DAS</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Ldev</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># length of development period in DAS</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Lend</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># length of end perdio in DAS</span>
+        
+        <span class="c1">#  calcualte lenght of gorwing period and harvest day in days after sowing</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__croptype</span> <span class="o">==</span> <span class="s2">&quot;annual&quot;</span><span class="p">:</span>
+            <span class="k">if</span>  <span class="n">wintercrop</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__Lini</span> <span class="o">=</span> <span class="p">(</span><span class="mi">365</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">__Dstart</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Dmin</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__Ldev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Dmax</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">__Dmin</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__Lend</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Dharv</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Dmax</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__harvest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Lini</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Ldev</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Lend</span>                
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__Lini</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Dmin</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Dstart</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__Ldev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Dmax</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">__Dmin</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__Lend</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Dharv</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Dmax</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__harvest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Lini</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Ldev</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Lend</span>        
+        
+        <span class="c1"># state variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__das</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># days after sowing (days)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Epot</span> <span class="o">=</span> <span class="mf">0.</span> <span class="c1"># potential evaporation (mm)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Tpot</span> <span class="o">=</span> <span class="mf">0.</span> <span class="c1"># potential transpiration (mm)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Tact</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="c1"># actual transpiration (mm)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Eact</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="c1"># actual evaporation (mm)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__PET</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="c1"># potential evapotranspiration (mm)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__waterstress_E</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># list with evaporation stress factor  per layer (-)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__waterstress_T</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># list with transpiration stress factor  per layer (-)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__soil_waterabstraction</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># plant water uptake + evaporation per layer (mm)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__soilevap</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># evaporation per layer (mm)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rootdepth</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># rooting depth (cm)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rootdistribution</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__soil_zm</span><span class="p">]</span> <span class="c1">#rootfraction in eac hsoil layer (-)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__potential_wateruptake</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__soil_zm</span><span class="p">]</span> <span class="c1"># wateruptake from each soil layer (mm)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__actual_wateruptake</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__soil_zm</span><span class="p">]</span> <span class="c1"># wateruptake from each soil layer (mm)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__compensated_uptake</span> <span class="o">=</span><span class="p">[</span><span class="mf">0.</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__soil_zm</span><span class="p">]</span>  <span class="c1"># compensated root water uptake</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__pressurehead</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># pressurehead per layer (cm water column)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__height</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="c1"># plant height (m)</span>
+        
+    <span class="c1">###########################################################################</span>
+    <span class="c1"># properties</span>
+    <span class="k">def</span> <span class="nf">__getName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plant name.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__name</span>
+    <span class="n">Name</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getName</span><span class="p">)</span>    
+    
+    <span class="k">def</span> <span class="nf">__getCropType</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plant type.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__croptype</span>
+    <span class="n">CropType</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getCropType</span><span class="p">)</span> 
+
+    <span class="k">def</span> <span class="nf">__getPET</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Potential evapotranspiration (mm/day)&quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__PET</span> 
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="n">PET</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getPET</span><span class="p">)</span>    
+    
+
+    <span class="k">def</span> <span class="nf">__getTact</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Actual transpiration (mm/day)&quot;&quot;&quot;</span>
+        
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Tact</span> 
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="n">Tact</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getTact</span><span class="p">)</span>    
+    
+    <span class="k">def</span> <span class="nf">__getEact</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Actual evaporation (mm/day)&quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Eact</span> 
+        <span class="k">return</span>  <span class="n">value</span>
+    <span class="n">Eact</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getEact</span><span class="p">)</span>           
+
+    <span class="k">def</span> <span class="nf">__getTpot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Potential transpiration (mm/day)&quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Tpot</span> 
+        <span class="k">return</span>  <span class="n">value</span>
+    <span class="n">Tpot</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getTpot</span><span class="p">)</span>    
+    
+    
+    <span class="k">def</span> <span class="nf">__getEpot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Potential evaporation (mm/day).&quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Epot</span> 
+        <span class="k">return</span>  <span class="n">value</span>
+    <span class="n">Epot</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getEpot</span><span class="p">)</span>    
+
+    <span class="k">def</span> <span class="nf">__getGLAI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Green leaf area index (-)&quot;&quot;&quot;</span>
+        <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">__GLAI</span>
+    <span class="n">GLAI</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getGLAI</span><span class="p">)</span>  
+
+    <span class="k">def</span> <span class="nf">__getLAI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Leaf area index (-)&quot;&quot;&quot;</span>
+        <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">__LAI</span>
+    <span class="n">LAI</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getLAI</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__getDAS</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Days after sowing (days)&quot;&quot;&quot;</span>
+        <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">__das</span>
+    <span class="n">DAS</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getDAS</span><span class="p">)</span>  
+    
+    <span class="k">def</span> <span class="nf">__getHarvest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Harvest day (days after sowing)&quot;&quot;&quot;</span>
+        <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">__harvest</span>
+    <span class="n">Harvest</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getHarvest</span><span class="p">)</span> 
+
+    <span class="k">def</span> <span class="nf">__getHeight</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plant height (cm)&quot;&quot;&quot;</span>
+        <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">__height</span>
+    <span class="n">Height</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getHeight</span><span class="p">)</span> 
+
+    <span class="k">def</span> <span class="nf">__getRootingDepth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Rooting depth (cm)&quot;&quot;&quot;</span>
+        <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">__rootdepth</span>
+    <span class="n">RootingDepth</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getRootingDepth</span><span class="p">)</span>  
+
+    <span class="k">def</span> <span class="nf">__getSoilWaterExtraction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Soil water abstraction (Eact+Tact) per layer (mm/day)&quot;&quot;&quot;</span>
+        <span class="k">return</span>  <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__soil_waterabstraction</span><span class="p">]</span>
+    <span class="n">SoilWaterExtraction</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getSoilWaterExtraction</span><span class="p">)</span> 
+     
+    <span class="k">def</span> <span class="nf">__getSoilRootWaterUptake</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Root water uptake per layer (mm/day)&quot;&quot;&quot;</span>       
+        <span class="k">return</span>  <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__actual_wateruptake</span><span class="p">]</span>
+    <span class="n">SoilRootWaterUptake</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getSoilRootWaterUptake</span><span class="p">)</span> 
+
+    <span class="k">def</span> <span class="nf">__getSoilEvaporation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Soil evaporation per layer (mm/day)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__soilevap</span><span class="p">]</span>
+    <span class="n">SoilEvaporation</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getSoilEvaporation</span><span class="p">)</span> 
+    
+    <span class="k">def</span> <span class="nf">__getRootDistribution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Root distribtuion per layer (-)&quot;&quot;&quot;</span>
+        <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">__rootdistribution</span>
+    <span class="n">RootDistribution</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getRootDistribution</span><span class="p">)</span> 
+
+    <span class="c1">###########################################################################</span>
+    <span class="c1"># functions leaf area index</span>
+
+<div class="viewcode-block" id="Plant.calc_Fsoil"><a class="viewcode-back" href="../../sourcecode.html#exam.Plant.Plant.calc_Fsoil">[docs]</a>    <span class="k">def</span> <span class="nf">calc_Fsoil</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">LAI</span><span class="p">,</span><span class="n">a_f</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates evaporation factor &#39;Fsoil&#39; (-).</span>
+<span class="sd">        </span>
+<span class="sd">        :param LAI: Leaf area index (-)</span>
+<span class="sd">        :type LAI: double</span>
+<span class="sd">        :param a_f: Radiation attenuationfacotr (-)</span>
+<span class="sd">        :type a_f: double      </span>
+<span class="sd">        :returns: Evaporation factor &#39;Fsoil&#39; (-)</span>
+<span class="sd">        :rtype: double</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">a_f</span> <span class="o">*</span> <span class="n">LAI</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="Plant.calc_Fcrop"><a class="viewcode-back" href="../../sourcecode.html#exam.Plant.Plant.calc_Fcrop">[docs]</a>    <span class="k">def</span> <span class="nf">calc_Fcrop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">GLAI</span><span class="p">,</span><span class="n">a_f</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates transpiration factor &#39;Fcrop&#39; (-).</span>
+<span class="sd">        </span>
+<span class="sd">        :param GLAI: Green leaf area index (-)</span>
+<span class="sd">        :type GLAI: double</span>
+<span class="sd">        :param a_f: Radiation attenuationfacotr (-)</span>
+<span class="sd">        :type a_f: double      </span>
+<span class="sd">        :returns: Transpiration factor &#39;Fcrop&#39; (-)</span>
+<span class="sd">        :rtype: double</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span>  <span class="mf">1.</span> <span class="o">-</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">a_f</span> <span class="o">*</span> <span class="n">GLAI</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Plant.calc_development_linear"><a class="viewcode-back" href="../../sourcecode.html#exam.Plant.Plant.calc_development_linear">[docs]</a>    <span class="k">def</span> <span class="nf">calc_development_linear</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">D</span><span class="p">,</span><span class="n">GLAImin</span><span class="p">,</span><span class="n">Dmin</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates green leaf area index &#39;GLAI&#39; (-) during linear </span>
+<span class="sd">        growth period.</span>
+<span class="sd">        </span>
+<span class="sd">        :param D: Actual days after sowing (days)</span>
+<span class="sd">        :type D: int</span>
+<span class="sd">        :param GLAI: Green leaf area index (-)</span>
+<span class="sd">        :type GLAI: double</span>
+<span class="sd">        :param GLAImin: Min green leaf area index (-)</span>
+<span class="sd">        :type GLAImin: double</span>
+<span class="sd">        :param Dmin: Day at GLAImin (days)</span>
+<span class="sd">        :type Dmin: int</span>
+<span class="sd">        :returns: GLAI during linear growth period (-)</span>
+<span class="sd">        :rtype: double</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">GLAImin</span> <span class="o">*</span> <span class="p">(</span><span class="n">D</span> <span class="o">/</span> <span class="n">Dmin</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="Plant.calc_development_exponential"><a class="viewcode-back" href="../../sourcecode.html#exam.Plant.Plant.calc_development_exponential">[docs]</a>    <span class="k">def</span> <span class="nf">calc_development_exponential</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">D</span><span class="p">,</span><span class="n">GLAImin</span><span class="p">,</span><span class="n">GLAImax</span><span class="p">,</span><span class="n">Dmin</span><span class="p">,</span><span class="n">Dmax</span><span class="p">,</span><span class="n">cform</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates green leaf area index &#39;GLAI&#39; (-) during exponential </span>
+<span class="sd">        growh period.</span>
+<span class="sd">        </span>
+<span class="sd">        :param D: Actual days after sowing (days)</span>
+<span class="sd">        :type D: int</span>
+<span class="sd">        :param GLAI: Green leaf area index (-)</span>
+<span class="sd">        :type GLAI: double</span>
+<span class="sd">        :param GLAImax: Max green leaf area index (-)</span>
+<span class="sd">        :type GLAImax: double</span>
+<span class="sd">        :param GLAImin: Min green leaf area index (-)</span>
+<span class="sd">        :type GLAImin: double</span>
+<span class="sd">        :param Dmax: Day at GLAImax (days)</span>
+<span class="sd">        :type Dmax: int</span>
+<span class="sd">        :param Dmin: Day at GLAImin (days)</span>
+<span class="sd">        :type Dmin: int</span>
+<span class="sd">        :param cform: Empirical &#39;form&#39; exponent development</span>
+<span class="sd">        :type cform: double</span>
+<span class="sd">        :returns: GLAI during expontetial growth period (-)</span>
+<span class="sd">        :rtype: double</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">GLAImin</span> <span class="o">+</span> <span class="p">(</span><span class="n">GLAImax</span> <span class="o">-</span> <span class="n">GLAImin</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="n">D</span><span class="o">-</span><span class="n">Dmin</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Dmax</span> <span class="o">-</span> <span class="n">Dmin</span><span class="p">))</span><span class="o">**</span><span class="n">cform</span></div>
+    
+<div class="viewcode-block" id="Plant.calc_senencence"><a class="viewcode-back" href="../../sourcecode.html#exam.Plant.Plant.calc_senencence">[docs]</a>    <span class="k">def</span> <span class="nf">calc_senencence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">D</span><span class="p">,</span><span class="n">GLAIharv</span><span class="p">,</span><span class="n">GLAImax</span><span class="p">,</span><span class="n">Dharv</span><span class="p">,</span><span class="n">Dmax</span><span class="p">,</span><span class="n">dform</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates senencence green leaf area index &#39;GLAI&#39; (-) after exponential </span>
+<span class="sd">        growh period.</span>
+<span class="sd">        </span>
+<span class="sd">        :param D: Actual days after sowing (days)</span>
+<span class="sd">        :type D: int</span>
+<span class="sd">        :param GLAI: Green leaf area index (-)</span>
+<span class="sd">        :type GLAI: double</span>
+<span class="sd">        :param GLAImax: Max green leaf area index (-)</span>
+<span class="sd">        :type GLAImax: double</span>
+<span class="sd">        GLAIharv (double):  green leaf area index at harvest (-)</span>
+<span class="sd">        :param Dmax: Day at GLAImax (days)</span>
+<span class="sd">        :type Dmax: int</span>
+<span class="sd">        :param Dharv: Day at harvest (days)</span>
+<span class="sd">        :type Dharv: int</span>
+<span class="sd">        :param dform: Empirical &#39;form&#39; exponent senencence</span>
+<span class="sd">        :type dform: double</span>
+<span class="sd">        :returns: GLAI after expontetial growth period (-)</span>
+<span class="sd">        :rtype: double</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span>  <span class="n">GLAIharv</span> <span class="o">+</span> <span class="p">(</span><span class="n">GLAImax</span> <span class="o">-</span> <span class="n">GLAIharv</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="n">Dharv</span><span class="o">-</span><span class="n">D</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Dharv</span> <span class="o">-</span> <span class="n">Dmax</span><span class="p">))</span><span class="o">**</span><span class="n">dform</span></div>
+
+    <span class="c1">###########################################################################</span>
+    <span class="c1"># functions root growth</span>
+    
+<div class="viewcode-block" id="Plant.calc_rootDistribution"><a class="viewcode-back" href="../../sourcecode.html#exam.Plant.Plant.calc_rootDistribution">[docs]</a>    <span class="k">def</span> <span class="nf">calc_rootDistribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">delta_z</span><span class="p">,</span><span class="n">zm</span><span class="p">,</span><span class="n">zr</span><span class="p">,</span><span class="n">rpin</span><span class="p">):</span>
+       <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">       Calculates &#39;root distribution&#39; (-) at depth zm (m).</span>
+<span class="sd">       </span>
+<span class="sd">       :param delta_z: Thickness of layer i</span>
+<span class="sd">       :type delta_z: double</span>
+<span class="sd">       :param zm: Mid-point of layer i (m)</span>
+<span class="sd">       :type zm: double</span>
+<span class="sd">       :param zr: Rootdepth (m)</span>
+<span class="sd">       :type zr: double</span>
+<span class="sd">       :param rpin: Emprical root distribution parameter</span>
+<span class="sd">       :type rpin: double</span>
+<span class="sd">       :returns: Root distribution (-)</span>
+<span class="sd">       :rtype: double</span>
+<span class="sd">       &quot;&quot;&quot;</span>
+       <span class="n">zeta</span> <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">rpin</span><span class="o">/</span><span class="mf">100.</span><span class="p">))</span>
+       <span class="n">r</span> <span class="o">=</span> <span class="n">zeta</span> <span class="o">*</span> <span class="p">(</span><span class="n">delta_z</span><span class="o">/</span><span class="n">zr</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">zeta</span> <span class="o">*</span> <span class="p">(</span><span class="n">zm</span> <span class="o">/</span> <span class="n">zr</span><span class="p">))</span>   
+       <span class="k">return</span> <span class="n">r</span></div>
+
+<div class="viewcode-block" id="Plant.calc_rootdepth"><a class="viewcode-back" href="../../sourcecode.html#exam.Plant.Plant.calc_rootdepth">[docs]</a>    <span class="k">def</span> <span class="nf">calc_rootdepth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">D</span><span class="p">,</span><span class="n">Lini</span><span class="p">,</span><span class="n">Ldev</span><span class="p">,</span><span class="n">rootmax</span><span class="p">,</span><span class="n">rootinit</span><span class="p">,</span><span class="n">croptype</span><span class="p">):</span>   
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates &#39;rootingdepth&#39; in (m).</span>
+<span class="sd">        </span>
+<span class="sd">        :param D: Actual days after sowing (days)</span>
+<span class="sd">        :type D: int        </span>
+<span class="sd">        :param Lini: Lenght of initial period (days)</span>
+<span class="sd">        :type Lini: double  </span>
+<span class="sd">        :param Ldev: Lenght of development period (days)</span>
+<span class="sd">        :type Ldev: double</span>
+<span class="sd">        :param rootmax: Maximum rooting depth (m)</span>
+<span class="sd">        :type rootmax: double</span>
+<span class="sd">        :param rootinit: Initial rootign depth (m)</span>
+<span class="sd">        :type rootinit: double</span>
+<span class="sd">        :param croptype : &#39;annual&#39; or &#39;perennial&#39;</span>
+<span class="sd">        :type croptype: str</span>
+<span class="sd">        :returns: Rooting depth (m)</span>
+<span class="sd">        :rtype: double</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rootdepth</span> <span class="o">=</span>  <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">croptype</span> <span class="o">==</span> <span class="s2">&quot;annual&quot;</span><span class="p">:</span>
+            <span class="n">das_Dmin</span> <span class="o">=</span> <span class="n">Lini</span>
+            <span class="n">das_Dmax</span> <span class="o">=</span> <span class="n">Lini</span> <span class="o">+</span> <span class="n">Ldev</span>
+            
+            <span class="k">if</span> <span class="n">D</span> <span class="o">&lt;=</span> <span class="n">das_Dmin</span><span class="p">:</span>
+                <span class="n">rootdepth</span> <span class="o">=</span> <span class="n">rootinit</span> <span class="o">*</span>  <span class="p">(</span><span class="n">D</span> <span class="o">/</span> <span class="n">das_Dmin</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">D</span> <span class="o">&gt;</span> <span class="n">das_Dmin</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">D</span> <span class="o">&lt;=</span> <span class="n">das_Dmax</span><span class="p">):</span>
+                <span class="n">rootdepth</span> <span class="o">=</span>  <span class="n">rootinit</span> <span class="o">+</span> <span class="p">(</span><span class="n">rootmax</span><span class="o">-</span><span class="n">rootinit</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="n">D</span><span class="o">-</span><span class="n">das_Dmin</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">das_Dmax</span> <span class="o">-</span> <span class="n">das_Dmin</span><span class="p">))</span> 
+            <span class="k">elif</span> <span class="n">D</span> <span class="o">&gt;</span> <span class="n">das_Dmax</span><span class="p">:</span>
+                <span class="n">rootdepth</span> <span class="o">=</span> <span class="n">rootmax</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rootdepth</span> <span class="o">=</span> <span class="n">rootmax</span>
+        <span class="k">return</span> <span class="n">rootdepth</span></div>
+
+<div class="viewcode-block" id="Plant.calc_height"><a class="viewcode-back" href="../../sourcecode.html#exam.Plant.Plant.calc_height">[docs]</a>    <span class="k">def</span> <span class="nf">calc_height</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">D</span><span class="p">,</span><span class="n">Lini</span><span class="p">,</span><span class="n">Ldev</span><span class="p">,</span><span class="n">heightmax</span><span class="p">,</span><span class="n">heightinit</span><span class="p">,</span><span class="n">croptype</span><span class="p">):</span>   
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates &#39;plant height&#39; in (m).</span>
+<span class="sd">        </span>
+<span class="sd">        :param D: Actual days after sowing (days)</span>
+<span class="sd">        :type D: int</span>
+<span class="sd">        :param Lini: Lenght of initial period (days)</span>
+<span class="sd">        :type Lini: double </span>
+<span class="sd">        :param Ldev: Lenght of development period (days)</span>
+<span class="sd">        :type Ldev: double</span>
+<span class="sd">        :param heightmax: Maximum plant height (m)</span>
+<span class="sd">        :type heightmax: double</span>
+<span class="sd">        :param heightinit: Initial plant height (m)</span>
+<span class="sd">        :type heightinit: double</span>
+<span class="sd">        :param croptype : &#39;annual&#39; or &#39;perennial&#39;</span>
+<span class="sd">        :type croptype: str</span>
+<span class="sd">        :returns: Plant height (m)</span>
+<span class="sd">        :rtype: double</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">height</span> <span class="o">=</span>  <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">croptype</span> <span class="o">==</span> <span class="s2">&quot;annual&quot;</span><span class="p">:</span>
+            <span class="n">das_Dmin</span> <span class="o">=</span> <span class="n">Lini</span>
+            <span class="n">das_Dmax</span> <span class="o">=</span> <span class="n">Lini</span> <span class="o">+</span> <span class="n">Ldev</span>
+            
+            <span class="k">if</span> <span class="n">D</span> <span class="o">&lt;=</span> <span class="n">das_Dmin</span><span class="p">:</span>
+                <span class="n">height</span> <span class="o">=</span> <span class="n">heightinit</span> <span class="o">*</span>  <span class="p">(</span><span class="n">D</span> <span class="o">/</span> <span class="n">das_Dmin</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">D</span> <span class="o">&gt;</span> <span class="n">das_Dmin</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">D</span> <span class="o">&lt;=</span> <span class="n">das_Dmax</span><span class="p">):</span>
+                <span class="n">height</span> <span class="o">=</span>  <span class="n">heightinit</span> <span class="o">+</span> <span class="p">(</span><span class="n">heightmax</span><span class="o">-</span><span class="n">heightinit</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="n">D</span><span class="o">-</span><span class="n">das_Dmin</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">das_Dmax</span> <span class="o">-</span> <span class="n">das_Dmin</span><span class="p">))</span> 
+            <span class="k">elif</span> <span class="n">D</span> <span class="o">&gt;</span> <span class="n">das_Dmax</span><span class="p">:</span>
+                <span class="n">height</span> <span class="o">=</span> <span class="n">heightmax</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">height</span> <span class="o">=</span> <span class="n">heightmax</span>
+        <span class="k">return</span> <span class="n">height</span></div>
+
+<div class="viewcode-block" id="Plant.calc_FeddedWaterstress"><a class="viewcode-back" href="../../sourcecode.html#exam.Plant.Plant.calc_FeddedWaterstress">[docs]</a>    <span class="k">def</span> <span class="nf">calc_FeddedWaterstress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">h_soil</span><span class="p">,</span><span class="n">feddes_waterstress</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes water uptake stress factor alpha (0-1.)</span>
+<span class="sd">                </span>
+<span class="sd">        :parm h_soil: Soil pressurehead per layer in (cm water column) </span>
+<span class="sd">        :type h_soil: list</span>
+<span class="sd">        feddes_waterstress: plant specific parameter for Feddes et al.</span>
+
+<span class="sd">        :returns: Plant height (m)</span>
+<span class="sd">        :rtype: double</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">h_plant</span> <span class="o">=</span> <span class="n">feddes_waterstress</span>
+        <span class="k">if</span> <span class="n">h_soil</span><span class="o">&lt;</span><span class="n">h_plant</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">h_soil</span><span class="o">&gt;</span><span class="n">h_plant</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span> <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">h_soil</span><span class="o">&gt;=</span><span class="n">h_plant</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">h_soil</span><span class="o">&lt;=</span><span class="n">h_plant</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">h_soil</span><span class="o">&lt;</span><span class="n">h_plant</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="k">return</span> <span class="p">(</span><span class="n">h_soil</span><span class="o">-</span><span class="n">h_plant</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">h_plant</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">h_plant</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span> <span class="k">return</span> <span class="p">(</span><span class="n">h_plant</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">h_soil</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">h_plant</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">h_plant</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span></div>
+  
+<div class="viewcode-block" id="Plant.compensate"><a class="viewcode-back" href="../../sourcecode.html#exam.Plant.Plant.compensate">[docs]</a>    <span class="k">def</span> <span class="nf">compensate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">Sh</span><span class="p">,</span><span class="n">Sp</span><span class="p">,</span><span class="n">pressurehead</span><span class="p">,</span><span class="n">alpha</span><span class="p">,</span><span class="n">feddes_opt</span><span class="p">,</span><span class="n">maxcomp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates root water uptake compensation factors (-) for each layer</span>
+<span class="sd">        in the rootingzone. The compsensation capacity is calculated</span>
+<span class="sd">        by (Actual uptake-Potential uptake)*maxcom.</span>
+
+<span class="sd">        :param s_p: Potential water uptake per layer (mm)</span>
+<span class="sd">        :type s_p: list</span>
+<span class="sd">        :param s_h: Actual water uptake per layer (mm)</span>
+<span class="sd">        :type s_h: list</span>
+<span class="sd">        :param pressurehead: Pressurehead per layer in (cm)</span>
+<span class="sd">        :type pressurehead: list</span>
+<span class="sd">        :param alpha: Water uptake stress factor (0-1) (-) </span>
+<span class="sd">        :type alpha: list</span>
+<span class="sd">        :param alpha: Maximum compensation capacity factor (-)</span>
+<span class="sd">        :type alpha: double</span>
+<span class="sd">        :param feddes_opt: Plant pressure head until water uptake can </span>
+<span class="sd">                                occur without stress in (cm water column)</span>
+<span class="sd">        :type feddes_opt: double</span>
+<span class="sd">        :returns: Plant height (m)</span>
+<span class="sd">        :rtype: double</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#Remaining alpha of the less stress soil layer</span>
+        <span class="n">remaining_alpha</span><span class="o">=</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="p">(</span><span class="n">m</span><span class="o">/</span><span class="n">feddes_opt</span><span class="p">),</span><span class="mf">0.</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">m</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pressurehead</span><span class="p">)]</span>         
+        <span class="c1">#Remaining uptake capacity of the soillayer</span>
+        <span class="n">remaining_uptake</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">Sp</span><span class="p">)</span><span class="o">-</span><span class="nb">sum</span><span class="p">(</span><span class="n">Sh</span><span class="p">)</span>       
+        <span class="c1">#Returns list with the compensation values in mm    </span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">r</span><span class="o">/</span><span class="nb">sum</span><span class="p">(</span><span class="n">remaining_alpha</span><span class="p">)</span><span class="o">*</span><span class="n">remaining_uptake</span><span class="p">,</span><span class="n">maxcomp</span><span class="o">*</span><span class="n">Sh</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">r</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">remaining_alpha</span><span class="p">)]</span>      </div>
+
+<div class="viewcode-block" id="Plant.calc_rootgrowth"><a class="viewcode-back" href="../../sourcecode.html#exam.Plant.Plant.calc_rootgrowth">[docs]</a>    <span class="k">def</span> <span class="nf">calc_rootgrowth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates rooting depth and distribution.</span>
+
+<span class="sd">        :returns: -</span>
+<span class="sd">        :rtype: -</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># calcualte rooting depth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rootdepth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_rootdepth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__das</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__Lini</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__Ldev</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__rootmax</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__rootinit</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__croptype</span><span class="p">)</span>
+        <span class="c1"># calculate root distribution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rootdistribution</span> <span class="o">=</span> <span class="p">[]</span>        
+        <span class="k">for</span> <span class="n">zm</span><span class="p">,</span><span class="n">delta_z</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__soil_zm</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__soil_delta_z</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__rootdistribution</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_rootDistribution</span><span class="p">(</span><span class="n">delta_z</span><span class="p">,</span><span class="n">zm</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__rootdepth</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__rpin</span><span class="p">))</span>
+        <span class="c1">#MACRO approach leads to a small residual which is allocated to teh upper layer according to N.Jarvis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rootdistribution</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__rootdistribution</span><span class="p">))</span></div>
+        
+<div class="viewcode-block" id="Plant.calc_wateruptake"><a class="viewcode-back" href="../../sourcecode.html#exam.Plant.Plant.calc_wateruptake">[docs]</a>    <span class="k">def</span> <span class="nf">calc_wateruptake</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates water uptake.</span>
+
+<span class="sd">        :returns: -</span>
+<span class="sd">        :rtype: -  </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__feddes_waterstress</span><span class="p">:</span>
+            <span class="c1"># calcuate potential uptake from each layer</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__potential_wateruptake</span> <span class="o">=</span> <span class="p">[</span><span class="n">rootfraction</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">__Tpot</span> <span class="k">for</span> <span class="n">rootfraction</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rootdistribution</span><span class="p">]</span>
+            <span class="c1"># calcuatle water stres factor transpiration # </span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__waterstress_T</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_FeddedWaterstress</span><span class="p">(</span><span class="n">pressure</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__feddes_waterstress</span><span class="p">)</span>  <span class="k">for</span> <span class="n">pressure</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pressurehead</span><span class="p">]</span>
+           <span class="c1"># calcualte actual water uptake            </span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__actual_wateruptake</span> <span class="o">=</span> <span class="p">[</span><span class="n">wpot</span><span class="o">*</span><span class="n">stress</span> <span class="k">for</span> <span class="n">wpot</span><span class="p">,</span><span class="n">stress</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__potential_wateruptake</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__waterstress_T</span><span class="p">)]</span>   
+            <span class="c1"># calculate water uptake compensation between soil layer TODO: test further</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__compensated_uptake</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__potential_wateruptake</span><span class="p">]</span><span class="c1"># self.compensate(self.__actual_wateruptake,self.__potential_wateruptake,self.__pressurehead,self.__waterstress_T,self.__feddes_waterstress[2],self.__maxcomp)</span>
+            <span class="c1"># calculate total water uptake</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__actual_wateruptake</span> <span class="o">=</span> <span class="p">[</span><span class="n">act</span><span class="o">+</span><span class="n">com</span> <span class="k">for</span> <span class="n">act</span><span class="p">,</span><span class="n">com</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__actual_wateruptake</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__compensated_uptake</span><span class="p">)]</span>
+            <span class="c1">#calcuate actual transpiration</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__Tact</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__actual_wateruptake</span><span class="p">)</span>        
+        <span class="c1"># calcualte evaproation from upper sol layer accordign to evap_depth</span>
+        <span class="c1">#TODO: evaporation onyl from upper layer ... no need for allocation of E, because cmf does the job ....</span>
+        <span class="n">Epot_per_Layer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Epot</span> <span class="o">/</span> <span class="nb">len</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__waterstress_E</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__soilevap</span> <span class="o">=</span> <span class="p">[</span><span class="n">Epot_per_Layer</span> <span class="o">*</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__waterstress_E</span><span class="p">]</span>
+        <span class="c1"># calcualte evaporation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Eact</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__soilevap</span><span class="p">)</span> <span class="c1">#TODO: no compensatio for E</span>
+        <span class="c1">#calcualte total soil water extraction E + T</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__actual_wateruptake</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__actual_wateruptake</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__soil_delta_z</span><span class="p">]</span>       
+        <span class="bp">self</span><span class="o">.</span><span class="n">__soil_waterabstraction</span> <span class="o">=</span> <span class="p">[(</span><span class="n">t</span><span class="o">+</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span><span class="n">e</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__actual_wateruptake</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__soilevap</span><span class="p">)]</span></div>
+       
+<div class="viewcode-block" id="Plant.calc_development"><a class="viewcode-back" href="../../sourcecode.html#exam.Plant.Plant.calc_development">[docs]</a>    <span class="k">def</span> <span class="nf">calc_development</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calcualtes plant development.</span>
+
+<span class="sd">        :returns: -</span>
+<span class="sd">        :rtype: -</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__croptype</span> <span class="o">==</span> <span class="s2">&quot;annual&quot;</span><span class="p">:</span>
+            <span class="c1"># linear development period</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__das</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Lini</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__GLAI</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_development_linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__das</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__GLAImin</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__Lini</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__LAI</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__GLAI</span>
+            <span class="c1"># exponential development period</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__das</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Lini</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__das</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__Lini</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">__Ldev</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__GLAI</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_development_exponential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__das</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__GLAImin</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__GLAImax</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__Lini</span><span class="p">,(</span><span class="bp">self</span><span class="o">.</span><span class="n">__Lini</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">__Ldev</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">__cform</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__LAI</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__GLAI</span>
+            <span class="c1"># senencence</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__das</span> <span class="o">&gt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__Lini</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">__Ldev</span><span class="p">))</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__das</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__Lini</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">__Ldev</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">__Lend</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__GLAI</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_senencence</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__das</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__GLAIharv</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__GLAImax</span><span class="p">,(</span><span class="bp">self</span><span class="o">.</span><span class="n">__Lini</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">__Ldev</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">__Lend</span><span class="p">),(</span><span class="bp">self</span><span class="o">.</span><span class="n">__Lini</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">__Ldev</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">__dform</span><span class="p">)</span>  
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__GLAI</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__GLAImax</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__LAI</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__GLAI</span></div>
+
+<div class="viewcode-block" id="Plant.calc_Ra_from_DOY"><a class="viewcode-back" href="../../sourcecode.html#exam.Plant.Plant.calc_Ra_from_DOY">[docs]</a>    <span class="k">def</span> <span class="nf">calc_Ra_from_DOY</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">latitude</span><span class="p">,</span><span class="n">DOY</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates extraterrestrial radiation based on latitude and day of year.        </span>
+<span class="sd">        </span>
+<span class="sd">        :param latitude: Latitude (decimal degree)</span>
+<span class="sd">        :type latitude: double</span>
+<span class="sd">        :param DOY: Day of year (days)</span>
+<span class="sd">        :type DOY: double</span>
+<span class="sd">        :returns: Radiation (MJ/m2)</span>
+<span class="sd">        :rtype: double</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lat_radians</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="o">*</span><span class="n">latitude</span> 
+        <span class="n">Gsc</span> <span class="o">=</span> <span class="mf">0.082</span> 
+        <span class="n">inverse_realtive_distance</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mf">0.033</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">DOY</span> <span class="o">/</span> <span class="mi">365</span><span class="p">)</span>
+        <span class="n">solar_decimation</span> <span class="o">=</span> <span class="mf">0.409</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">365</span> <span class="o">*</span> <span class="n">DOY</span> <span class="o">-</span> <span class="mf">1.39</span><span class="p">)</span> 
+        <span class="n">sunset_hour_angle</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">acos</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">lat_radians</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">solar_decimation</span><span class="p">))</span> 
+        <span class="n">term1</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">Gsc</span> <span class="o">*</span> <span class="n">inverse_realtive_distance</span>
+        <span class="n">term2</span> <span class="o">=</span> <span class="n">sunset_hour_angle</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_radians</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">solar_decimation</span><span class="p">)</span>
+        <span class="n">term3</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_radians</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">solar_decimation</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">sunset_hour_angle</span><span class="p">)</span>
+        <span class="n">Ra</span> <span class="o">=</span> <span class="n">term1</span> <span class="o">*</span> <span class="p">(</span><span class="n">term2</span> <span class="o">+</span> <span class="n">term3</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Ra</span></div>
+
+<div class="viewcode-block" id="Plant.calcETo2"><a class="viewcode-back" href="../../sourcecode.html#exam.Plant.Plant.calcETo2">[docs]</a>    <span class="k">def</span> <span class="nf">calcETo2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">DOY</span><span class="p">,</span><span class="n">Rs</span><span class="p">,</span><span class="n">Tmin</span><span class="p">,</span><span class="n">Tmax</span><span class="p">,</span><span class="n">Wind</span><span class="p">,</span><span class="n">vapourpressure</span><span class="p">,</span><span class="n">G</span><span class="p">,</span><span class="n">altitude</span><span class="p">,</span><span class="n">latitude</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates potential evapotranspiration.</span>
+<span class="sd">        </span>
+<span class="sd">        :param DOY: Day of year (days)</span>
+<span class="sd">        :type DOY: int</span>
+<span class="sd">        :param Rs: Solar raidation (MJ/m2)</span>
+<span class="sd">        :type Rs: double</span>
+<span class="sd">        :param Tmin: Minimum temperature</span>
+<span class="sd">        :type Tmin: double</span>
+<span class="sd">        :param Tmax: Maximum temperature</span>
+<span class="sd">        :type Tmax: double</span>
+<span class="sd">        :param Wind: Wind speed (m/s)</span>
+<span class="sd">        :type Wind: double</span>
+<span class="sd">        :param vapourpressure: Vapour pressure (kpa)</span>
+<span class="sd">        :type vapourpressure: double</span>
+<span class="sd">        :param G: Soil heat fuc (MJ/m2)</span>
+<span class="sd">        :type G: double</span>
+<span class="sd">        :param altitude: Altitude (m)</span>
+<span class="sd">        :type altitude: double</span>
+<span class="sd">        :param latitude: Latitude (decimal degree)</span>
+<span class="sd">        :type latitude: double</span>
+<span class="sd">        :returns: Potential evapotranspiration (m)</span>
+<span class="sd">        :rtype: double</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="n">Tmean</span><span class="o">=</span><span class="p">(</span><span class="n">Tmin</span><span class="o">+</span><span class="n">Tmax</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+        <span class="c1">#constants</span>
+        <span class="n">AerDyn_Resistance</span><span class="o">=</span><span class="mi">206</span>
+        <span class="n">AeroT_Cff</span> <span class="o">=</span> <span class="mi">900</span>
+        <span class="n">rc</span> <span class="o">=</span> <span class="mi">70</span>
+        <span class="n">albedo</span><span class="o">=</span><span class="mf">0.23</span>
+        <span class="c1"># Vapor pressure deficit [kPa]</span>
+        <span class="n">ea_Tmax</span> <span class="o">=</span> <span class="mf">0.6108</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="mf">17.27</span> <span class="o">*</span> <span class="n">Tmax</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Tmax</span> <span class="o">+</span> <span class="mf">237.3</span><span class="p">))</span>
+        <span class="n">ea_Tmin</span> <span class="o">=</span> <span class="mf">0.6108</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="mf">17.27</span> <span class="o">*</span> <span class="n">Tmin</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Tmin</span> <span class="o">+</span> <span class="mf">237.3</span><span class="p">))</span>
+        <span class="n">ea</span> <span class="o">=</span> <span class="p">(</span><span class="n">ea_Tmax</span> <span class="o">+</span> <span class="n">ea_Tmin</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">edew</span> <span class="o">=</span> <span class="n">vapourpressure</span>
+        <span class="c1"># Rad term</span>
+        <span class="n">Ra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_Ra_from_DOY</span><span class="p">(</span><span class="n">latitude</span><span class="p">,</span><span class="n">DOY</span><span class="p">)</span>
+        <span class="n">Rns</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">albedo</span><span class="p">)</span> <span class="o">*</span> <span class="n">Rs</span> <span class="c1"># 1-albedo (grass=0.23)</span>
+        <span class="n">Rso</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.75</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">altitude</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**-</span><span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="n">Ra</span>
+        <span class="n">Rs_Rso</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">Rs</span><span class="o">/</span><span class="n">Rso</span><span class="p">,</span><span class="mf">1.0</span><span class="p">])</span>            
+        <span class="n">Rns</span> <span class="o">=</span> <span class="mf">0.77</span> <span class="o">*</span> <span class="n">Rs</span> <span class="c1"># 1-albedo (grass=0.23)</span>
+        <span class="n">Rnl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_Rnl</span><span class="p">(</span><span class="n">Tmin</span><span class="p">,</span> <span class="n">Tmax</span><span class="p">,</span> <span class="n">Rs_Rso</span><span class="p">,</span> <span class="n">edew</span><span class="p">)</span>
+        <span class="n">Rn</span> <span class="o">=</span> <span class="n">Rns</span> <span class="o">-</span> <span class="n">Rnl</span>
+        <span class="n">Rn_G</span><span class="o">=</span><span class="n">Rn</span><span class="o">-</span><span class="n">G</span>
+        <span class="n">Lambda</span> <span class="o">=</span> <span class="mf">2.501</span><span class="o">-</span><span class="p">(</span><span class="mf">0.002361</span><span class="o">*</span><span class="p">(</span><span class="n">Tmean</span><span class="p">))</span>
+        <span class="n">Delta</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4098</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.6108</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">17.27</span> <span class="o">*</span> <span class="n">Tmean</span> <span class="o">/</span> <span class="p">(</span><span class="n">Tmean</span> <span class="o">+</span> <span class="mf">237.3</span><span class="p">))))</span> <span class="o">/</span> <span class="p">(</span><span class="n">Tmean</span> <span class="o">+</span> <span class="mf">237.3</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">P</span> <span class="o">=</span>  <span class="mf">101.3</span> <span class="o">*</span> <span class="p">((</span><span class="mi">293</span> <span class="o">-</span> <span class="mf">0.0065</span> <span class="o">*</span> <span class="n">altitude</span><span class="p">)</span> <span class="o">/</span> <span class="mi">293</span><span class="p">)</span><span class="o">**</span><span class="mf">5.26</span>  
+        <span class="n">ra</span> <span class="o">=</span> <span class="n">AerDyn_Resistance</span> <span class="o">/</span> <span class="n">Wind</span>
+        <span class="n">Gamma1</span><span class="o">=</span><span class="mf">0.0016286</span><span class="o">*</span><span class="n">P</span><span class="o">/</span><span class="n">Lambda</span>
+        <span class="n">Gamma2</span><span class="o">=</span><span class="n">Gamma1</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">rc</span><span class="o">/</span><span class="n">ra</span><span class="p">)</span>
+        <span class="n">dl_gm</span><span class="o">=</span><span class="n">Delta</span><span class="o">/</span><span class="p">(</span><span class="n">Delta</span><span class="o">+</span><span class="n">Gamma2</span><span class="p">)</span>
+        <span class="n">Radterm</span> <span class="o">=</span> <span class="n">dl_gm</span><span class="o">*</span><span class="n">Rn_G</span><span class="o">/</span><span class="n">Lambda</span>
+        <span class="n">gm_dl</span> <span class="o">=</span> <span class="n">Gamma1</span><span class="o">/</span><span class="p">(</span><span class="n">Delta</span><span class="o">+</span><span class="n">Gamma2</span><span class="p">)</span>
+        <span class="n">Areoterm</span> <span class="o">=</span> <span class="n">gm_dl</span><span class="o">*</span><span class="n">AeroT_Cff</span> <span class="o">/</span> <span class="p">(</span><span class="n">Tmean</span><span class="o">+</span><span class="mi">273</span><span class="p">)</span><span class="o">*</span><span class="n">Wind</span><span class="o">*</span><span class="p">(</span><span class="n">ea</span><span class="o">-</span><span class="n">edew</span><span class="p">)</span>
+        <span class="n">ET</span><span class="o">=</span><span class="n">Radterm</span><span class="o">+</span><span class="n">Areoterm</span>
+        <span class="n">ET</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">ET</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ET</span><span class="p">,</span><span class="n">Ra</span><span class="p">,</span><span class="n">Rn</span><span class="p">,</span><span class="n">Rs</span></div>
+    
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="n">soil</span><span class="p">,</span><span class="n">atmosphere</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates plant growth for timestep t which includes development,</span>
+<span class="sd">        leaf area index, rooting depth as well as transpiation and evaporation.</span>
+<span class="sd">        </span>
+<span class="sd">        :param t: Actual time</span>
+<span class="sd">        :type: datetime</span>
+<span class="sd">        :param soil: Other model which implements soil interface</span>
+<span class="sd">        :type soil: SoilInterface</span>
+<span class="sd">        :param atmosphere: Other model which implements atmosphere interface</span>
+<span class="sd">        :type atmosphere: AtmosphereInterface</span>
+<span class="sd">        :returns: -</span>
+<span class="sd">        :rtype: -</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get soil pressruehead for each layer</span>
+        <span class="n">pressurehead</span> <span class="o">=</span> <span class="n">soil</span><span class="o">.</span><span class="n">PressureHead</span>
+        <span class="c1"># get evaporation stress factor for each layer</span>
+        <span class="n">waterstress_E</span> <span class="o">=</span> <span class="n">soil</span><span class="o">.</span><span class="n">Kr</span>
+        <span class="c1"># get climate variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__PET</span> <span class="o">=</span> <span class="n">atmosphere</span><span class="o">.</span><span class="n">get_Sunshine</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+<span class="c1">#        Rs = atmosphere.get_Rs(t)</span>
+<span class="c1">#        Tmax = atmosphere.get_tmax(t)</span>
+<span class="c1">#        Tmin = atmosphere.get_tmin(t)</span>
+<span class="c1">#        Ra = self.calc_Ra_from_DOY(self.__latitude,t.DOY())</span>
+<span class="c1">#        # calc PET with hargreaves-Samani  </span>
+<span class="c1">#        self.__PET = 0.0023 * ((Tmax + Tmin)/2. + 17.8) * (Tmax - Tmin)**0.5 * Rs</span>
+        <span class="c1"># check crop type</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__croptype</span> <span class="o">==</span> <span class="s2">&quot;annual&quot;</span><span class="p">:</span>
+            <span class="c1"># calculate growing during growing period of annual crops</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__das</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">__harvest</span><span class="p">:</span>
+                <span class="c1"># update DAS</span>
+                <span class="c1"># i ncase of hourly steps update DAS at the beginning of the day </span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">hour</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__das</span> <span class="o">+=</span> <span class="mi">1</span>    
+                <span class="c1"># calculate crop development</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">calc_development</span><span class="p">()</span>
+                <span class="c1"># calcualte plant height</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_height</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__das</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__Lini</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__Ldev</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__heightmax</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__heightinit</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__croptype</span><span class="p">)</span>
+                <span class="c1"># calculate potential E and T</span>
+                <span class="n">Fsoil</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_Fsoil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__LAI</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__a_f</span><span class="p">)</span>
+                <span class="n">Fcrop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_Fcrop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__GLAI</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__a_f</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__PET</span> <span class="o">*</span> <span class="n">Fsoil</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__Tpot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__PET</span> <span class="o">*</span> <span class="n">Fcrop</span>
+                <span class="c1"># calculate root growth</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">calc_rootgrowth</span><span class="p">()</span>
+                <span class="c1"># calculate water uptake</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">plantmodel</span> <span class="o">==</span> <span class="s2">&quot;macro&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__pressurehead</span> <span class="o">=</span> <span class="n">pressurehead</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__waterstress_E</span> <span class="o">=</span> <span class="p">[</span><span class="n">stress</span> <span class="k">if</span> <span class="n">depth</span><span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">depth</span><span class="p">,</span><span class="n">stress</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__soil_evap_depth</span><span class="p">,</span><span class="n">waterstress_E</span><span class="p">)]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">calc_wateruptake</span><span class="p">()</span>
+            <span class="c1"># set all state variables to zero when no plant exists</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__GLAI</span> <span class="o">=</span> <span class="mf">0.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__LAI</span> <span class="o">=</span> <span class="mf">0.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__Tpot</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__Epot</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__Tact</span> <span class="o">=</span> <span class="mf">0.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__Eact</span> <span class="o">=</span> <span class="mf">0.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__rootdepth</span> <span class="o">=</span> <span class="mf">0.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__height</span> <span class="o">=</span> <span class="mf">0.0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__root_distribution</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__soil_zm</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__soil_waterabstraction</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__soil_zm</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__actual_wateruptake</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__soil_zm</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__soilevap</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__soil_zm</span><span class="p">]</span>
+       <span class="c1"># calculate growing during growing period of annual crops</span>
+        <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># update DAS</span>
+                <span class="c1"># i ncase of hourly steps update DAS at the beginning of the day </span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">hour</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__das</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1"># calculate crop development</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">calc_development</span><span class="p">()</span>
+                <span class="c1"># calculate potential E and T</span>
+                <span class="n">Fsoil</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_Fsoil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__LAI</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__a_f</span><span class="p">)</span>
+                <span class="n">Fcrop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_Fcrop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__GLAI</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__a_f</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__PET</span> <span class="o">*</span> <span class="n">Fsoil</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__Tpot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__PET</span> <span class="o">*</span> <span class="n">Fcrop</span>
+                <span class="c1"># calculate root growth (the perennial growth path is also used</span>
+                <span class="c1"># for baresoil conditions which requires no root growth)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__name</span> <span class="o">==</span> <span class="s2">&quot;baresoil&quot;</span><span class="p">):</span> 
+                    <span class="bp">self</span><span class="o">.</span><span class="n">calc_rootgrowth</span><span class="p">()</span>
+                    <span class="c1"># calcualte plant height</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_height</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__das</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__Lini</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__Ldev</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__heightmax</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__heightinit</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__croptype</span><span class="p">)</span>
+                <span class="c1">#calcualte water uptake</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">plantmodel</span> <span class="o">==</span> <span class="s2">&quot;macro&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__pressurehead</span> <span class="o">=</span> <span class="n">pressurehead</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__waterstress_E</span> <span class="o">=</span> <span class="p">[</span><span class="n">stress</span> <span class="k">if</span> <span class="n">depth</span><span class="o">==</span><span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">depth</span><span class="p">,</span><span class="n">stress</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__soil_evap_depth</span><span class="p">,</span><span class="n">waterstress_E</span><span class="p">)]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">calc_wateruptake</span><span class="p">()</span>    </div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2018, knoell Germany GmbH.
+    </div>
+  </body>
+</html>

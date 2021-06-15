@@ -1,0 +1,3 @@
+[console_scripts]
+pyzo = pyzo.__main__:main
+

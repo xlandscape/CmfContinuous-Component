@@ -1,0 +1,354 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Numdifftools &mdash; numdifftools 0.9.17 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="numdifftools 0.9.17 documentation" href="#"/>
+        <link rel="next" title="Introduction to Numdifftools" href="src/overview.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="#" class="icon icon-home"> numdifftools
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.17
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="src/overview.html">Introduction to Numdifftools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/overview.html#documentation-and-code">Documentation and code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/overview.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/overview.html#unit-tests">Unit tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/overview.html#acknowledgement">Acknowledgement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/overview.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/numerical/main.html">Numerical differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/algorithmic/main.html">Algorithmic differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changes.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">Module reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="#">numdifftools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="#">Docs</a> &raquo;</li>
+      
+    <li>Numdifftools</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/index.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="numdifftools">
+<h1>Numdifftools<a class="headerlink" href="#numdifftools" title="Permalink to this headline">¶</a></h1>
+<a class="reference external image-reference" href="https://pypi.python.org/pypi/Numdifftools/"><img alt="https://badge.fury.io/py/numdifftools.png" src="https://badge.fury.io/py/numdifftools.png" /></a>
+<a class="reference external image-reference" href="https://travis-ci.org/pbrod/numdifftools"><img alt="https://travis-ci.org/pbrod/numdifftools.svg?branch=master" src="https://travis-ci.org/pbrod/numdifftools.svg?branch=master" /></a>
+<a class="reference external image-reference" href="http://numdifftools.readthedocs.org/en/latest/"><img alt="https://readthedocs.org/projects/pip/badge/?version=latest" src="https://readthedocs.org/projects/pip/badge/?version=latest" /></a>
+<a class="reference external image-reference" href="https://landscape.io/github/pbrod/numdifftools/master"><img alt="Code Health" src="https://landscape.io/github/pbrod/numdifftools/master/landscape.svg?style=flat" /></a>
+<a class="reference external image-reference" href="https://coveralls.io/github/pbrod/numdifftools?branch=master"><img alt="https://coveralls.io/repos/pbrod/numdifftools/badge.svg?branch=master" src="https://coveralls.io/repos/pbrod/numdifftools/badge.svg?branch=master" /></a>
+<a class="reference external image-reference" href="https://github.com/pbrod/numdifftools"><img src="https://img.shields.io/pypi/pyversions/numdifftools.svg" /></a>
+<p>This is the documentation of <strong>Numdifftools</strong> 0.9.17.</p>
+<p>Bleeding edge available at: <a class="reference external" href="https://github.com/pbrod/numdifftools">https://github.com/pbrod/numdifftools</a>.</p>
+<p>Official releases are available at: <a class="reference external" href="http://pypi.python.org/pypi/Numdifftools">http://pypi.python.org/pypi/Numdifftools</a>.</p>
+</div>
+<div class="section" id="contents">
+<h1>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="src/overview.html">Introduction to Numdifftools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/overview.html#getting-started">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/overview.html#see-also">See also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src/overview.html#documentation-and-code">Documentation and code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/overview.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/overview.html#unit-tests">Unit tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/overview.html#acknowledgement">Acknowledgement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/overview.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/numerical/main.html">Numerical differentiation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/numerical/derivest.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/numerical/derivest.html#numerical-differentiation-of-a-general-function-of-one-variable">Numerical differentiation of a general function of one variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/numerical/derivest.html#unequally-spaced-finite-difference-rules">Unequally spaced finite difference rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/numerical/derivest.html#odd-and-even-transformations-of-a-function">Odd and even transformations of a function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/numerical/derivest.html#complex-step-derivative">Complex step derivative</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/numerical/derivest.html#high-order-derivative">High order derivative</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/numerical/derivest.html#richardson-extrapolation-methodology-applied-to-derivative-estimation">Richardson extrapolation methodology applied to derivative estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/numerical/derivest.html#multiple-term-richardson-extrapolants">Multiple term Richardson extrapolants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/numerical/derivest.html#uncertainty-estimates-for-derivative">Uncertainty estimates for Derivative</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/numerical/derivest.html#derivative-in-action">Derivative in action</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/numerical/derivest.html#gradient-and-hessian-estimation">Gradient and Hessian  estimation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src/numerical/derivest.html#multivariate-calculus-examples">Multivariate calculus examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src/numerical/derivest.html#gradients-and-hessians">Gradients and Hessians</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src/numerical/derivest.html#directional-derivatives">Directional derivatives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src/numerical/derivest.html#jacobian-matrix">Jacobian matrix</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src/numerical/derivest.html#conclusion">Conclusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/numerical/derivest.html#acknowledgments">Acknowledgments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/numerical/derivest.html#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src/algorithmic/main.html">Algorithmic differentiation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/algorithmic/ad.html">Numdifftools.nd_algopy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/algorithmic/ad.html#algoritmic-differentiation">Algoritmic differentiation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src/algorithmic/ad.html#reference">Reference</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changes.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#version-0-9-17-sep-8-2016">Version 0.9.17, Sep 8, 2016</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#version-0-9-15-may-10-2016">Version 0.9.15, May 10, 2016</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#version-0-9-14-november-10-2015">Version 0.9.14, November 10, 2015</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#version-0-9-13-october-30-2015">Version 0.9.13, October 30, 2015</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#version-0-9-12-august-28-2015">Version 0.9.12, August 28, 2015</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#version-0-9-11-august-27-2015">Version 0.9.11, August 27, 2015</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#version-0-9-10-august-26-2015">Version 0.9.10, August 26, 2015</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#version-0-9-4-august-26-2015">Version 0.9.4, August 26, 2015</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#version-0-9-3-august-23-2015">Version 0.9.3, August 23, 2015</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#version-0-9-2-august-20-2015">Version 0.9.2, August 20, 2015</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#version-0-9-1-august-20-2015">Version 0.9.1, August 20,2015</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#version-0-7-7-december-18-2014">Version 0.7.7, December 18, 2014</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#version-0-7-3-december-17-2014">Version 0.7.3, December 17, 2014</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#version-0-6-0-february-8-2014">Version 0.6.0, February 8, 2014</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#version-0-5-0-january-10-2014">Version 0.5.0, January 10, 2014</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#version-0-4-0-may-5-2012">Version 0.4.0, May 5, 2012</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#version-0-3-5-may-19-2011">Version 0.3.5, May 19, 2011</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#version-0-3-4-feb-24-2011">Version 0.3.4, Feb 24, 2011</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#version-0-3-1-may-20-2009">Version 0.3.1, May 20, 2009</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">Module reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/numdifftools.html">numdifftools package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/numdifftools.html#step-generators">Step generators</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/numdifftools.core.MinStepGenerator.html">numdifftools.core.MinStepGenerator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/numdifftools.core.MaxStepGenerator.html">numdifftools.core.MaxStepGenerator</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/numdifftools.html#utility-functions">Utility functions</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/numdifftools.html#finite-difference-approximations">Finite difference approximations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/numdifftools.core.Derivative.html">numdifftools.core.Derivative</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/numdifftools.core.Gradient.html">numdifftools.core.Gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/numdifftools.core.Jacobian.html">numdifftools.core.Jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/numdifftools.core.Hessdiag.html">numdifftools.core.Hessdiag</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/numdifftools.core.Hessian.html">numdifftools.core.Hessian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/numdifftools.core.directionaldiff.html">numdifftools.core.directionaldiff</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/numdifftools.html#numdifftools-extrapolation-module">numdifftools.extrapolation module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/numdifftools.extrapolation.convolve.html">numdifftools.extrapolation.convolve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/numdifftools.extrapolation.Dea.html">numdifftools.extrapolation.Dea</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/numdifftools.extrapolation.dea3.html">numdifftools.extrapolation.dea3</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/numdifftools.extrapolation.Richardson.html">numdifftools.extrapolation.Richardson</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/numdifftools.html#numdifftools-limits-module">numdifftools.limits module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/numdifftools.limits.MinStepGenerator.html">numdifftools.limits.MinStepGenerator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/numdifftools.limits.Limit.html">numdifftools.limits.Limit</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/numdifftools.html#numdifftools-multicomplex-module">numdifftools.multicomplex module</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/numdifftools.html#numdifftools-nd-algopy-module">numdifftools.nd_algopy module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/numdifftools.nd_algopy.Jacobian.html">numdifftools.nd_algopy.Jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/numdifftools.nd_algopy.Hessdiag.html">numdifftools.nd_algopy.Hessdiag</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/numdifftools.nd_algopy.Hessian.html">numdifftools.nd_algopy.Hessian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/numdifftools.nd_algopy.directionaldiff.html">numdifftools.nd_algopy.directionaldiff</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/numdifftools.html#module-numdifftools.run_benchmark">numdifftools.run_benchmark module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/numdifftools.html#module-numdifftools">Module contents</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/numdifftools.html#introduction-to-numdifftools">Introduction to Numdifftools</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/numdifftools.html#documentation-and-code">Documentation and code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/numdifftools.html#installation">Installation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/numdifftools.html#unit-tests">Unit tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/numdifftools.html#acknowledgement">Acknowledgement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/numdifftools.html#references">References</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span>Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span>Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span>Search Page</span></a></li>
+</ul>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="src/overview.html" class="btn btn-neutral float-right" title="Introduction to Numdifftools" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2009-2015, Per A Brodtkorb, John D&#39;Errico.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.9.17',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

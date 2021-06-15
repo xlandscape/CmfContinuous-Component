@@ -1,0 +1,402 @@
+﻿**Concept**
+******************************
+
+Catchment
+=========================
+
+
+Programming structure
+--------------------------
+
+The model is implemented following an object-oriented programming approach using `Python3 <https://www.python.org/>`_. Natural entities 
+are represented by a Class in Python. The relation between these classes is defined by 
+a `has-a-relationship <https://en.wikipedia.org/wiki/Has-a>`_, e.g. a catchment has one or more reaches and cells. 
+Furthermore, the catchment holds one CatchmentOutlet, which is connected to the most downstream reaches. A DeepAquifer is connected to one or
+more cells and to the CatchmentOutlet and has no connection to the reaches. The storages are connected by various water fluxes (surface runoff, drainage,
+groundwater, discharge, evaporation, water uptake). All of them tranport water and solutes, except the fluxes evaporation and water uptake. 
+Evaporation does not transport solutes at all. Solute transport by water uptake can be set by the user (plant uptake factor compound).
+
+.. figure:: /_static/concept_uml_catchment.png
+    :align: center
+    :figclass: align-center
+
+The cell is further divided into several storages which are represented by a fleible
+number of soil layer as well as a surface water, drainage and groundwater storage. 
+The storages are connected to further cells or reaches.
+
+.. figure:: /_static/concept_uml_cells.png
+    :align: center
+    :figclass: align-center
+
+Another set of classes provides functionalities, i.e. representations of natural processes. Most processes are taken from the CMF core library,
+but functionalities have been added related to canopy processes, drift assessment and aquatic efate (e.g. STEPS-1-2-3-4). 
+
+
+Modelling structure
+--------------------------
+
+The catchment with all its components, i.e. forests, fields, rivers and urban areas, is divided into a set of cells and river segments. 
+Each cell has its unique land use, climate and soil type. Cells and river segments are connected to each other 
+automatically by the model in order to simulate water and solute fluxes across the catchment. Water and solute fluxes are routed across the catchment 
+with respect to different levels of detail. Exposure models can be coupled to assess the entry of solutes by drift, runoff and drainage into aquatic systems
+in order to derive predicted environmental concentrations (PEC) in sediment and water.
+
+.. figure:: /_static/concept_assesmentsteps.png
+    :align: center
+    :figclass: align-center 
+
+The user has the opportunity to select from three different option for running the whole catchment and one option to simulate only single cells. This is a unique future 
+of the model, because it provides flexibility in terms of hydrological detail and spatial representation of the catchment. 
+The different options are as follows:
+
+(a) **completeCatchment:** The entire flow network of the catchment is simulating including river segments and cells. All fluxes are simulated by CMF
+on the basis of climate and soil data.
+
+.. figure:: /_static/concept_storageconnections.png
+    :align: center
+    :figclass: align-center
+
+(b) **timeseriesCatchment:** The entire flow network of the catchment is simulating including river segments and cells. The fluxes from single cells
+must be provided as time series for surface runoff, drainage flow and groundwater flow. Theses flows can be calculated using the ***1dField** option or by any other 
+1D field scale model such as MACRO or PEARL.
+
+.. figure:: /_static/concept_timeseries.png
+    :align: center
+    :figclass: align-center
+
+(c) **areayieldCatchment:** Only the stream network is simulated. In order to simulate the inflow into each reach, the area weighted inflow
+is calculated by multiplying the related catchment area by observed flow. The catchment
+area is calculated on the basis on the cumulative areas of cells which are connected to directly or indirectly to the reach.
+
+.. figure:: /_static/concept_instream.png
+    :align: center
+    :figclass: align-center
+
+The last option differs from previous ones:
+
+(d) **1dField:** Only single fields are simulated with a 1D simulation approach. The soil is divided into several layers as well as holds a 
+surface, drainage and groundwater flow. This approach is equal to the field representation of completeCatchment, 
+but without connecting the cells across the catchment.
+
+.. figure:: /_static/concept_1dfieldscale.png
+    :align: center
+    :figclass: align-center
+
+
+Flow connections
+--------------------------
+
+An automatic procedure exist to create a flow network across a catchment by connecting cells and reaches to each other. 
+The underlying script makes us of the Python packages scipy (`scipy.spatial.Voronoi <https://docs.scipy.org/doc/scipy-0.18.1/reference/generated/scipy.spatial.Voronoi.html>`_ , 
+`scipy.interpolate.griddata <https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html>`_ ) and `shapely <https://pypi.org/project/Shapely/>`_ . 
+
+First, Thiessen-Polygons are calculated for each cell. Second, the altitude of each cell is compared with each neighbouring cell. 
+The cell is connected to the nearest downslope cell. If a reach crosses the Thiessen-Polygon of a cell or a connection to another cell, 
+a connection to the reach is created. Each cell has only one downslope neighbour (cell or reach), but can obtain flows from several cells.
+
+.. figure:: /_static/usermanual_CatchmentConnector.png
+    :align: center
+    :figclass: align-center 
+
+Third, the flow network is simplified. The aim of the simplification is to achieve a flow network with
+direct flow connection which avoid long chains of cell connections. For each connection an algorithms test if the next cell
+can be skipped. This is the case, if the current cell touches the after next cell as well. The result
+of this procedure is shown in the example below. Each red connection was revised. For example, 
+field f390 (left mid) would be connected to f419.By using the optimisation, the final connection is 
+done with the field f444. 
+
+.. figure:: /_static/usermanual_CatchmentConnector2.png
+    :align: center
+    :figclass: align-center 
+
+Spatial discretisation
+--------------------------
+
+A catchment can be grouped into solver units in order to create independent sub-catchments which are integrated by one solver Of CMF.
+The algorithm starts at the catchment outlet and divides the catchment into solver units.
+which are create at each branch of the river. Each solver unit represents a hydrological independent unit which has one outlet, but 
+can have one or more inflows from other solver units. 
+
+.. figure:: /_static/usermanual_CatchmentSeparator.png
+    :align: center
+    :figclass: align-center 
+
+The process runs in the background. A sub-folder is automatically created which holds a single project folder for each solver unit.
+
+.. figure:: /_static/usermanual_CatchmentSeparator2.png
+    :align: center
+    :figclass: align-center 
+
+A file called 'solverunits_runorder.csv' holds the information on the run sequence and the connection between solver units. If a solver unit has a downslope
+neighbour, the inflow data from the outlet is copied into the 'Timeseries folder' of the downslope solver unit as input for the upstream reach.
+
+.. figure:: /_static/usermanual_CatchmentSeparator3.png
+    :align: center
+    :figclass: align-center 
+
+Analysis
+--------------------------
+
+The results can be analysed for a whole catchment, a branch which consists of several reaches and individual reaches, e.g. closed to the outlet.
+The focus of the analysis is on the water flows as well as solute concentration in water and sediment of reaches. The latter one are part of
+each modelling option (completeCatchment, timeseriesCatchment, areayieldCatchment).
+
+.. figure:: /_static/usermanual_CatchmentSummary.png
+    :scale: 150%
+    :align: center
+    :figclass: align-center 
+
+Natural processes
+=========================
+
+Hydrology
+--------------------------
+
+CMF serves as core library for this catchment model. Detailed information on the implementation of CMF and specific flux equations 
+can be found in the documentation of CMF (https://philippkraft.github.io/cmf/). 
+The processes which are used by the catchment model are explained shortly in the next paragraphs.
+
+Generally, a catchment model consists of storages which hold water and solutes. These storages are connected to each other by flux connections. 
+Three types of flux connections are used which are related to different spatial units in the catchment:
+
+* **Soil flux**: The soil layer of a 1dField scale cell are connected via the `Richards' equation  <https://philippkraft.github.io/cmf/classcmf_1_1upslope_1_1connections_1_1_richards.html>`_.
+* **catchment flux**: The field storages for surface water, drainage and groundwater are connected to neighbouring cells and reaches by a `Kinematic wave  <https://philippkraft.github.io/cmf/classcmf_1_1water_1_1kinematic__wave.html>`_. Note that CMF would also allow for more physical based methods such as `Darcy  <https://philippkraft.github.io/cmf/classcmf_1_1upslope_1_1connections_1_1_darcy.html>`_ , but such an approach is limited by the high computational demand and availability of parameter.
+* **River flux**: The flux from one river segment to another is modelled with the `Manning's equation  <https://philippkraft.github.io/cmf/classcmf_1_1river_1_1_manning.html>`_.
+
+The storages are localised by the spatial coordinates and altitude. Reaches can have one of three different types:
+
+* `Triangular <https://philippkraft.github.io/cmf/classcmf_1_1river_1_1_triangular_reach.html>`_ : The profile of a river segment is represented by a v-shape. Even if this is not the case for most natural rivers, it is the preferable option if no information is at hand on the actual shape of the river segments. 
+* `Rectangular <https://philippkraft.github.io/cmf/classcmf_1_1river_1_1_rectangular_reach.html>`_: The rectangualar shape might be needed for artificial channels in urban areas or to represent manmade open water drainage channels.
+* `Trapezoidal <https://philippkraft.github.io/cmf/classcmf_1_1river_1_1_s_w_a_t_reach_type.html>`_: The trapezoidal shape might results in the optimal representation of natural rivers. But more detailed information is needed on the shape of the river bed.
+
+Solutes
+--------------------------
+
+The solute processes differ with the environmental compartment:
+
+* **Soil flux**: When assessing the flux of water and solutes along a 1D soil profile, a `linear adsorption term  <https://philippkraft.github.io/cmf/classcmf_1_1water_1_1_linear_adsorption.html>`_  is used to simulate adsorption/desorption to the soil matrix.
+
+.. figure:: /_static/concept_soilsolutetransport.png
+    :align: center
+    :figclass: align-center
+
+* **catchment flux**: CMF calculates conservative solute transport between storages with the possibility of assuming a fixed decay rate of the solute in the `storage <https://philippkraft.github.io/cmf/classcmf_1_1water_1_1_solute_storage.html>`_.
+* **River flux**: The transport is conservative. In order to account for exchange between water and sediment phase, the model ships with an implementation of the STEPS-1-2-3-4 approach to assess adsorption/desorption to two sediment layer as well as degradation.
+
+Note, when using the time series option the user has the opportunity to set the water flux per hour (m³/day) as well as the related concentration of the solute. 
+CMF solves than the transport across the catchment as defined by the different hydrological processes considering the spatial and temporal information from the time series.
+
+
+Canopy
+--------------------------
+
+The canopy water balance is calculated on the basis of the approach and parametrisation provided by 
+`FOCUS MARCO5.2 <https://esdac.jrc.ec.europa.eu/projects/macro-0>`_ . A database ships with the model which holds 
+a parametrisation of all FOCUS crops and scenarios.
+
+The crop development is modelled related to several development stages (emergence, maturity, harvest) which are 
+in-turn defined by a cumulative sum of days. The leaf area index (LAI) is calculated based on the current development 
+stage in relation to the cumulative days after sowing (DAS). Shape parameter are applied to scale the LAI to 
+specific crop types. LAI is corrected for senescence at the end of the growing season resulting in 
+the so called green LAI (GLAI).
+
+.. figure:: /_static/concept_LAI.png
+    :align: center
+    :figclass: align-center
+
+The rooting depth defines the number of soil layer available for crop water uptake. Root growth is calculated by crop specific 
+parameters (initial depth at emergence, maximum depth at maturity) related to crop development as shown below.
+
+.. figure:: /_static/concept_rootingdepth.png
+    :align: center
+    :figclass: align-center
+
+Actual water uptake and evaporation is calculated based on the LAI, rooting depth and potential evapotranspiration (PET).
+Firstly, PET is adjusted by the LAI to crop specific conditions resulting in resulting potential crop specific evapotranspiration,
+which is allocated over the rooting zone as potential root water uptake and evaporation (upper 10cm by default, set by user) 
+depending on GLAI and LAI.
+
+Water uptake is limited by the available water in the soil as given by the matrix potential in each soil layer.
+The amount of water which can be extracted by the plant from the soil is given by the approach by Feddes et al., 
+where root water uptake takes place at matrix potential between field capacity (pF=1.8) and permanent wilting point (pF=4.2). 
+In a certain range the water uptake is 100% and decreases to zero when the matrix potential reaches its upper and lower boundary. 
+
+.. figure:: /_static/concept_rootwateruptake.png
+    :align: center
+    :figclass: align-center
+
+Finally, the actual crop specific transpiration and evaporation is calculated related to actual soil moisture.
+
+.. figure:: /_static/concept_eta.png
+    :align: center
+    :figclass: align-center
+
+Please refer to the MACRO manual for further details. Some example parametrisations are shown below:
+
+.. figure:: /_static/usermanual_cropcoefficients.png
+    :align: center
+    :figclass: align-center 
+
+Aquatic efate
+--------------------------
+
+The STEPS-1-2-3-4 approach by M. Klein (http://publica.fraunhofer.de/documents/N-73445.html) has been implemented to assess 
+aquatic PEC surface water and PEC sediment. Model coupling is realised by interfaces (see chapter model coupling).
+This way of coupling is known as operator split. Both models assess their own state variables and an
+interface (here a Python script) defines functions for data transfer between models on the memory level. 
+The key features of STEPS-1-2-3-4 are as follow:
+
+* A substance is defined by KOC and DT50.
+* The system consists of one water layer and two sediment layer.
+* Degradation is calculated by by DT50 in water and sediment.
+* Sorption / desorption are calculated by the gradient between water layer and pore water of sediment.
+
+.. figure:: /_static/concept_steps1234.png
+    :align: center
+    :figclass: align-center 
+
+Each river segment of the catchment model is coupled to a STEPS-1-2-3-4 instance. 
+The catchment model solves the conservative solute transport between river segments.
+STEPS-1-2-3-4 calculates degradation in the water and sediment phase as well as sorption/adsorption to the sediment layer
+
+.. figure:: /_static/concept_steps1234_processes.png
+    :align: center
+    :figclass: align-center 
+
+Model coupling
+=========================
+
+Model coupling is done by using pre-defined interfaces which are implemented as classes
+in Python which is a common strategy to couple environmental models (Kraft et. al, 2010; Sanner et al. 1999).
+The following code-snippet shows an example where a Model1 delivers a parameter which is 
+used by Model2. Moreover, the interface holds unit conversion factors if required.
+
+.. code-block:: python
+  :linenos:
+
+  class Model1:
+	""" A model which calculates stateA."""
+    def __init__(self):
+		self.interface = None
+		self.stateA = 0.
+	def get_stateA(self):
+		return self.stateA
+	def calculate_stateA(self):
+		""" Calculate stateA variable."""
+		self.stateA = 42
+	def connect(self,interface):
+		self.interface = interface
+	def __call__(self):
+		""" Run model for one time step."""
+		self.calcualte_stateA()
+
+  class Model2:
+	""" A model which requires stateA to calculate stateB"""
+    def __init__(self):
+		self.interface = None
+		self.stateB = 0.
+	def get_stateB(self):
+		return self.stateB
+	def calculate_stateB(self,stateA):
+		""" Calculate stateB variable based on stateA."""
+		self.stateB = 100 * stateA
+	def connect(self,interface):
+		self.interface = interface
+	def __call__(self):
+		""" Run model for one time step."""
+		self.calcualte_stateB(self.interface.get_stateA)
+		
+  class Interface_model1_2:
+	""" Interface between Model1 and Model2"""
+	def __init__(self,model1,model2,unit_conversion_stateA):
+		self.model1 = model1
+		self.model2 = model2
+		self.unit_conversion_stateA = unit_conversion_stateA
+	def get_stateA(self):
+		# get data from model
+		stateA = self.model1.get_stateA()
+		# convert unit if required
+		stateA *= unit_conversion_stateA
+		return stateA
+	def connect_models(self):
+		self.model1.connect(self)
+		self.model2.connect(self
+
+  ##################################################################
+  # setup models and conduct model runs for a certain time period
+  # create models
+  model1 = Model1()
+  model2 = Model2()
+  # create interface
+  interface = Inferace_model1_2(model1,model2,unit_conversion_stateA=100)
+  # connect models
+  interface.connect_models()
+  # run models
+  timesteps = [ ...  some time period ...] 
+  for timestep in timesteps:
+	model1()
+	model2()
+	
+	
+What is meant by "is based on CMF library"?
+==================================
+
+`CMF <https://github.com/philippkraft/cmf>`_ is a hydrological programming 
+library which holds functions to create storages (e.g. groundwater) and 
+connect them by processes (e.g. kinematic wave). Thus, CMF is a toolbox 
+which allows to setup individual models using Python scripting. The 
+following code-snippet shows a straight forward hydrological model with
+one cell which has two soil layer as well as a surface water and a groundwater
+storage. The surface and groundwater storage are connect to a river segment: 
+
+.. code-block:: python
+  :linenos:
+
+  # import library
+  import CMF
+  # create a new container for all CMF objects
+  p = cmf.project() 
+  # create a groundwater storage
+  gw = p.NewStorage("groundwater storage",x=0,y=0,z=9.5) 
+  # create a cell
+  c = p.NewCell(x=0,y=0,z=10,area=1000,with_surfacewater=True) 
+  # add soil layer (0m-1m) with a saturated conductivity of 1m/day 
+  l_upper = c.add_alyer(depth=1,rcurve=cmf.VanGenuchtenMualem(Ksat=1))
+  # add another soil layer (1m-2m) with a saturated conductivity of 1m/day 
+  l_lower = c.add_alyer(depth=2,rcurve=cmf.VanGenuchtenMualem(Ksat=1))
+  # connect soil layer with Richards equation
+  c.install_connection(cmf.Richards)
+  # connect lower soil layer with groundwater storage
+  cmf.Richards(l_lower,gw) 
+  # create a river segment with a length of 100m and a triangular shape
+  reach = p.NewReach(x=10,y=10,z=9,
+                 shape=cmf.TriangularReach(flowwidth=100,bankslope=0.2))
+  # connect gw with reach (residence time = 1day)
+  cmf.kinematic_wave(gw,reach,res_t=1) 
+  # create a numerical solver and set number of threads
+  cmf.set_parallel_threads(16)
+  solver = cmf.CVodeIntegrator(p,1e-9)
+  # run the model for a certain timeperiod
+  for t in self.solver.run(begin,end,step=cmf.h):
+      # e.g. store some state variables
+      gw_flux = gw.flux_to(reach)
+ 
+This example is only for illustration of the functionalities of the CMF library.
+CMF itself holds no information on specific parameterization or a pre-defined 
+spatial discretization. It provides a infrastructure to setup a catchment 
+(storages, connections, mechanistic processes) and uses the finite volume method to turn 
+the related partial differential equations into a system of 
+`ordinary differential equations (ODE) <https://philippkraft.github.io/cmf/finite_volume_method.html>`_. The ODE system in turn is solved by using
+the `CVODE solver <https://computation.llnl.gov/projects/sundials>`_ .
+	
+
+References
+=========================
+
+Klein, M. 2007. "Long term surface water simulations with STEPS-1-2-3-4". Proceedings of the 13th Symposium on Pesticide Chemistry,Piacenza. 
+
+Kraft, P., S. Multsch, K. B. Vaché, H.-G. Frede, and L. Breuer. 2010. “Using Python as a Coupling Platform for Integrated Catchment Models.” Advances in Geosciences 27 (27): 51–56. https://doi.org/10.5194/adgeo-27-51-2010.
+
+Kraft, Philipp, Kellie B. Vaché, Hans-Georg Frede, and Lutz Breuer. 2011. “CMF: A Hydrological Programming Language Extension for Integrated Catchment Models.” Environmental Modelling & Software 26 (6):828–830.
+
+Sanner, Michel F. 1999. “Python: A Programming Language for Software Integration and Development.” J Mol Graph Model 17 (1):57–61.

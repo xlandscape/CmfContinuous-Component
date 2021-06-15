@@ -1,0 +1,572 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>numdifftools.multicomplex &mdash; numdifftools 0.9.17 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="numdifftools 0.9.17 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> numdifftools
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.17
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html">Introduction to Numdifftools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#documentation-and-code">Documentation and code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#unit-tests">Unit tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#acknowledgement">Acknowledgement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/numerical/main.html">Numerical differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/algorithmic/main.html">Algorithmic differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../authors.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">Module reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">numdifftools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>numdifftools.multicomplex</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for numdifftools.multicomplex</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on 22. apr. 2015</span>
+
+<span class="sd">@author: pab</span>
+
+<span class="sd">References</span>
+<span class="sd">----------</span>
+<span class="sd">A METHODOLOGY FOR ROBUST OPTIMIZATION OF</span>
+<span class="sd">LOW-THRUST TRAJECTORIES IN MULTI-BODY</span>
+<span class="sd">ENVIRONMENTS</span>
+<span class="sd">Gregory Lantoine (2010)</span>
+<span class="sd">Phd thesis, Georgia Institute of Technology</span>
+
+<span class="sd">USING MULTICOMPLEX VARIABLES FOR AUTOMATIC</span>
+<span class="sd">COMPUTATION OF HIGH-ORDER DERIVATIVES</span>
+<span class="sd">Gregory Lantoine, Ryan P. Russell , and Thierry Dargent</span>
+<span class="sd">ACM Transactions on Mathematical Software, Vol. 38, No. 3, Article 16,</span>
+<span class="sd">April 2012, 21 pages,</span>
+
+<span class="sd">M.E. Luna-Elizarraras, M. Shapiro, D.C. Struppa1, A. Vajiac (2012)</span>
+<span class="sd">CUBO A Mathematical Journal</span>
+<span class="sd">Vol. 14, No 2, (61-80). June 2012.</span>
+
+<span class="sd">Computation of higher-order derivatives using the multi-complex</span>
+<span class="sd">step method</span>
+<span class="sd">Adriaen Verheyleweghen, (2014)</span>
+<span class="sd">Project report, NTNU</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="n">_TINY</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">machar</span><span class="o">.</span><span class="n">tiny</span>
+
+
+<span class="k">def</span> <span class="nf">c_atan2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1j</span> <span class="o">*</span> <span class="p">(</span><span class="n">c</span> <span class="o">*</span> <span class="n">b</span> <span class="o">-</span> <span class="n">a</span> <span class="o">*</span> <span class="n">d</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">c</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">c_max</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">real</span> <span class="o">&lt;</span> <span class="n">y</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">c_min</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">real</span> <span class="o">&gt;</span> <span class="n">y</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">c_abs</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="o">-</span><span class="n">z</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="bicomplex"><a class="viewcode-back" href="../../api/generated/numdifftools.multicomplex.bicomplex.html#numdifftools.multicomplex.bicomplex">[docs]</a><span class="k">class</span> <span class="nc">bicomplex</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    BICOMPLEX(z1, z2)</span>
+
+<span class="sd">    Creates an instance of a bicomplex object.</span>
+<span class="sd">    zeta = z1 + j*z2, where z1 and z2 are complex numbers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="bicomplex.__init__"><a class="viewcode-back" href="../../api/generated/numdifftools.multicomplex.bicomplex.html#numdifftools.multicomplex.bicomplex.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z1</span><span class="p">,</span> <span class="n">z2</span><span class="p">):</span>
+        <span class="n">z1</span><span class="p">,</span> <span class="n">z2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">broadcast_arrays</span><span class="p">(</span><span class="n">z1</span><span class="p">,</span> <span class="n">z2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">z1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">z2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="o">.</span><span class="n">size</span>
+
+    <span class="k">def</span> <span class="nf">mod_c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Complex modulus&quot;&quot;&quot;</span>
+        <span class="n">r12</span><span class="p">,</span> <span class="n">r22</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">z2</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">r12</span> <span class="o">+</span> <span class="n">r22</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">r</span>
+        <span class="c1"># return np.where(r == 0, np.sqrt(r12 - r22), r)</span>
+
+    <span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">z1</span><span class="p">,</span> <span class="n">z2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">z1</span><span class="o">.</span><span class="n">real</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">z2</span><span class="o">.</span><span class="n">real</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">z1</span><span class="o">.</span><span class="n">imag</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">z2</span><span class="o">.</span><span class="n">imag</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">real</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="o">.</span><span class="n">real</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">imag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="o">.</span><span class="n">imag</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">imag1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="o">.</span><span class="n">imag</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">imag2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="o">.</span><span class="n">real</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">imag12</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="o">.</span><span class="n">imag</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">asarray</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+        <span class="n">z1</span><span class="p">,</span> <span class="n">z2</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">z2</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">z1</span><span class="p">,</span> <span class="o">-</span><span class="n">z2</span><span class="p">)),</span>
+                          <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">z2</span><span class="p">,</span> <span class="n">z1</span><span class="p">))))</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_coerce</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">bicomplex</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">other</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">other</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">mat2bicomp</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[:</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:]</span>
+        <span class="n">slices</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="nb">slice</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]])</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="n">z1</span><span class="p">[</span><span class="n">slices</span><span class="p">],</span> <span class="n">z2</span><span class="p">[</span><span class="n">slices</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">__array_wrap__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">bicomplex</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cls</span><span class="o">.</span><span class="n">z1</span> <span class="k">for</span> <span class="n">cls</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">ravel</span><span class="p">()])</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cls</span><span class="o">.</span><span class="n">z2</span> <span class="k">for</span> <span class="n">cls</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">ravel</span><span class="p">()])</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="n">z1</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">),</span> <span class="n">z2</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;{0!s}(z1={1!s}, z2={2!s})&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="o">.</span><span class="n">real</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">z1</span><span class="o">.</span><span class="n">real</span>
+
+    <span class="k">def</span> <span class="nf">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="o">.</span><span class="n">real</span> <span class="o">&lt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">z1</span><span class="o">.</span><span class="n">real</span>
+
+    <span class="k">def</span> <span class="nf">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="o">.</span><span class="n">real</span> <span class="o">&gt;</span> <span class="n">other</span><span class="o">.</span><span class="n">z1</span><span class="o">.</span><span class="n">real</span>
+
+    <span class="k">def</span> <span class="nf">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="o">.</span><span class="n">real</span> <span class="o">&gt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">z1</span><span class="o">.</span><span class="n">real</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z2</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;z1&#39;</span><span class="p">,</span> <span class="s1">&#39;z2&#39;</span><span class="p">]:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">z1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">z2</span>
+
+    <span class="k">def</span> <span class="nf">__abs__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">z1</span><span class="p">,</span> <span class="n">z2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">z1</span><span class="p">,</span> <span class="o">-</span><span class="n">z1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">z2</span><span class="p">,</span> <span class="o">-</span><span class="n">z2</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__neg__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span> <span class="o">-</span> <span class="n">other</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span> <span class="o">-</span> <span class="n">other</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__rsub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sub__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__div__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;elementwise division&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="o">*</span> <span class="n">other</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># np.exp(-np.log(other))</span>
+
+    <span class="n">__truediv__</span> <span class="o">=</span> <span class="n">__div__</span>
+
+    <span class="k">def</span> <span class="nf">__rdiv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;elementwise division&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">other</span> <span class="o">*</span> <span class="bp">self</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;elementwise multiplication&quot;&quot;&quot;</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span> <span class="o">*</span> <span class="n">other</span><span class="o">.</span><span class="n">z1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span> <span class="o">*</span> <span class="n">other</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span>
+                         <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span> <span class="o">*</span> <span class="n">other</span><span class="o">.</span><span class="n">z2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span> <span class="o">*</span> <span class="n">other</span><span class="o">.</span><span class="n">z1</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_pow_singular</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">z1</span><span class="p">,</span> <span class="n">z2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span>
+        <span class="n">z01</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">z1</span> <span class="o">-</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">z2</span><span class="p">)</span> <span class="o">**</span> <span class="n">other</span>
+        <span class="n">z02</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">z1</span> <span class="o">+</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">z2</span><span class="p">)</span> <span class="o">**</span> <span class="n">other</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="n">z01</span> <span class="o">+</span> <span class="n">z02</span><span class="p">,</span> <span class="p">(</span><span class="n">z01</span> <span class="o">-</span> <span class="n">z02</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1j</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__pow__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">()</span><span class="o">*</span><span class="n">other</span><span class="p">)</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span>
+        <span class="n">non_invertible</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mod_c</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">non_invertible</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">non_invertible</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">non_invertible</span><span class="p">]</span><span class="o">.</span><span class="n">_pow_singular</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">__rpow__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span>
+
+    <span class="n">__radd__</span> <span class="o">=</span> <span class="n">__add__</span>
+    <span class="n">__rmul__</span> <span class="o">=</span> <span class="n">__mul__</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">conjugate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">flat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">dot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">other</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span> <span class="o">*</span> <span class="n">other</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mat2bicomp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">logaddexp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">other</span><span class="o">-</span><span class="bp">self</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">logaddexp2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="n">other</span><span class="o">-</span><span class="bp">self</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">sin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="n">z1</span><span class="p">,</span> <span class="n">z2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">cos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="n">z1</span><span class="p">,</span> <span class="n">z2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">tan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sin</span><span class="p">()</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">cos</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">cot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cos</span><span class="p">()</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sin</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">sec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">1.</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">cos</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">csc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">1.</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sin</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">cosh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="n">z1</span><span class="p">,</span> <span class="n">z2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">sinh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="n">z1</span><span class="p">,</span> <span class="n">z2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">tanh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sinh</span><span class="p">()</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">cosh</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">coth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cosh</span><span class="p">()</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sinh</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">sech</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">1.</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">cosh</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">csch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">1.</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sinh</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">exp2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pow__</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">log10</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">()</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">log2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">()</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">log1p</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mod_c</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="n">arg_c1p</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">expm1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">expz1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expm1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="n">expz1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">),</span> <span class="n">expz1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">exp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">expz1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="n">expz1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">),</span> <span class="n">expz1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">mod_c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mod_c</span><span class="p">()</span>
+<span class="c1">#         if (mod_c == 0).any():</span>
+<span class="c1">#             raise ValueError(&#39;mod_c is zero -&gt; number not invertable!&#39;)</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">mod_c</span> <span class="o">+</span> <span class="n">_TINY</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">arg_c</span><span class="p">())</span>
+
+<span class="c1">#     def _log_m(self, m=0):</span>
+<span class="c1">#         return np.log(self.mod_c() + _TINY) + 1j * \</span>
+<span class="c1">#             (self.arg_c() + 2 * m * np.pi)</span>
+<span class="c1">#</span>
+<span class="c1">#     def _log_mn(self, m=0, n=0):</span>
+<span class="c1">#         arg_c = self.arg_c()</span>
+<span class="c1">#         log_m = np.log(self.mod_c() + _TINY) + 1j * (2 * m * np.pi)</span>
+<span class="c1">#         return bicomplex(log_m, arg_c + 2 * n * np.pi)</span>
+
+    <span class="k">def</span> <span class="nf">arcsin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">J</span> <span class="o">=</span> <span class="n">bicomplex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">J</span> <span class="o">*</span> <span class="p">((</span><span class="n">J</span><span class="o">*</span><span class="bp">self</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="bp">self</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">log</span><span class="p">())</span>
+        <span class="c1"># return (np.pi/2 - self.arccos())</span>
+
+    <span class="k">def</span> <span class="nf">arccos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">arcsin</span><span class="p">())</span>
+        <span class="c1"># J = bicomplex(0, 1)</span>
+        <span class="c1"># return J * ((self - J * (1-self**2)**0.5).log())</span>
+
+    <span class="k">def</span> <span class="nf">arctan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">J</span> <span class="o">=</span> <span class="n">bicomplex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">arg1</span><span class="p">,</span> <span class="n">arg2</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">J</span> <span class="o">*</span> <span class="bp">self</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">J</span> <span class="o">*</span> <span class="bp">self</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">J</span> <span class="o">*</span> <span class="p">(</span><span class="n">arg1</span><span class="o">.</span><span class="n">log</span><span class="p">()</span> <span class="o">-</span> <span class="n">arg2</span><span class="o">.</span><span class="n">log</span><span class="p">())</span> <span class="o">*</span> <span class="mf">0.5</span>
+        <span class="k">return</span> <span class="n">bicomplex</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">tmp</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">arccosh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">((</span><span class="bp">self</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">log</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">arcsinh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">((</span><span class="bp">self</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">log</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">arctanh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(((</span><span class="mi">1</span><span class="o">+</span><span class="bp">self</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="bp">self</span><span class="p">))</span><span class="o">.</span><span class="n">log</span><span class="p">())</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_arg_c</span><span class="p">(</span><span class="n">z1</span><span class="p">,</span> <span class="n">z2</span><span class="p">):</span>
+        <span class="n">sign</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">z1</span><span class="o">.</span><span class="n">real</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">z2</span><span class="o">.</span><span class="n">real</span> <span class="o">==</span> <span class="mi">0</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">z2</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="c1"># clip to avoid nans for complex args</span>
+        <span class="n">arg</span> <span class="o">=</span> <span class="n">z2</span> <span class="o">/</span> <span class="p">(</span><span class="n">z1</span> <span class="o">+</span> <span class="n">_TINY</span><span class="p">)</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="nb">min</span><span class="o">=-</span><span class="mf">1e150</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">1e150</span><span class="p">)</span>
+        <span class="n">arg_c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="o">+</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">z1</span><span class="o">.</span><span class="n">real</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">arg_c</span>
+
+    <span class="k">def</span> <span class="nf">arg_c1p</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">z1</span><span class="p">,</span> <span class="n">z2</span> <span class="o">=</span> <span class="mi">1</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arg_c</span><span class="p">(</span><span class="n">z1</span><span class="p">,</span> <span class="n">z2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">arg_c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arg_c</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2009-2015, Per A Brodtkorb, John D&#39;Errico.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.9.17',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

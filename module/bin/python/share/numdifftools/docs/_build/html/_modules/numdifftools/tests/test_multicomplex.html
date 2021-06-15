@@ -1,0 +1,581 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>numdifftools.tests.test_multicomplex &mdash; numdifftools 0.9.17 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="numdifftools 0.9.17 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> numdifftools
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.17
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html">Introduction to Numdifftools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#documentation-and-code">Documentation and code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#unit-tests">Unit tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#acknowledgement">Acknowledgement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/numerical/main.html">Numerical differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/algorithmic/main.html">Algorithmic differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Module reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../index.html">numdifftools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      
+    <li>numdifftools.tests.test_multicomplex</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for numdifftools.tests.test_multicomplex</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on 22. apr. 2015</span>
+
+<span class="sd">@author: pab</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+
+<span class="kn">from</span> <span class="nn">numdifftools.multicomplex</span> <span class="kn">import</span> <span class="n">Bicomplex</span>
+<span class="kn">from</span> <span class="nn">numdifftools.example_functions</span> <span class="kn">import</span> <span class="n">get_function</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="n">EPS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">MachAr</span><span class="p">()</span><span class="o">.</span><span class="n">eps</span>
+
+
+<span class="k">def</span> <span class="nf">_default_base_step</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="n">EPS</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="n">scale</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="mf">0.1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">h</span>
+
+
+<div class="viewcode-block" id="BicomplexTester"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester">[docs]</a><span class="k">class</span> <span class="nc">BicomplexTester</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BicomplexTester.test_init"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_init">[docs]</a>    <span class="k">def</span> <span class="nf">test_init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BicomplexTester.test_neg"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_neg">[docs]</a>    <span class="k">def</span> <span class="nf">test_neg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="o">-</span><span class="n">z</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">z2</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="o">-</span><span class="n">z</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">z2</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span> <span class="o">-</span><span class="n">z</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BicomplexTester.test_shape"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_shape">[docs]</a>    <span class="k">def</span> <span class="nf">test_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
+
+        <span class="n">z</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">())</span></div>
+
+<div class="viewcode-block" id="BicomplexTester.test_norm"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_norm">[docs]</a>    <span class="k">def</span> <span class="nf">test_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">norm</span><span class="p">(),</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">5</span><span class="o">*</span><span class="n">t</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">z</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">norm</span><span class="p">(),</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_lt"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_lt">[docs]</a>    <span class="k">def</span> <span class="nf">test_lt</span><span class="p">():</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="n">z2</span>
+        <span class="n">truth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">],</span>
+                          <span class="p">[</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">],</span>
+                          <span class="p">[</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">truth</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_le"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_le">[docs]</a>    <span class="k">def</span> <span class="nf">test_le</span><span class="p">():</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">z</span> <span class="o">&lt;=</span> <span class="n">z2</span>
+        <span class="n">truth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">],</span>
+                          <span class="p">[</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">],</span>
+                          <span class="p">[</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">truth</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_ge"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_ge">[docs]</a>    <span class="k">def</span> <span class="nf">test_ge</span><span class="p">():</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">z</span> <span class="o">&gt;=</span> <span class="n">z2</span>
+        <span class="n">truth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="bp">False</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">],</span>
+                          <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">],</span>
+                          <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">truth</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_gt"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_gt">[docs]</a>    <span class="k">def</span> <span class="nf">test_gt</span><span class="p">():</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">z</span> <span class="o">&gt;</span> <span class="n">z2</span>
+        <span class="n">truth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">True</span><span class="p">],</span>
+                          <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">],</span>
+                          <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">truth</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_eq"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_eq">[docs]</a>    <span class="k">def</span> <span class="nf">test_eq</span><span class="p">():</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">z</span> <span class="o">==</span> <span class="n">z2</span>
+        <span class="n">truth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="bp">False</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">],</span>
+                          <span class="p">[</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">],</span>
+                          <span class="p">[</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">truth</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BicomplexTester.test_conjugate"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_conjugate">[docs]</a>    <span class="k">def</span> <span class="nf">test_conjugate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">conjugate</span><span class="p">()</span> <span class="o">==</span> <span class="n">z2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BicomplexTester.test_flat"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_flat">[docs]</a>    <span class="k">def</span> <span class="nf">test_flat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">flat</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">t</span> <span class="o">==</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_subsref"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_subsref">[docs]</a>    <span class="k">def</span> <span class="nf">test_subsref</span><span class="p">():</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span>
+
+        <span class="n">z0</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z0</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">z1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z0</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">z2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">z</span><span class="p">[:]</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z1</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">z1</span><span class="p">[:])</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z1</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">z2</span><span class="p">[:])</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z1</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">z1</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z1</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">z2</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_assign"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_assign">[docs]</a>    <span class="k">def</span> <span class="nf">test_assign</span><span class="p">():</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">),</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">))</span>
+        <span class="n">z0</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z0</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">z1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z0</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">z2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">z</span><span class="p">[:]</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z1</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">z1</span><span class="p">[:])</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z1</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">z2</span><span class="p">[:])</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_add"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_add">[docs]</a>    <span class="k">def</span> <span class="nf">test_add</span><span class="p">():</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">z0</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">),</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">))</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">),</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">))</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">z0</span> <span class="o">+</span> <span class="n">z1</span>
+
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z2</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">z0</span><span class="o">.</span><span class="n">z1</span> <span class="o">+</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z2</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span> <span class="n">z0</span><span class="o">.</span><span class="n">z2</span> <span class="o">+</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span>
+        <span class="n">z3</span> <span class="o">=</span> <span class="n">z0</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z3</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">z0</span><span class="o">.</span><span class="n">z1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z3</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span> <span class="n">z0</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_sub"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_sub">[docs]</a>    <span class="k">def</span> <span class="nf">test_sub</span><span class="p">():</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">z0</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">),</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">))</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">),</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">))</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">z0</span> <span class="o">-</span> <span class="n">z1</span>
+
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z2</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">z0</span><span class="o">.</span><span class="n">z1</span> <span class="o">-</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z2</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span> <span class="n">z0</span><span class="o">.</span><span class="n">z2</span> <span class="o">-</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_rsub"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_rsub">[docs]</a>    <span class="k">def</span> <span class="nf">test_rsub</span><span class="p">():</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">1j</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">a</span> <span class="o">-</span> <span class="n">z1</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z2</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">a</span> <span class="o">-</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z2</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span> <span class="o">-</span><span class="n">z1</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BicomplexTester.test_repr"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_repr">[docs]</a>    <span class="k">def</span> <span class="nf">test_repr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">txt</span><span class="p">,</span> <span class="s2">&quot;Bicomplex(z1=(1+0j), z2=(2+0j))&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_multiplication"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">test_multiplication</span><span class="p">():</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">z3</span> <span class="o">=</span> <span class="n">z1</span> <span class="o">*</span> <span class="n">z2</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z3</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span> <span class="o">*</span> <span class="n">z2</span><span class="o">.</span><span class="n">z1</span> <span class="o">-</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span> <span class="o">*</span> <span class="n">z2</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z3</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span> <span class="o">*</span> <span class="n">z2</span><span class="o">.</span><span class="n">z2</span> <span class="o">+</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span> <span class="o">*</span> <span class="n">z2</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_pow"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_pow">[docs]</a>    <span class="k">def</span> <span class="nf">test_pow</span><span class="p">():</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">z1</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">z3</span> <span class="o">=</span> <span class="n">z1</span> <span class="o">*</span> <span class="n">z1</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">z2</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span> <span class="o">*</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span> <span class="o">-</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span> <span class="o">*</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">z2</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span> <span class="o">*</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span> <span class="o">+</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span> <span class="o">*</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">z3</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span> <span class="o">*</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span> <span class="o">-</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span> <span class="o">*</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">z3</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span> <span class="o">*</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span> <span class="o">+</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span> <span class="o">*</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span>
+
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">z1</span><span class="o">=-</span><span class="mi">1j</span><span class="p">,</span> <span class="n">z2</span><span class="o">=-</span><span class="mi">1</span><span class="o">-</span><span class="mi">0j</span><span class="p">)</span>
+
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">z1</span> <span class="o">*</span> <span class="n">z1</span>
+        <span class="n">z3</span> <span class="o">=</span> <span class="n">z1</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">z2</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span> <span class="o">*</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span> <span class="o">-</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span> <span class="o">*</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">z2</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span> <span class="o">*</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span> <span class="o">+</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span> <span class="o">*</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">z3</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span> <span class="o">*</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span> <span class="o">-</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span> <span class="o">*</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">z3</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span> <span class="o">*</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span> <span class="o">+</span> <span class="n">z1</span><span class="o">.</span><span class="n">z2</span> <span class="o">*</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_division"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_division">[docs]</a>    <span class="k">def</span> <span class="nf">test_division</span><span class="p">():</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">z3</span> <span class="o">=</span> <span class="n">z1</span> <span class="o">/</span> <span class="n">z2</span>
+        <span class="n">z4</span> <span class="o">=</span> <span class="n">z1</span> <span class="o">*</span> <span class="p">(</span><span class="n">z2</span><span class="o">**-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">z3</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">z4</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">z3</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span> <span class="n">z4</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span></div>
+
+<span class="c1"># TODO: test_rdivision crashes on python3.4 on travis</span>
+<span class="c1">#     def test_rdivision(self):</span>
+<span class="c1">#</span>
+<span class="c1">#         z2 = Bicomplex(3, 4)</span>
+<span class="c1">#         z3 = 1 / z2</span>
+<span class="c1">#         z4 = (z2**-1)</span>
+<span class="c1">#         np.testing.assert_array_equal(z3.z1, z4.z1)</span>
+<span class="c1">#         np.testing.assert_array_equal(z3.z2, z4.z2)</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_rpow"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_rpow">[docs]</a>    <span class="k">def</span> <span class="nf">test_rpow</span><span class="p">():</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">z3</span> <span class="o">=</span> <span class="mf">2.</span> <span class="o">**</span> <span class="n">z2</span>
+        <span class="n">z4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">z2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">z3</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">z4</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">z3</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span> <span class="n">z4</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_dot"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_dot">[docs]</a>    <span class="k">def</span> <span class="nf">test_dot</span><span class="p">():</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">z3</span> <span class="o">=</span> <span class="n">z1</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">z2</span><span class="p">)</span>
+        <span class="n">z4</span> <span class="o">=</span> <span class="n">z1</span> <span class="o">*</span> <span class="n">z2</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z3</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">z4</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z3</span><span class="o">.</span><span class="n">z2</span><span class="p">,</span> <span class="n">z4</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_cos"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_cos">[docs]</a>    <span class="k">def</span> <span class="nf">test_cos</span><span class="p">():</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">z1</span><span class="o">.</span><span class="n">cos</span><span class="p">()</span>  <span class="c1"># np.cos(z1)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z2</span><span class="o">.</span><span class="n">z1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">z1</span><span class="o">.</span><span class="n">z1</span><span class="p">))</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_arg_c"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_arg_c">[docs]</a>    <span class="k">def</span> <span class="nf">test_arg_c</span><span class="p">():</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">z1</span><span class="o">.</span><span class="n">arg_c</span><span class="p">()</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">z2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">z1</span><span class="o">.</span><span class="n">z2</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">z1</span><span class="o">.</span><span class="n">z1</span><span class="o">.</span><span class="n">real</span><span class="p">))</span>
+
+        <span class="n">z3</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+        <span class="n">z4</span> <span class="o">=</span> <span class="n">z3</span><span class="o">.</span><span class="n">arg_c</span><span class="p">()</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">z4</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">z3</span><span class="o">.</span><span class="n">z2</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">z3</span><span class="o">.</span><span class="n">z1</span><span class="o">.</span><span class="n">real</span><span class="p">))</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_arcsin"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_arcsin">[docs]</a>    <span class="k">def</span> <span class="nf">test_arcsin</span><span class="p">():</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.98</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">z1</span><span class="o">.</span><span class="n">arcsin</span><span class="p">()</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">z2</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">z1</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">z2</span><span class="o">.</span><span class="n">imag1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">z1</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_arccos"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_arccos">[docs]</a>    <span class="k">def</span> <span class="nf">test_arccos</span><span class="p">():</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.98</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">z1</span><span class="o">.</span><span class="n">arccos</span><span class="p">()</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">z2</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">z1</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">z2</span><span class="o">.</span><span class="n">imag1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">z1</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_der_cos"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_der_cos">[docs]</a>    <span class="k">def</span> <span class="nf">test_der_cos</span><span class="p">():</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.99</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="mf">1e-9</span>
+        <span class="n">der1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Bicomplex</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">h</span> <span class="o">*</span> <span class="mi">1j</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">imag1</span> <span class="o">/</span> <span class="n">h</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">der1</span><span class="p">,</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">h</span> <span class="o">*=</span> <span class="mi">100</span>
+        <span class="n">der2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Bicomplex</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">h</span> <span class="o">*</span> <span class="mi">1j</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span><span class="o">.</span><span class="n">imag12</span> <span class="o">/</span> <span class="n">h</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">der2</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">))</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_der_log"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_der_log">[docs]</a>    <span class="k">def</span> <span class="nf">test_der_log</span><span class="p">():</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="mf">1e-15</span>
+        <span class="n">der1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">Bicomplex</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">h</span> <span class="o">*</span> <span class="mi">1j</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">imag1</span> <span class="o">/</span> <span class="n">h</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">der1</span><span class="p">,</span> <span class="mf">1.</span><span class="o">/</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">der2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">Bicomplex</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">h</span> <span class="o">*</span> <span class="mi">1j</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span><span class="o">.</span><span class="n">imag12</span> <span class="o">/</span> <span class="n">h</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">der2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="o">/</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_der_arccos"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_der_arccos">[docs]</a>    <span class="k">def</span> <span class="nf">test_der_arccos</span><span class="p">():</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.98</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="mf">1e-8</span>
+        <span class="n">der1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">Bicomplex</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">h</span> <span class="o">*</span> <span class="mi">1j</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">imag1</span> <span class="o">/</span> <span class="n">h</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">der1</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">h</span> <span class="o">=</span> <span class="p">(</span><span class="n">_default_base_step</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">der2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">Bicomplex</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">h</span> <span class="o">*</span> <span class="mi">1j</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span><span class="o">.</span><span class="n">imag12</span> <span class="o">/</span> <span class="n">h</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">true_der2</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">3.</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">der2</span><span class="p">,</span> <span class="n">true_der2</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_der_arccosh"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_der_arccosh">[docs]</a>    <span class="k">def</span> <span class="nf">test_der_arccosh</span><span class="p">():</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1.2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="mf">1e-8</span>
+        <span class="n">der1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccosh</span><span class="p">(</span><span class="n">Bicomplex</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">h</span> <span class="o">*</span> <span class="mi">1j</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">imag1</span> <span class="o">/</span> <span class="n">h</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">der1</span><span class="p">,</span> <span class="mf">1.</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="n">h</span> <span class="o">=</span> <span class="p">(</span><span class="n">_default_base_step</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">der2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccosh</span><span class="p">(</span><span class="n">Bicomplex</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">h</span> <span class="o">*</span> <span class="mi">1j</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span><span class="o">.</span><span class="n">imag12</span> <span class="o">/</span> <span class="n">h</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">true_der2</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">3.</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">der2</span><span class="p">,</span> <span class="n">true_der2</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_der_abs"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_der_abs">[docs]</a>    <span class="k">def</span> <span class="nf">test_der_abs</span><span class="p">():</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.98</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="mf">1e-8</span>
+        <span class="n">der1</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">Bicomplex</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">h</span> <span class="o">*</span> <span class="mi">1j</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">imag1</span> <span class="o">/</span> <span class="n">h</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">der1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">der2</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">Bicomplex</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">h</span> <span class="o">*</span> <span class="mi">1j</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span><span class="o">.</span><span class="n">imag12</span> <span class="o">/</span> <span class="n">h</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">der2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BicomplexTester.test_der_arctan"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.BicomplexTester.test_der_arctan">[docs]</a>    <span class="k">def</span> <span class="nf">test_der_arctan</span><span class="p">():</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="mf">1e-8</span>
+        <span class="n">der1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">Bicomplex</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">h</span> <span class="o">*</span> <span class="mi">1j</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">imag1</span> <span class="o">/</span> <span class="n">h</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">der1</span><span class="p">,</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">der2</span> <span class="o">=</span> <span class="n">Bicomplex</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">h</span><span class="o">*</span><span class="mi">1j</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span><span class="o">.</span><span class="n">arctan</span><span class="p">()</span><span class="o">.</span><span class="n">imag12</span><span class="o">/</span><span class="n">h</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">der2</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">_test_first_derivative</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0001</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">_default_base_step</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">f</span><span class="p">,</span> <span class="n">df</span> <span class="o">=</span> <span class="n">get_function</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">der</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">Bicomplex</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">h</span> <span class="o">*</span> <span class="mi">1j</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">imag1</span> <span class="o">/</span> <span class="n">h</span>
+    <span class="n">der_true</span> <span class="o">=</span> <span class="n">df</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">der</span><span class="p">,</span> <span class="n">der_true</span><span class="p">,</span> <span class="n">err_msg</span><span class="o">=</span><span class="s1">&#39;{0!s}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">_test_second_derivative</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">_default_base_step</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span>
+
+    <span class="n">f</span><span class="p">,</span> <span class="n">df</span> <span class="o">=</span> <span class="n">get_function</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">der</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">Bicomplex</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">h</span> <span class="o">*</span> <span class="mi">1j</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span><span class="o">.</span><span class="n">imag12</span> <span class="o">/</span> <span class="n">h</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">der_true</span> <span class="o">=</span> <span class="n">df</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">der</span><span class="p">,</span> <span class="n">der_true</span><span class="p">,</span> <span class="n">err_msg</span><span class="o">=</span><span class="s1">&#39;{0!s}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+<span class="n">_function_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cos&#39;</span><span class="p">,</span> <span class="s1">&#39;sin&#39;</span><span class="p">,</span> <span class="s1">&#39;tan&#39;</span><span class="p">,</span> <span class="s1">&#39;arccos&#39;</span><span class="p">,</span> <span class="s1">&#39;arcsin&#39;</span><span class="p">,</span> <span class="s1">&#39;arctan&#39;</span><span class="p">,</span> <span class="s1">&#39;cosh&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;sinh&#39;</span><span class="p">,</span> <span class="s1">&#39;tanh&#39;</span><span class="p">,</span> <span class="s1">&#39;exp&#39;</span><span class="p">,</span> <span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="s1">&#39;exp2&#39;</span><span class="p">,</span> <span class="s1">&#39;square&#39;</span><span class="p">,</span> <span class="s1">&#39;sqrt&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;log1p&#39;</span><span class="p">,</span> <span class="s1">&#39;expm1&#39;</span><span class="p">,</span> <span class="s1">&#39;log10&#39;</span><span class="p">,</span> <span class="s1">&#39;log2&#39;</span><span class="p">,</span> <span class="s1">&#39;arcsinh&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;arctanh&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="DerivativeTester"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.DerivativeTester">[docs]</a><span class="k">class</span> <span class="nc">DerivativeTester</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="DerivativeTester.test_all_first_derivatives"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.DerivativeTester.test_all_first_derivatives">[docs]</a>    <span class="k">def</span> <span class="nf">test_all_first_derivatives</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">_function_names</span><span class="p">:</span>
+            <span class="n">_test_first_derivative</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="DerivativeTester.test_all_second_derivatives"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_multicomplex.DerivativeTester.test_all_second_derivatives">[docs]</a>    <span class="k">def</span> <span class="nf">test_all_second_derivatives</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">_function_names</span><span class="p">:</span>
+            <span class="n">_test_second_derivative</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">unittest</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2009-2015, Per A Brodtkorb, John D&#39;Errico.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.9.17',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

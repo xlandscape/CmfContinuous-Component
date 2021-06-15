@@ -1,0 +1,557 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>exam.Cmf1d &#8212; LanscapeModelingToolbox 0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="../../_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">LanscapeModelingToolbox 0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for exam.Cmf1d</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. module:: Cmf1d</span>
+<span class="sd">   :synopsis: Module which holds a base class.</span>
+
+<span class="sd">.. moduleauthor:: Sebastian Multsch &lt;smultschw@gmail.com&gt;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">cmf</span>
+<span class="c1">#from LandscapeModel.utils import convert_Koc_to_Kd</span>
+
+
+<div class="viewcode-block" id="Cmf1d"><a class="viewcode-back" href="../../sourcecode.html#exam.Cmf1d.Cmf1d">[docs]</a><span class="k">class</span> <span class="nc">Cmf1d</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The soil layer are paramterized according to the input table from</span>
+<span class="sd">    AgriculturalField.SoilLayerInfo. Each soil layer holds a Neuman-</span>
+<span class="sd">    Boundary which enables the connection to the plant model.</span>
+<span class="sd">    </span>
+<span class="sd">    Surface runoff is caclulated based on GreenAmptInfiltration and </span>
+<span class="sd">    connected with a river segment by KinematicSurfaceRunoff. Other </span>
+<span class="sd">    connection types are possible.</span>
+<span class="sd">    </span>
+<span class="sd">    A groundwater storage recieves water from the lowest soil layer</span>
+<span class="sd">    vie Richards&#39; flow. The gr storage is connected with the river </span>
+<span class="sd">    segment with kinematic_wave.</span>
+
+<span class="sd">    A drainage can be installed which enables wate rflow from a specific </span>
+<span class="sd">    deprh into the river segment.     </span>
+<span class="sd">    </span>
+<span class="sd">    Plant ET is modelled with CMDF or Plant.py. In both cases, plant LAI and </span>
+<span class="sd">    development is calcualted by Plant.py.</span>
+<span class="sd">    </span>
+<span class="sd">    A linear isotherm for adsorption is assumed with a decay rate according</span>
+<span class="sd">    to substance information.</span>
+<span class="sd">    </span>
+<span class="sd">    Soil column and reaches can be connected in different ways as defined</span>
+<span class="sd">    in the input file, e.g. the sw,gw and drainage storage of one cell can</span>
+<span class="sd">    be connected with a river segment or another soil column. Moreover, not</span>
+<span class="sd">    all storages (sw,gw,drainage) must be considered.</span>
+<span class="sd">    </span>
+<span class="sd">    Note that CMF1d represents the base class for the implementation of other</span>
+<span class="sd">    more specific setups of a 1DField with CMF:</span>
+<span class="sd">        - Cmf1d_richards.py</span>
+<span class="sd">        - Cmf1d_richards_bucket.py</span>
+<span class="sd">        - Cmf1d_storage.py</span>
+<span class="sd">        - Cmf1d_timeseries.py</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">AgricultureField</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param AgricultureField: Agriculture field</span>
+<span class="sd">        :type AgricultureField: AgricultureField</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#######################################################################</span>
+        <span class="c1"># attributes</span>
+        <span class="c1"># agriculture fields which holds the cmf1d isnstance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">af</span> <span class="o">=</span> <span class="n">AgricultureField</span>
+        <span class="c1"># list for NeumannBoundaries which manage plant water uptake</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bc</span><span class="o">=</span><span class="p">[]</span>
+        
+        <span class="c1">#######################################################################</span>
+        <span class="c1"># create cell</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">NewCell</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">z</span><span class="p">,</span>
+                                             <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">area</span><span class="p">,</span><span class="n">with_surfacewater</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> 
+
+        <span class="c1">#######################################################################        </span>
+        <span class="c1"># create groundwater storage</span>
+        <span class="n">gw_depth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">z</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">gw_depth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">groundwater</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">NewStorage</span><span class="p">(</span><span class="s1">&#39;groundwater&#39;</span><span class="p">,</span>
+                                                          <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+                                                          <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+                                                          <span class="n">z</span><span class="o">=</span><span class="n">gw_depth</span><span class="p">)</span> 
+        
+<div class="viewcode-block" id="Cmf1d.create_vegetation"><a class="viewcode-back" href="../../sourcecode.html#exam.Cmf1d.Cmf1d.create_vegetation">[docs]</a>    <span class="k">def</span> <span class="nf">create_vegetation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Connects the cell to a cmf vegetation object with standard values. Crop</span>
+<span class="sd">        height, rooting depth and LAI is calculated with the MACRO plant growth</span>
+<span class="sd">        classPlant.py. Root growth is calculated based on a fixed distribution</span>
+<span class="sd">        of root related to the actual depth. Plant water uptake according</span>
+<span class="sd">        to Feddes et al..</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># use Shuttleworth-Wallace</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">install_connection</span><span class="p">(</span><span class="n">cmf</span><span class="o">.</span><span class="n">ShuttleworthWallace</span><span class="p">)</span>
+        <span class="c1"># set some inital parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">vegetation</span><span class="o">.</span><span class="n">fractio_at_rootdepth</span> <span class="o">=</span> <span class="mf">0.8</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">vegetation</span><span class="o">.</span><span class="n">albedo</span> <span class="o">=</span> <span class="mf">0.23</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">vegetation</span><span class="o">.</span><span class="n">CanopyClosure</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">vegetation</span><span class="o">.</span><span class="n">CanopyPARExtinction</span> <span class="o">=</span> <span class="mf">0.7</span> <span class="c1">#0.5 to 0.7</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">vegetation</span><span class="o">.</span><span class="n">StomatalResistance</span> <span class="o">=</span> <span class="mi">100</span> <span class="c1">#100 - 300</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">solutes</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">subs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">modelrun</span><span class="o">.</span><span class="n">substance</span>
+            <span class="n">subsInfo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">inpData</span><span class="o">.</span><span class="n">SubstanceList</span><span class="p">[</span><span class="n">subs</span><span class="p">]</span>
+            <span class="c1"># set plant uptake</span>
+            <span class="k">for</span> <span class="n">etcon</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">transpiration</span><span class="o">.</span><span class="n">connections</span><span class="p">:</span>
+                <span class="n">etcon</span><span class="o">.</span><span class="n">set_tracer_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">subs1</span><span class="p">,</span><span class="n">subsInfo</span><span class="o">.</span><span class="n">plantuptake</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Cmf1d.connect_to_catchment_gw"><a class="viewcode-back" href="../../sourcecode.html#exam.Cmf1d.Cmf1d.connect_to_catchment_gw">[docs]</a>    <span class="k">def</span> <span class="nf">connect_to_catchment_gw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        connects the groundwater storage of hte single cell to the groundwater</span>
+<span class="sd">        storages of the catchment.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># connect to catchment groundwater body if needed</span>
+        <span class="n">cmf</span><span class="o">.</span><span class="n">kinematic_wave</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groundwater</span><span class="p">,</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">gw</span><span class="o">.</span><span class="n">Storage</span><span class="p">,</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">deep_gw_rt</span><span class="p">)</span> </div>
+
+<div class="viewcode-block" id="Cmf1d.connect_to_adjacent_river"><a class="viewcode-back" href="../../sourcecode.html#exam.Cmf1d.Cmf1d.connect_to_adjacent_river">[docs]</a>    <span class="k">def</span> <span class="nf">connect_to_adjacent_river</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Connects the field to an adjancent field. The connections depends on</span>
+<span class="sd">        the type, e.g. &quot;RO&quot; (runoff) and/or &quot;GW&quot; (groudnwater) and/or</span>
+<span class="sd">        &quot;DR&quot; (drainage). The type of connection is defined in the input data</span>
+<span class="sd">        in Fields.csv.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># calculate flow width</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">unit_traveltime</span> <span class="o">==</span> <span class="s2">&quot;ksat&quot;</span><span class="p">:</span>
+            <span class="c1"># calculate distance between both storages</span>
+            <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">river</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span>
+                               <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">river</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> 
+                               <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">river</span><span class="o">.</span><span class="n">z</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">z</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>  
+            <span class="c1">#calculate residancetime in days        </span>
+            <span class="n">res_time_gw</span> <span class="o">=</span> <span class="n">distance</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">residencetime_gw_river</span>
+            <span class="n">res_time_dr</span> <span class="o">=</span> <span class="n">distance</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">residencetime_drainage_river</span>
+            
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">unit_traveltime</span> <span class="o">==</span> <span class="s2">&quot;day&quot;</span><span class="p">:</span>
+            <span class="c1">#calculate residancetime in days        </span>
+            <span class="n">res_time_gw</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">residencetime_gw_river</span>
+            <span class="n">res_time_dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">residencetime_drainage_river</span>
+        <span class="c1"># connect to adjacent storage</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">reach_connection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;GW&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            
+            
+            <span class="n">cmf</span><span class="o">.</span><span class="n">kinematic_wave</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groundwater</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">river</span><span class="o">.</span><span class="n">Reach</span> <span class="p">,</span><span class="n">res_time_gw</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">reach_connection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;DR&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">cmf</span><span class="o">.</span><span class="n">kinematic_wave</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">drainage</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">river</span><span class="o">.</span><span class="n">Reach</span><span class="p">,</span><span class="n">res_time_dr</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">reach_connection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;RO&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="c1">#TODO: test???</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">soilwaterflux</span> <span class="o">==</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">:</span>
+                <span class="n">cmf</span><span class="o">.</span><span class="n">kinematic_wave</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">surfacewater</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">river</span><span class="o">.</span><span class="n">Reach</span> <span class="p">,</span>
+                                   <span class="mf">0.00001</span><span class="p">)</span>   
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cmf</span><span class="o">.</span><span class="n">KinematicSurfaceRunoff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">surfacewater</span><span class="p">,</span>
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">river</span><span class="o">.</span><span class="n">Reach</span><span class="p">,</span>
+                                           <span class="n">flowwidth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">flowwdith_sw</span><span class="p">)</span>  </div>
+
+<div class="viewcode-block" id="Cmf1d.connect_to_adjacent_field"><a class="viewcode-back" href="../../sourcecode.html#exam.Cmf1d.Cmf1d.connect_to_adjacent_field">[docs]</a>    <span class="k">def</span> <span class="nf">connect_to_adjacent_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Connects the field to an adjancent field. The connections depends on</span>
+<span class="sd">        the type, e.g. &quot;RO&quot; (runoff) and/or &quot;GW&quot; (groudnwater) and/or</span>
+<span class="sd">        &quot;DR&quot; (drainage). The type of connection is defined in the input data</span>
+<span class="sd">        in Fields.csv.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">adjCell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">adjacent_field</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">unit_traveltime</span> <span class="o">==</span> <span class="s2">&quot;ksat&quot;</span><span class="p">:</span>
+            <span class="c1"># calculate distance between both storages</span>
+            <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">adjCell</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> 
+                               <span class="p">(</span><span class="n">adjCell</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> 
+                               <span class="p">(</span><span class="n">adjCell</span><span class="o">.</span><span class="n">z</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">z</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>  
+            
+            
+            <span class="c1">#calculate residancetime in days        </span>
+            <span class="n">res_time_gw</span> <span class="o">=</span> <span class="n">distance</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">residencetime_gw_river</span>
+            <span class="n">res_time_dr</span> <span class="o">=</span> <span class="n">distance</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">residencetime_drainage_river</span>
+        
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">unit_traveltime</span> <span class="o">==</span> <span class="s2">&quot;day&quot;</span><span class="p">:</span>
+            <span class="c1">#calculate residancetime in days        </span>
+            <span class="n">res_time_gw</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">residencetime_gw_river</span>
+            <span class="n">res_time_dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">residencetime_drainage_river</span>
+            
+        <span class="c1">#set water flow connection</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">field_connection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;RO&quot;</span><span class="p">)</span><span class="o">&gt;-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="c1">#TODO: test???</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">soilwaterflux</span> <span class="o">==</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">:</span>
+                <span class="n">cmf</span><span class="o">.</span><span class="n">kinematic_wave</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">surfacewater</span><span class="p">,</span>
+                                   <span class="n">adjCell</span><span class="o">.</span><span class="n">cmf1d</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">surfacewater</span> <span class="p">,</span>
+                                   <span class="mf">0.00001</span><span class="p">)</span>   
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cmf</span><span class="o">.</span><span class="n">KinematicSurfaceRunoff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">surfacewater</span><span class="p">,</span>
+                                           <span class="n">adjCell</span><span class="o">.</span><span class="n">cmf1d</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">surfacewater</span><span class="p">,</span>
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">flowwdith_sw</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">field_connection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;GW&quot;</span><span class="p">)</span><span class="o">&gt;-</span><span class="mi">1</span><span class="p">:</span>
+            
+            
+            <span class="n">cmf</span><span class="o">.</span><span class="n">kinematic_wave</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groundwater</span><span class="p">,</span><span class="n">adjCell</span><span class="o">.</span><span class="n">cmf1d</span><span class="o">.</span><span class="n">groundwater</span><span class="p">,</span>
+                               <span class="n">res_time_gw</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">field_connection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;DR&quot;</span><span class="p">)</span><span class="o">&gt;-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">cmf</span><span class="o">.</span><span class="n">kinematic_wave</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">drainage</span><span class="p">,</span><span class="n">adjCell</span><span class="o">.</span><span class="n">cmf1d</span><span class="o">.</span><span class="n">drainage</span><span class="p">,</span>
+                               <span class="n">res_time_dr</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Cmf1d.add_drainage"><a class="viewcode-back" href="../../sourcecode.html#exam.Cmf1d.Cmf1d.add_drainage">[docs]</a>    <span class="k">def</span> <span class="nf">add_drainage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">suction_limit</span><span class="p">,</span> <span class="n">t_ret</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a drainage with a kinematic wave representation at depth.</span>
+<span class="sd">        Here, the drainage becomes active when the layer saturation </span>
+<span class="sd">        is above field capacity</span>
+<span class="sd">        :param: depth in m</span>
+<span class="sd">        :param: suction_limit The drainage becomes active below the </span>
+<span class="sd">        suction pressure in m. </span>
+<span class="sd">                Field capacity is between pF 1.8 to pF 2.5, that is </span>
+<span class="sd">                a suction pressure between 0.63 - 3.16m</span>
+<span class="sd">        :param: t_ret Retention time in drainage </span>
+<span class="sd">        :returns: A dictionary describing the drainage:</span>
+<span class="sd">            dict(outlet=outlet, depth=depth, layer=l, connection=connection,</span>
+<span class="sd">            Vret=Vret)</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mindepth</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower_boundary</span><span class="p">)</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="n">L</span> <span class="k">for</span> <span class="n">L</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">layers</span> <span class="k">if</span> <span class="n">L</span><span class="o">.</span><span class="n">lower_boundary</span> <span class="o">&gt;=</span> <span class="n">mindepth</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">drainage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">NewStorage</span><span class="p">(</span><span class="s1">&#39;drainage at &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">),</span> 
+                                                  <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="mi">10</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> 
+                                                  <span class="n">l</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
+        <span class="c1"># Calculate the water content from the suction limit</span>
+        <span class="n">Vret</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">soil</span><span class="o">.</span><span class="n">Wetness</span><span class="p">([</span><span class="o">-</span><span class="n">suction_limit</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">l</span><span class="o">.</span><span class="n">get_capacity</span><span class="p">()</span>
+        <span class="c1"># Create connection</span>
+        <span class="n">cmf</span><span class="o">.</span><span class="n">kinematic_wave</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">drainage</span><span class="p">,</span> <span class="n">residencetime</span><span class="o">=</span><span class="n">t_ret</span><span class="p">,</span> <span class="n">residual</span><span class="o">=</span><span class="n">Vret</span><span class="p">)</span>
+        <span class="c1"># return the building blocks of the drainage</span>
+        <span class="k">return</span> <span class="n">drainage</span><span class="p">,</span><span class="n">l</span><span class="c1"># </span></div>
+
+    <span class="c1">###########################################################################</span>
+    <span class="c1"># Properties: water flow</span>
+    <span class="k">def</span> <span class="nf">__getqperc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns percolation to groundwater (m3, read-only).&quot;&quot;&quot;</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">t</span>
+        <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flux_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groundwater</span><span class="p">,</span><span class="n">t</span><span class="p">)</span> 
+    <span class="n">qperc</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getqperc</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__getqsurf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns surface water flow to next each or cell (m3, read-only).&quot;&quot;&quot;</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">t</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">river</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">surfacewater</span><span class="o">.</span><span class="n">flux_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">river</span><span class="o">.</span><span class="n">Reach</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">adjacent_field</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">next_storage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">adjacent_field</span><span class="o">.</span><span class="n">cmf1d</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">surfacewater</span>
+            <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">surfacewater</span><span class="o">.</span><span class="n">flux_to</span><span class="p">(</span><span class="n">next_storage</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.</span> 
+    <span class="n">qsurf</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getqsurf</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__getqdrain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns drainage flow to next reach or cell (m3, read-only).&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">hasDrainage</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">t</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">river</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">drainage</span><span class="o">.</span><span class="n">flux_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">river</span><span class="o">.</span><span class="n">Reach</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">adjacent_field</span> <span class="o">!=</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">field_connection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;DR&quot;</span><span class="p">)</span> <span class="o">&gt;-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">drainage</span><span class="o">.</span><span class="n">flux_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">adjacent_field</span><span class="o">.</span><span class="n">cmf1d</span><span class="o">.</span><span class="n">drainage</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">drainage_layer</span><span class="o">.</span><span class="n">flux_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">drainage</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+    <span class="n">qdrain</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getqdrain</span><span class="p">)</span>         
+    
+    <span class="k">def</span> <span class="nf">__getqgw_river</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns groundwater flow to next reach or cell (m3, read-only).&quot;&quot;&quot;</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">t</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">river</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">groundwater</span><span class="o">.</span><span class="n">flux_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">river</span><span class="o">.</span><span class="n">Reach</span>  <span class="p">,</span><span class="n">t</span><span class="p">)</span> 
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">adjacent_field</span> <span class="o">!=</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">field_connection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;GW&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">groundwater</span><span class="o">.</span><span class="n">flux_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">adjacent_field</span><span class="o">.</span><span class="n">cmf1d</span><span class="o">.</span><span class="n">groundwater</span><span class="p">,</span><span class="n">t</span><span class="p">)</span> 
+        <span class="k">else</span><span class="p">:</span>            
+            <span class="k">return</span> <span class="mf">0.0</span> <span class="c1">#TODO: </span>
+    <span class="n">qgw_river</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getqgw_river</span><span class="p">)</span> 
+    
+    <span class="k">def</span> <span class="nf">__getqgw_gw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns groundwater flow to deep aquifer (m3, read-only).&quot;&quot;&quot;</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">t</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">deep_gw</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">groundwater</span><span class="o">.</span><span class="n">flux_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">gw</span><span class="o">.</span><span class="n">Storage</span><span class="p">,</span><span class="n">t</span><span class="p">)</span> 
+        <span class="k">else</span><span class="p">:</span>            
+            <span class="k">return</span> <span class="mf">0.0</span>
+    <span class="n">qgw_gw</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getqgw_gw</span><span class="p">)</span> 
+
+    <span class="k">def</span> <span class="nf">__getVsw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns surface water volume in (m3, read-only)&quot;&quot;&quot;</span>
+        <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">surfacewater</span><span class="o">.</span><span class="n">volume</span>
+    <span class="n">Vsw</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getVsw</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__getVgw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns groundwater volume in (m3, read-only)&quot;&quot;&quot;</span>
+        <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">groundwater</span><span class="o">.</span><span class="n">volume</span>
+    <span class="n">Vgw</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getVgw</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__getVdr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns draiange water volume (m3, read-only)&quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">field_connection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;DR&quot;</span><span class="p">)</span> <span class="o">&gt;-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">drainage</span><span class="o">.</span><span class="n">volume</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+    <span class="n">Vdr</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getVdr</span><span class="p">)</span>
+
+    <span class="c1">###########################################################################</span>
+    <span class="c1"># Properties: solute load and concentration</span>
+    
+    <span class="k">def</span> <span class="nf">__getconcsoil</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the substance concentration in each soil layer (mg/m3, read-only).&quot;&quot;&quot;</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">t</span>
+        
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">solutes</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>  <span class="p">[</span><span class="n">l</span><span class="o">.</span><span class="n">conc</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">solutes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">layers</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>  <span class="p">[</span><span class="mi">0</span>  <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">layers</span><span class="p">]</span> <span class="c1">#  g/m3  </span>
+    <span class="n">concsoil</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getconcsoil</span><span class="p">)</span>       
+
+    <span class="k">def</span> <span class="nf">__getconcgw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns substance concentration in groundwater (mg/m3, read-only).&quot;&quot;&quot;</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">t</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">solutes</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">groundwater</span><span class="o">.</span><span class="n">conc</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">solutes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+    <span class="n">concgw</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getconcgw</span><span class="p">)</span>      
+
+    <span class="k">def</span> <span class="nf">__getconcsw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns substance concentration in surface water (mg/m3, read-only)&quot;&quot;&quot;</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">t</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">solutes</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">surfacewater</span><span class="o">.</span><span class="n">conc</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">solutes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>  <span class="mi">0</span> <span class="c1">#  g/m3  </span>
+    <span class="n">concsw</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getconcsw</span><span class="p">)</span>      
+
+    <span class="k">def</span> <span class="nf">__getconcdrainage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns substance concentration in surface water (mg/m3, read-only).&quot;&quot;&quot;</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">t</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">hasDrainage</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">solutes</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">drainage</span><span class="o">.</span><span class="n">conc</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">solutes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> 
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>    
+    <span class="n">concdrainage</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getconcdrainage</span><span class="p">)</span>      
+
+    <span class="c1">###########################################################################</span>
+    <span class="c1"># Properties: flux connections, state and attributes of soil layer</span>
+    <span class="k">def</span> <span class="nf">__getVsoil</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns water volume of each soil layer (m3)&quot;&quot;&quot;</span>
+        <span class="k">return</span>  <span class="p">[</span><span class="n">l</span><span class="o">.</span><span class="n">volume</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">layers</span><span class="p">]</span>
+    <span class="n">Vsoil</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getVsoil</span><span class="p">)</span>     
+    
+    <span class="k">def</span> <span class="nf">__get_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns water balance of NeumannBoundary per layer (list).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">bc</span><span class="o">.</span><span class="n">water_balance</span><span class="p">(</span><span class="n">cmf</span><span class="o">.</span><span class="n">Time</span><span class="p">())</span> <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bc</span><span class="p">])</span>
+    <span class="k">def</span> <span class="nf">__set_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fluxes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets water balance of NeumannBoundary per layer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">bc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bc</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span><span class="o">&lt;</span><span class="nb">len</span><span class="p">(</span><span class="n">fluxes</span><span class="p">):</span>
+                <span class="n">bc</span><span class="o">.</span><span class="n">flux</span><span class="o">=</span> <span class="n">fluxes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="c1"># cmf.timeseries(fluxes[i])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">bc</span><span class="o">.</span><span class="n">flux</span><span class="o">=</span> <span class="mf">0.0</span> <span class="c1"># cmf.timeseries(0.0)        </span>
+    <span class="n">flux</span><span class="o">=</span><span class="nb">property</span><span class="p">(</span><span class="n">__get_flux</span><span class="p">,</span><span class="n">__set_flux</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__get_Kr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Returns evaporation reduction factor (list,read-only).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fieldcapacity</span><span class="o">=</span><span class="p">[</span><span class="n">l</span><span class="o">.</span><span class="n">soil</span><span class="o">.</span><span class="n">Wetness_pF</span><span class="p">([</span><span class="mf">1.8</span><span class="p">])</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">layers</span><span class="p">]</span>
+        <span class="n">wiltingpoint</span><span class="o">=</span><span class="p">[</span><span class="n">l</span><span class="o">.</span><span class="n">soil</span><span class="o">.</span><span class="n">Wetness_pF</span><span class="p">([</span><span class="mf">4.2</span><span class="p">])</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">layers</span><span class="p">]</span>
+        <span class="n">wetness</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span><span class="o">.</span><span class="n">wetness</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">layers</span><span class="p">]</span>
+        <span class="n">kr</span> <span class="o">=</span> <span class="p">[</span><span class="n">cmf</span><span class="o">.</span><span class="n">piecewise_linear</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="mf">0.5</span><span class="o">*</span><span class="n">wp</span><span class="p">,</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">fc</span><span class="o">+</span><span class="n">wp</span><span class="p">))</span> <span class="k">for</span> <span class="n">w</span><span class="p">,</span><span class="n">fc</span><span class="p">,</span><span class="n">wp</span> <span class="ow">in</span> 
+              <span class="nb">zip</span><span class="p">(</span><span class="n">wetness</span><span class="p">,</span><span class="n">fieldcapacity</span><span class="p">,</span><span class="n">wiltingpoint</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">kr</span>
+    <span class="n">Kr</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_Kr</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getPressureHead</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Returns pressure headof soil layer (cm, read-only).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">l</span><span class="o">.</span><span class="n">matrix_potential</span><span class="o">*-</span><span class="mi">100</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">layers</span><span class="p">]</span>
+    <span class="n">PressureHead</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getPressureHead</span><span class="p">)</span> 
+
+    <span class="c1">###########################################################################</span>
+    <span class="c1">#some functions to provide climate information for the plant model</span>
+<div class="viewcode-block" id="Cmf1d.get_tmin"><a class="viewcode-back" href="../../sourcecode.html#exam.Cmf1d.Cmf1d.get_tmin">[docs]</a>    <span class="k">def</span> <span class="nf">get_tmin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Return actual minimum temperature (Celsius, read-only).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">get_weather</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">Tmin</span></div>
+   
+<div class="viewcode-block" id="Cmf1d.get_tmax"><a class="viewcode-back" href="../../sourcecode.html#exam.Cmf1d.Cmf1d.get_tmax">[docs]</a>    <span class="k">def</span> <span class="nf">get_tmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Return actual maximum temperature (Celsius, read-only).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">get_weather</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">Tmax</span></div>
+    
+<div class="viewcode-block" id="Cmf1d.get_Rs"><a class="viewcode-back" href="../../sourcecode.html#exam.Cmf1d.Cmf1d.get_Rs">[docs]</a>    <span class="k">def</span> <span class="nf">get_Rs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Returns total solar radiation in (MJ/m2, read-only).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">get_weather</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">Rs</span></div>
+    
+<div class="viewcode-block" id="Cmf1d.get_Sunshine"><a class="viewcode-back" href="../../sourcecode.html#exam.Cmf1d.Cmf1d.get_Sunshine">[docs]</a>    <span class="k">def</span> <span class="nf">get_Sunshine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Returns sunshine hours (hours).</span>
+<span class="sd">       </span>
+<span class="sd">        :param time: Actual time.</span>
+<span class="sd">        :type time: datetime</span>
+<span class="sd">        :returns: Sunshine hours (hours)</span>
+<span class="sd">        :rtype: double</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">get_weather</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">sunshine</span> </div>
+    
+<div class="viewcode-block" id="Cmf1d.get_Windspeed"><a class="viewcode-back" href="../../sourcecode.html#exam.Cmf1d.Cmf1d.get_Windspeed">[docs]</a>    <span class="k">def</span> <span class="nf">get_Windspeed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Returns windspeed (m/s, read-only).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">get_weather</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">Windspeed</span>  </div>
+    
+<div class="viewcode-block" id="Cmf1d.get_rHmean"><a class="viewcode-back" href="../../sourcecode.html#exam.Cmf1d.Cmf1d.get_rHmean">[docs]</a>    <span class="k">def</span> <span class="nf">get_rHmean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Returns relative humidity (%, read-only).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">get_weather</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">rHmean</span>          </div>
+    
+<div class="viewcode-block" id="Cmf1d.get_rain"><a class="viewcode-back" href="../../sourcecode.html#exam.Cmf1d.Cmf1d.get_rain">[docs]</a>    <span class="k">def</span> <span class="nf">get_rain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Returns rainfall (mm, read-only).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">t</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">get_rainfall</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> </div>
+
+    <span class="c1">###########################################################################</span>
+    <span class="c1"># properites vegetation    </span>
+    <span class="k">def</span> <span class="nf">__getTact</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Returns actual transpiration (mm, read-only).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">t</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">transpiration</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> 
+    <span class="n">Tact</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getTact</span><span class="p">)</span>    
+    
+    <span class="k">def</span> <span class="nf">__getEact</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Returns actual evaporation (mm, read-only).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">af</span><span class="o">.</span><span class="n">catchment</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">t</span>
+        <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">evaporation</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> 
+    <span class="n">Eact</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__getEact</span><span class="p">)</span>  </div>
+
+
+       
+
+<span class="c1">#        #######################################################################</span>
+<span class="c1">#        # canopy storage</span>
+<span class="c1">#                # Make c.canopy a water storage</span>
+<span class="c1">#        self.c.add_storage(&#39;Canopy&#39;,&#39;C&#39;)</span>
+<span class="c1">#        # Split the rainfall from the rain source (RS) between </span>
+<span class="c1">#        # intercepted rainfall (RS-&gt;canopy) and throughfall (RS-surface)</span>
+<span class="c1">#        cmf.Rainfall(self.c.canopy,self.c,False,True) # RS-&gt;canopy, only intercepted rain</span>
+<span class="c1">#        cmf.Rainfall(self.c.surfacewater,self.c,True,False) # RS-&gt;surface, only throughfall</span>
+<span class="c1">#        # Use an overflow mechanism, eg. the famous Rutter-Interception Model</span>
+<span class="c1">#        cmf.RutterInterception(self.c.canopy,self.c.surfacewater,self.c) </span>
+<span class="c1">#        # And now the evaporation from the wet canopy (using a classical Penman equation)</span>
+<span class="c1">#        cmf.CanopyStorageEvaporation(self.c.canopy,self.c.evaporation,self.c)</span>
+    
+          
+<span class="c1">#        #######################################################################</span>
+<span class="c1">#        # snow</span>
+<span class="c1">#        self.c.add_storage(&#39;Snow&#39;,&#39;S&#39;)</span>
+<span class="c1">#        cmf.Snowfall(self.c.snow,self.c)</span>
+<span class="c1">#        snowmelt = cmf.SimpleTindexSnowMelt(self.c.snow,self.c.surfacewater,self.c,rate=7.0)</span>
+
+<span class="c1">#        #######################################################################</span>
+<span class="c1">#        # lateral flow connection between soil layer and river</span>
+<span class="c1">#        for l in self.c.layers:</span>
+<span class="c1">#            cmf.Darcy(l,self.af.river.Reach,10)#TODO: calc flowwidth between river and cell</span>
+<span class="c1">##            # Calculate the water content from the suction limit</span>
+<span class="c1">#            Vret = l.soil.Wetness([-1])[0] * l.get_capacity()</span>
+<span class="c1">##            # Make the linear storage cnnection with residence time t_ret and the residual volume</span>
+<span class="c1">#            cmf.kinematic_wave(l, self.af.river.Reach, residencetime=25, residual=Vret)</span>
+<span class="c1">##           </span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2018, knoell Germany GmbH.
+    </div>
+  </body>
+</html>

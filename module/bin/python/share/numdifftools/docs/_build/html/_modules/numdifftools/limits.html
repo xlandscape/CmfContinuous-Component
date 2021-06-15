@@ -1,0 +1,682 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>numdifftools.limits &mdash; numdifftools 0.9.17 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="numdifftools 0.9.17 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> numdifftools
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.17
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html">Introduction to Numdifftools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#documentation-and-code">Documentation and code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#unit-tests">Unit tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#acknowledgement">Acknowledgement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/numerical/main.html">Numerical differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/algorithmic/main.html">Algorithmic differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../authors.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">Module reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">numdifftools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>numdifftools.limits</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for numdifftools.limits</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on 27. aug. 2015</span>
+
+<span class="sd">@author: pab</span>
+<span class="sd">Author: John D&#39;Errico</span>
+<span class="sd">e-mail: woodchips@rochester.rr.com</span>
+<span class="sd">Release: 1.0</span>
+<span class="sd">Release date: 5/23/2008</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">numdifftools.step_generators</span> <span class="kn">import</span> <span class="n">MinStepGenerator</span>
+<span class="kn">from</span> <span class="nn">numdifftools.extrapolation</span> <span class="kn">import</span> <span class="n">Richardson</span><span class="p">,</span> <span class="n">dea3</span>
+
+
+<span class="k">class</span> <span class="nc">CStepGenerator</span><span class="p">(</span><span class="n">MinStepGenerator</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a sequence of steps</span>
+
+<span class="sd">    where</span>
+<span class="sd">        steps = base_step * step_nom * (exp(1j*dtheta) * step_ratio) ** (i + offset)</span>
+<span class="sd">    for i = 0, 1, ..., num_steps-1</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    base_step : float, array-like, default None</span>
+<span class="sd">        Defines the minimum step, if None, the value is set to EPS**(1/scale)</span>
+<span class="sd">    step_ratio : real scalar, optional, default 4.0</span>
+<span class="sd">        Ratio between sequential steps generated.</span>
+<span class="sd">    num_steps : scalar integer, optional,</span>
+<span class="sd">        defines number of steps generated.</span>
+<span class="sd">        If None the value is 2 * int(round(16.0/log(abs(step_ratio)))) + 1</span>
+<span class="sd">    step_nom :  default maximum(log(1+|x|), 1)</span>
+<span class="sd">        Nominal step where x is supplied at runtime through the __call__ method.</span>
+<span class="sd">    offset : real scalar, optional, default 0</span>
+<span class="sd">        offset to the base step</span>
+<span class="sd">    use_exact_steps : boolean</span>
+<span class="sd">        If true make sure exact steps are generated</span>
+<span class="sd">    scale : real scalar, default 1.2</span>
+<span class="sd">        scale used in base step.</span>
+<span class="sd">    path : &#39;spiral&#39; or &#39;radial&#39;</span>
+<span class="sd">        Specifies the type of path to take the limit along.</span>
+<span class="sd">    dtheta: real scalar</span>
+<span class="sd">        If the path is spiral it will follow an exponential spiral into the</span>
+<span class="sd">        limit, with angular steps at dtheta radians.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_step</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">step_ratio</span><span class="o">=</span><span class="mf">4.0</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">step_nom</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">use_exact_steps</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                 <span class="n">path</span><span class="o">=</span><span class="s1">&#39;radial&#39;</span><span class="p">,</span> <span class="n">dtheta</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">8</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtheta</span> <span class="o">=</span> <span class="n">dtheta</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CStepGenerator</span><span class="p">,</span>
+              <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">base_step</span><span class="o">=</span><span class="n">base_step</span><span class="p">,</span> <span class="n">step_ratio</span><span class="o">=</span><span class="n">step_ratio</span><span class="p">,</span>
+                             <span class="n">num_steps</span><span class="o">=</span><span class="n">num_steps</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
+                             <span class="n">use_exact_steps</span><span class="o">=</span><span class="n">use_exact_steps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_path</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_check_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;spiral&#39;</span><span class="p">,</span> <span class="s1">&#39;radial&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid Path: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)))</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">step_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dtheta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtheta</span>
+        <span class="n">_step_ratio</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_step_ratio</span><span class="p">)</span>  <span class="c1"># radial path</span>
+        <span class="k">if</span> <span class="n">dtheta</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">_step_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1j</span> <span class="o">*</span> <span class="n">dtheta</span><span class="p">)</span> <span class="o">*</span> <span class="n">_step_ratio</span>  <span class="c1"># a spiral path</span>
+        <span class="k">return</span> <span class="n">_step_ratio</span>
+
+    <span class="nd">@step_ratio.setter</span>
+    <span class="k">def</span> <span class="nf">step_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_ratio</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step_ratio</span> <span class="o">=</span> <span class="n">step_ratio</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dtheta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">radial_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;r&#39;</span>
+        <span class="k">return</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">radial_path</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtheta</span>
+
+    <span class="nd">@dtheta.setter</span>
+    <span class="k">def</span> <span class="nf">dtheta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtheta</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dtheta</span> <span class="o">=</span> <span class="n">dtheta</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_steps</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mf">16.0</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step_ratio</span><span class="p">))))</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_steps</span>
+
+    <span class="nd">@num_steps.setter</span>
+    <span class="k">def</span> <span class="nf">num_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_steps</span> <span class="o">=</span> <span class="n">num_steps</span>
+
+
+<span class="k">class</span> <span class="nc">_Limit</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Common methods and member variables&quot;&quot;&quot;</span>
+
+    <span class="n">info</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;info&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;error_estimate&#39;</span><span class="p">,</span> <span class="s1">&#39;final_step&#39;</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;above&#39;</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                 <span class="n">full_output</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">=</span> <span class="n">order</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">full_output</span> <span class="o">=</span> <span class="n">full_output</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_generator</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_arg_min</span><span class="p">(</span><span class="n">errors</span><span class="p">):</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">errors</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">arg_mins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanargmin</span><span class="p">(</span><span class="n">errors</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">min_errors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">errors</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">msg</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">min_error</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">min_errors</span><span class="p">):</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">errors</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">min_error</span><span class="p">)</span>
+            <span class="n">arg_mins</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx</span><span class="p">[</span><span class="n">idx</span><span class="o">.</span><span class="n">size</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel_multi_index</span><span class="p">((</span><span class="n">arg_mins</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span> <span class="n">shape</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_add_error_to_outliers</span><span class="p">(</span><span class="n">der</span><span class="p">,</span> <span class="n">trim_fact</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="c1"># discard any estimate that differs wildly from the</span>
+        <span class="c1"># median of all estimates. A factor of 10 to 1 in either</span>
+        <span class="c1"># direction is probably wild enough here. The actual</span>
+        <span class="c1"># trimming factor is defined as a parameter.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">median</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmedian</span><span class="p">(</span><span class="n">der</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">p75</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanpercentile</span><span class="p">(</span><span class="n">der</span><span class="p">,</span> <span class="mi">75</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">p25</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanpercentile</span><span class="p">(</span><span class="n">der</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">iqr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">p75</span><span class="o">-</span><span class="n">p25</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">msg</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span>
+            <span class="k">return</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">der</span>
+
+        <span class="n">a_median</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">median</span><span class="p">)</span>
+        <span class="n">outliers</span> <span class="o">=</span> <span class="p">(((</span><span class="nb">abs</span><span class="p">(</span><span class="n">der</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">a_median</span> <span class="o">/</span> <span class="n">trim_fact</span><span class="p">))</span> <span class="o">+</span>
+                    <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">der</span><span class="p">)</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">a_median</span> <span class="o">*</span> <span class="n">trim_fact</span><span class="p">)))</span> <span class="o">*</span> <span class="p">(</span><span class="n">a_median</span> <span class="o">&gt;</span> <span class="mf">1e-8</span><span class="p">)</span> <span class="o">+</span>
+                    <span class="p">((</span><span class="n">der</span> <span class="o">&lt;</span> <span class="n">p25</span><span class="o">-</span><span class="mf">1.5</span><span class="o">*</span><span class="n">iqr</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">p75</span><span class="o">+</span><span class="mf">1.5</span><span class="o">*</span><span class="n">iqr</span> <span class="o">&lt;</span> <span class="n">der</span><span class="p">)))</span>
+        <span class="n">errors</span> <span class="o">=</span> <span class="n">outliers</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">der</span> <span class="o">-</span> <span class="n">median</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">errors</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_best_estimate</span><span class="p">(</span><span class="n">der</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+        <span class="n">errors</span> <span class="o">+=</span> <span class="n">_Limit</span><span class="o">.</span><span class="n">_add_error_to_outliers</span><span class="p">(</span><span class="n">der</span><span class="p">)</span>
+        <span class="n">ix</span> <span class="o">=</span> <span class="n">_Limit</span><span class="o">.</span><span class="n">_get_arg_min</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
+        <span class="n">final_step</span> <span class="o">=</span> <span class="n">steps</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="n">errors</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">der</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">),</span> <span class="n">_Limit</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">err</span><span class="p">,</span> <span class="n">final_step</span><span class="p">,</span> <span class="n">ix</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_wynn_extrapolate</span><span class="p">(</span><span class="n">der</span><span class="p">,</span> <span class="n">steps</span><span class="p">):</span>
+        <span class="n">der</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">dea3</span><span class="p">(</span><span class="n">der</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">der</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">der</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span> <span class="n">symmetric</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">der</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="n">steps</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+
+    <span class="k">def</span> <span class="nf">_extrapolate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+        <span class="n">der1</span><span class="p">,</span> <span class="n">errors1</span><span class="p">,</span> <span class="n">steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">richardson</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">der1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">der1</span><span class="p">,</span> <span class="n">errors1</span><span class="p">,</span> <span class="n">steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wynn_extrapolate</span><span class="p">(</span><span class="n">der1</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
+        <span class="n">der</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_best_estimate</span><span class="p">(</span><span class="n">der1</span><span class="p">,</span> <span class="n">errors1</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">der</span><span class="p">,</span> <span class="n">info</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_vstack</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">steps</span><span class="p">):</span>
+        <span class="n">original_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">sequence</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">f_del</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">r</span><span class="p">))</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">sequence</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">original_shape</span><span class="p">)</span><span class="o">*</span><span class="n">step</span><span class="p">))</span>
+                      <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">f_del</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">h</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;fun did not return data of correct size &#39;</span> <span class="o">+</span>
+                             <span class="s1">&#39;(it must be vectorized)&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">f_del</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">original_shape</span>
+
+
+<div class="viewcode-block" id="Limit"><a class="viewcode-back" href="../../api/generated/numdifftools.limits.Limit.html#numdifftools.limits.Limit">[docs]</a><span class="k">class</span> <span class="nc">Limit</span><span class="p">(</span><span class="n">_Limit</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute limit of a function at a given point</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    f : callable</span>
+<span class="sd">        function f(z, `*args`, `**kwds`) to compute the limit for z-&gt;z0.</span>
+<span class="sd">        The function, f, is assumed to return a result of the same shape and</span>
+<span class="sd">        size as its input, `z`.</span>
+<span class="sd">    step: float, complex, array-like or StepGenerator object, optional</span>
+<span class="sd">        Defines the spacing used in the approximation.</span>
+<span class="sd">        Default is CStepGenerator(base_step=step, **options)</span>
+<span class="sd">    method : {&#39;above&#39;, &#39;below&#39;}</span>
+<span class="sd">        defines if the limit is taken from `above` or `below`</span>
+<span class="sd">    order: positive scalar integer, optional.</span>
+<span class="sd">        defines the order of approximation used to find the specified limit.</span>
+<span class="sd">        The order must be member of [1 2 3 4 5 6 7 8]. 4 is a good compromise.</span>
+<span class="sd">    full_output: bool</span>
+<span class="sd">        If true return additional info.</span>
+<span class="sd">    options:</span>
+<span class="sd">        options to pass on to CStepGenerator</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    limit_fz: array like</span>
+<span class="sd">        estimated limit of f(z) as z --&gt; z0</span>
+<span class="sd">    info:</span>
+<span class="sd">        Only given if full_output is True and contains the following:</span>
+<span class="sd">        error estimate: ndarray</span>
+<span class="sd">            95 uncertainty estimate around the limit, such that</span>
+<span class="sd">            abs(limit_fz - lim z-&gt;z0 f(z)) &lt; error_estimate</span>
+<span class="sd">        final_step: ndarray</span>
+<span class="sd">            final step used in approximation</span>
+
+<span class="sd">    Description</span>
+<span class="sd">    -----------</span>
+<span class="sd">    `Limit` computes the limit of a given function at a specified</span>
+<span class="sd">    point, z0. When the function is evaluable at the point in question,</span>
+<span class="sd">    this is a simple task. But when the function cannot be evaluated</span>
+<span class="sd">    at that location due to a singularity, you may need a tool to</span>
+<span class="sd">    compute the limit. `Limit` does this, as well as produce an</span>
+<span class="sd">    uncertainty estimate in the final result.</span>
+
+<span class="sd">    The methods used by `Limit` are Richardson extrapolation in a combination</span>
+<span class="sd">    with Wynn&#39;s epsilon algorithm which also yield an error estimate.</span>
+<span class="sd">    The user can specify the method order, as well as the path into</span>
+<span class="sd">    z0. z0 may be real or complex. `Limit` uses a proportionally cascaded</span>
+<span class="sd">    series of function evaluations, moving away from your point of evaluation</span>
+<span class="sd">    along a path along the real line (or in the complex plane for complex z0 or</span>
+<span class="sd">    step.) The `step_ratio` is the ratio used between sequential steps. The</span>
+<span class="sd">    sign of step allows you to specify a limit from above or below. Negative</span>
+<span class="sd">    values of step will cause the limit to be taken approaching z0 from below.</span>
+
+<span class="sd">    A smaller `step_ratio` means that `Limit` will take more function</span>
+<span class="sd">    evaluations to evaluate the limit, but the result will potentially be less</span>
+<span class="sd">    accurate. The `step_ratio` MUST be a scalar larger than 1. A value in the</span>
+<span class="sd">    range [2,100] is recommended. 4 seems a good compromise.</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">     Compute the limit of sin(x)./x, at x == 0. The limit is 1.</span>
+
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from numdifftools.limits import Limit</span>
+<span class="sd">    &gt;&gt;&gt; def f(x): return np.sin(x)/x</span>
+<span class="sd">    &gt;&gt;&gt; lim_f0, err = Limit(f, full_output=True)(0)</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(lim_f0, 1)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(err.error_estimate, 1.77249444610966e-15)</span>
+<span class="sd">    True</span>
+
+<span class="sd">    Compute the derivative of cos(x) at x == pi/2. It should</span>
+<span class="sd">    be -1. The limit will be taken as a function of the</span>
+<span class="sd">    differential parameter, dx.</span>
+
+<span class="sd">    &gt;&gt;&gt; x0 = np.pi/2;</span>
+<span class="sd">    &gt;&gt;&gt; def g(x): return (np.cos(x0+x)-np.cos(x0))/x</span>
+<span class="sd">    &gt;&gt;&gt; lim_g0, err = Limit(g, full_output=True)(0)</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(lim_g0, -1)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; err.error_estimate &lt; 1e-14</span>
+<span class="sd">    True</span>
+
+<span class="sd">    Compute the residue at a first order pole at z = 0</span>
+<span class="sd">    The function 1./(1-exp(2*z)) has a pole at z == 0.</span>
+<span class="sd">    The residue is given by the limit of z*fun(z) as z --&gt; 0.</span>
+<span class="sd">    Here, that residue should be -0.5.</span>
+
+<span class="sd">    &gt;&gt;&gt; def h(z): return -z/(np.expm1(2*z))</span>
+<span class="sd">    &gt;&gt;&gt; lim_h0, err = Limit(h, full_output=True)(0)</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(lim_h0, -0.5)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; err.error_estimate &lt; 1e-14</span>
+<span class="sd">    True</span>
+
+<span class="sd">    Compute the residue of function 1./sin(z)**2 at z = 0.</span>
+<span class="sd">    This pole is of second order thus the residue is given by the limit of</span>
+<span class="sd">    z**2*fun(z) as z --&gt; 0.</span>
+
+<span class="sd">    &gt;&gt;&gt; def g(z): return z**2/(np.sin(z)**2)</span>
+<span class="sd">    &gt;&gt;&gt; lim_gpi, err = Limit(g, full_output=True)(0)</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(lim_gpi, 1)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; err.error_estimate &lt; 1e-14</span>
+<span class="sd">    True</span>
+
+<span class="sd">    A more difficult limit is one where there is significant</span>
+<span class="sd">    subtractive cancellation at the limit point. In the following</span>
+<span class="sd">    example, the cancellation is second order. The true limit</span>
+<span class="sd">    should be 0.5.</span>
+
+<span class="sd">    &gt;&gt;&gt; def k(x): return (x*np.exp(x)-np.expm1(x))/x**2</span>
+<span class="sd">    &gt;&gt;&gt; lim_k0,err = Limit(k, full_output=True)(0)</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(lim_k0, 0.5)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; err.error_estimate &lt; 1.0e-8</span>
+<span class="sd">    True</span>
+
+<span class="sd">    &gt;&gt;&gt; def h(x): return  (x-np.sin(x))/x**3</span>
+<span class="sd">    &gt;&gt;&gt; lim_h0, err = Limit(h, full_output=True)(0)</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(lim_h0, 1./6)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; err.error_estimate &lt; 1e-8</span>
+<span class="sd">    True</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">dz</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">z</span><span class="o">+</span><span class="n">dz</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_make_generator</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="s1">&#39;__call__&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">step</span>
+        <span class="k">return</span> <span class="n">CStepGenerator</span><span class="p">(</span><span class="n">base_step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xi</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">step</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">xi</span><span class="p">)]</span>
+
+    <span class="k">def</span> <span class="nf">_set_richardson_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_ratio</span><span class="p">,</span> <span class="n">num_terms</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">richardson</span> <span class="o">=</span> <span class="n">Richardson</span><span class="p">(</span><span class="n">step_ratio</span><span class="o">=</span><span class="n">step_ratio</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                     <span class="n">num_terms</span><span class="o">=</span><span class="n">num_terms</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_lim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwds</span><span class="p">):</span>
+        <span class="n">sign</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">forward</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">above</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">backward</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">below</span><span class="o">=-</span><span class="mi">1</span><span class="p">)[</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">]</span>
+        <span class="n">steps</span> <span class="o">=</span> <span class="p">[</span><span class="n">sign</span> <span class="o">*</span> <span class="n">step</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">z</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_richardson_rule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="o">.</span><span class="n">step_ratio</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+            <span class="n">sequence</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">]</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vstack</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
+        <span class="n">lim_fz</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extrapolate</span><span class="p">(</span><span class="o">*</span><span class="n">results</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">lim_fz</span><span class="p">,</span> <span class="n">info</span>
+
+    <span class="k">def</span> <span class="nf">limit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">fz</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_f</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwds</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_output</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fz</span><span class="p">,</span> <span class="n">info</span>
+        <span class="k">return</span> <span class="n">fz</span>
+
+    <span class="k">def</span> <span class="nf">_call_lim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fz</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwds</span><span class="p">):</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">fz</span><span class="p">)</span>
+        <span class="n">final_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">fz</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">fz</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">fz</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">fz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">fz</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">fz</span><span class="p">)</span>
+            <span class="n">lim_fz</span><span class="p">,</span> <span class="n">info1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lim</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwds</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">fz</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">lim_fz</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_output</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">final_step</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">info1</span><span class="o">.</span><span class="n">final_step</span><span class="p">)</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">info1</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">err</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">info1</span><span class="o">.</span><span class="n">error_estimate</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">err</span><span class="p">,</span> <span class="n">final_step</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_f</span>
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+            <span class="n">fz</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+        <span class="n">fz</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_lim</span><span class="p">(</span><span class="n">fz</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwds</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_output</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fz</span><span class="p">,</span> <span class="n">info</span>
+        <span class="k">return</span> <span class="n">fz</span></div>
+
+
+<span class="k">class</span> <span class="nc">Residue</span><span class="p">(</span><span class="n">Limit</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute residue of a function at a given point</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    f : callable</span>
+<span class="sd">        function f(z, `*args`, `**kwds`) to compute the Residue at z=z0.</span>
+<span class="sd">        The function, f, is assumed to return a result of the same shape and</span>
+<span class="sd">        size as its input, `z`.</span>
+<span class="sd">    step: float, complex, array-like or StepGenerator object, optional</span>
+<span class="sd">        Defines the spacing used in the approximation.</span>
+<span class="sd">        Default is CStepGenerator(base_step=step, **options)</span>
+<span class="sd">    method : {&#39;above&#39;, &#39;below&#39;}</span>
+<span class="sd">        defines if the limit is taken from `above` or `below`</span>
+<span class="sd">    order: positive scalar integer, optional.</span>
+<span class="sd">        defines the order of approximation used to find the specified limit.</span>
+<span class="sd">        The order must be member of [1 2 3 4 5 6 7 8]. 4 is a good compromise.</span>
+<span class="sd">    pole_order : scalar integer</span>
+<span class="sd">        specifies the order of the pole at z0.</span>
+<span class="sd">    full_output: bool</span>
+<span class="sd">        If true return additional info.</span>
+<span class="sd">    options:</span>
+<span class="sd">        options to pass on to CStepGenerator</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    res_fz: array like</span>
+<span class="sd">        estimated residue, i.e., limit of f(z)*(z-z0)**pole_order as z --&gt; z0</span>
+<span class="sd">        When the residue is estimated as approximately zero,</span>
+<span class="sd">          the wrong order pole may have been specified.</span>
+
+<span class="sd">    info:</span>
+<span class="sd">        Only given if full_output is True and contains the following:</span>
+<span class="sd">        error estimate: ndarray</span>
+<span class="sd">            95 uncertainty estimate around the residue, such that</span>
+<span class="sd">            abs(res_fz - lim z-&gt;z0 f(z)*(z-z0)**pole_order) &lt; error_estimate</span>
+<span class="sd">            Large uncertainties here suggest that the wrong order</span>
+<span class="sd">            pole was specified for f(z0).</span>
+<span class="sd">        final_step: ndarray</span>
+<span class="sd">            final step used in approximation</span>
+
+
+<span class="sd">    Residue computes the residue of a given function at a simple first order</span>
+<span class="sd">    pole, or at a second order pole.</span>
+
+<span class="sd">    The methods used by residue are polynomial extrapolants, which also yield</span>
+<span class="sd">    an error estimate. The user can specify the method order, as well as the</span>
+<span class="sd">    order of the pole.</span>
+
+<span class="sd">    z0  - scalar point at which to compute the residue. z0 may be</span>
+<span class="sd">          real or complex.</span>
+
+
+<span class="sd">    See the document DERIVEST.pdf for more explanation of the</span>
+<span class="sd">    algorithms behind the parameters of Residue. In most cases,</span>
+<span class="sd">    the user should never need to specify anything other than possibly</span>
+<span class="sd">    the PoleOrder.</span>
+
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    A first order pole at z = 0</span>
+
+<span class="sd">    &gt;&gt;&gt; def f(z): return -1./(np.expm1(2*z))</span>
+<span class="sd">    &gt;&gt;&gt; res_f, info = Residue(f, full_output=True)(0)</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(res_f, -0.5)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; info.error_estimate &lt; 1e-14</span>
+<span class="sd">    True</span>
+
+<span class="sd">    A second order pole around z = 0 and z = pi</span>
+<span class="sd">    &gt;&gt;&gt; def h(z): return 1.0/np.sin(z)**2</span>
+<span class="sd">    &gt;&gt;&gt; res_h, info = Residue(h, full_output=True, pole_order=2)([0, np.pi])</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(res_h, 1)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; (info.error_estimate &lt; 1e-10).all()</span>
+<span class="sd">    True</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;above&#39;</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">pole_order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">full_output</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">order</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># MethodOrder will always = pole_order + 2</span>
+            <span class="n">order</span> <span class="o">=</span> <span class="n">pole_order</span> <span class="o">+</span> <span class="mi">2</span>
+
+        <span class="k">if</span> <span class="n">order</span> <span class="o">&lt;=</span> <span class="n">pole_order</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;order must be at least pole_order+1.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pole_order</span> <span class="o">=</span> <span class="n">pole_order</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Residue</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
+                                      <span class="n">full_output</span><span class="o">=</span><span class="n">full_output</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">dz</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">z</span> <span class="o">+</span> <span class="n">dz</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">dz</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">pole_order</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">numdifftools.testing</span> <span class="kn">import</span> <span class="n">test_docstrings</span>
+    <span class="n">test_docstrings</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2009-2015, Per A Brodtkorb, John D&#39;Errico.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.9.17',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

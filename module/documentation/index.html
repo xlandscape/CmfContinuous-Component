@@ -1,0 +1,328 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Regulatory Catchment Model &#8212; LanscapeModelingToolbox 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">LanscapeModelingToolbox 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="align-right figure">
+<a class="reference internal image-reference" href="_images/jlu_knoell_bayer.png"><img alt="_images/jlu_knoell_bayer.png" src="_images/jlu_knoell_bayer.png" style="width: 425px; height: 100px;" /></a>
+</div>
+<div class="figure align-right">
+<a class="reference internal image-reference" href="_images/cropprotection.png"><img alt="alternate text" src="_images/cropprotection.png" style="width: 150.0px; height: 150.0px;" /></a>
+</div>
+<div class="section" id="regulatory-catchment-model">
+<h1><strong>Regulatory Catchment Model</strong><a class="headerlink" href="#regulatory-catchment-model" title="Permalink to this headline">¶</a></h1>
+<p>Modern agriculture often relies on the use of pesticides in order to
+maintain a high production level. However, a fraction of the pesticide
+amount applied to agricultural fields can reach surface waters and
+groundwater via a number of different pathways and can cause harmful
+effects to the environment. Computer simulations are being frequently applied
+in the authorization procedure of pesticides in order to evaluate the
+risk for the environment or in the frame of water stewardship projects.</p>
+<p>Catchment modelling is a higher tier option for ecological risk assessment as stated in the <a class="reference external" href="https://esdac.jrc.ec.europa.eu/projects/focus-landscape-mitigation">FOCUS Landscape &amp; Mitigation guidance (2002)</a>.
+The EFSA Guidance Document on Aquatic Risk Assessment <a class="reference external" href="http://www.efsa.europa.eu/de/efsajournal/pub/3290">(EFSA, 2013)</a> indicates a
+key role for effect modelling in future aquatic risk characterization in a tiered risk assessment framework.
+Such approaches require correspondingly adapted exposure tools and scenarios ranging from simple edge-of-field
+to spatio-temporally explicit landscape-scale catchment models. These approaches should be sufficiently flexible
+and transparent in order to design lower- and higher-tiers of consistent protection levels.</p>
+<p>The newly developed catchment model is a modular, flexible and scalable (in time and space) toolbox in order to provide
+solutions for future regulatory requirements and refinement options in aquatic risk assessment of plant protection products.
+The toolbox allows for stepwise adaption of model complexity to address tiered risk assessments.
+The approach is based on the open-source hydrological programming library <a class="reference external" href="https://philippkraft.github.io/cmf/">CMF (Kraft et al., 2011)</a> .
+The unique advantages of the newly developed approach are as follows:</p>
+<p><strong>Adapting the hydrological model structure within a consistent geospatial catchment discretisation</strong>:
+The user has then the oppertunity to select from three different option for running the whole catchment and one option
+to simulate only single cells. This is an unique future of the model, because it provides flexibility in terms of hydrological
+detail and spatial representation of the catchment.</p>
+<p><strong>Integrating 1d models into fully connected catchment scale flow regimes</strong>:
+The model allows for the utilisation of timeseries from established 1d models of <a class="reference external" href="https://esdac.jrc.ec.europa.eu/projects/surface-water">FOCUS risk assessment</a>,
+e.g. <a class="reference external" href="https://esdac.jrc.ec.europa.eu/projects/macro-0">MACRO</a>, <a class="reference external" href="https://esdac.jrc.ec.europa.eu/projects/pearl">PEARL</a> or <a class="reference external" href="https://esdac.jrc.ec.europa.eu/projects/przmsw">PRZM</a>, and to connect them in a spatial manner in order to simulate water and solute transport across entire catchments.</p>
+<p><strong>Grouping single areas in catchments on the basis of unique combinations of natural properties</strong>:
+In larger catchments environmental data is often similar for single fields (e.g. climate x soil x management). Such fields can be summarized as unique combinations,
+which can be simulated one time by using the ‘1dField’ option and afterwards related to localised cells using within the ‘timeseriesCatchment’ option.
+This approach can save a lot of simulation time, because the complexity of individual setups is reduced, but the spatial discretisation stays in place.</p>
+<p><strong>Handling data efficient and transparent</strong>:
+The user can select between the two formats <a class="reference external" href="https://en.wikipedia.org/wiki/Comma-separated_values">CSV</a> and <a class="reference external" href="https://en.wikipedia.org/wiki/Hierarchical_Data_Format">HDF5</a>.
+CSV gives the user easy access to modelling data by using a text editor or MS Excel, which is a good choice for small scale / short term analysis. When simulating
+larger areas for long time periods disk space and data transfer time could be a limiting factor. HDF provides the ability to create compressed binary files, which reduce
+the required disk space in a high extent and can be accessed and processed by specific libraries of scripting programming languages such
+as R (<a class="reference external" href="https://cran.r-project.org/web/packages/h5/vignettes/h5-Intro.html">h5</a>) or Python (<a class="reference external" href="https://www.h5py.org/">h5py</a>).</p>
+<p>The model is implemented following an object-oriented programming approach using <a class="reference external" href="https://www.python.org/">Python3</a>. Natural entities and their relation
+to each other are defined by a <a class="reference external" href="https://en.wikipedia.org/wiki/Has-a">has-a-relationship</a>. The numerical calculations are done by the CMF library which
+is implemented in C++ and makes use of the <a class="reference external" href="https://computation.llnl.gov/projects/sundials">CVODE solver</a>. Model documentation is done by using
+<a class="reference external" href="http://www.sphinx-doc.org/en/master/">sphinx</a> and model versions are managed by <a class="reference external" href="https://tortoisesvn.net/index.de.html">TortoiseSVN</a>.
+When programming the model a focus was on using well established open-source Python packages with a widespread use by science, authorities and industry as
+well as by other third party software in the field of geoanalysis (e.g. <a class="reference external" href="http://desktop.arcgis.com/de/arcmap/10.3/analyze/arcpy/what-is-arcpy-.htm">ESRI ArcPy</a>):</p>
+<ul class="simple">
+<li>Multi-dimensional array processing with <a class="reference external" href="https://www.numpy.org/">numpy</a>,</li>
+<li>Statistics with <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/">scipy</a> and  <a class="reference external" href="https://pandas.pydata.org/">pandas</a>,</li>
+<li>spatial oeprations with <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/spatial.html">scipy.spatial</a> and <a class="reference external" href="https://pypi.org/project/Shapely/">shapely</a> as well as</li>
+<li>plotting with <a class="reference external" href="https://matplotlib.org/">matplotlib</a>.</li>
+</ul>
+<p>The following paragraphs hold a brief overview about the model. Details can be found in the respective pages:</p>
+<ul class="simple">
+<li><a class="reference internal" href="concept.html"><span class="doc">Concept</span></a></li>
+<li><a class="reference internal" href="usermanual.html"><span class="doc">Step-by-step user guide</span></a></li>
+<li><a class="reference internal" href="data_io.html"><span class="doc">Data I/O</span></a></li>
+<li>:doc:<a href="#id1"><span class="problematic" id="id2">`</span></a>Install &lt;/install&gt;</li>
+<li><span class="xref std std-doc">Source code &lt;/sourcecode&gt;`</span></li>
+</ul>
+<div class="section" id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<p>Drift from agricultural fields to aquatic systems related to plant protection product application is a major
+issue to be addressed in aquatic risk assessment. Using the newly developed catchment model
+the regulatory relevant concentrations in sediment and water assessed. The spatial
+(i.e. size and number of single river segments)  and temporal resolution (hourly) are set by the user
+to match the relevant scale for consecutive aquatic ecotoxicolocial risk assessment.</p>
+<p>The example shows a large scale catchment (ca. 1600 river segments which sum up to 150km) in Belgium with a
+dense river network and an intensive cultivation of pome fruits (purple areas). The case study shows the predicted
+environmental concentration in surface water (PECsw) after an application of a fungicide to all pome fields
+at the beginning of May. The video covers a period of eight days after the application.</p>
+<div class="figure">
+<img alt="_images/rummen_short.apng" src="_images/rummen_short.apng" />
+</div>
+<div class="figure align-left">
+<img alt="_images/legend_all.png" src="_images/legend_all.png" />
+</div>
+<div class="figure">
+<img alt="_images/legend.png" src="_images/legend.png" />
+</div>
+</div>
+<div class="section" id="modelling-concept">
+<h2>Modelling concept<a class="headerlink" href="#modelling-concept" title="Permalink to this headline">¶</a></h2>
+<p>The catchment with all its components, i.e. forests, fields, rivers and urban areas, is divided into a set of cells and river segments which
+are represented by a set of natural properties and biophysical processes. The information on the spatial location, extent and land use must
+be obtained from land use cover data from public available resources (e.g. <a class="reference external" href="https://land.copernicus.eu/pan-european/corine-land-cover">CORINE Land Cover</a> ,
+<a class="reference external" href="https://www.eea.europa.eu/data-and-maps/data/european-catchments-and-rivers-network">European catchments and Rivers network system</a>) or
+local authorities.</p>
+<p>The modelling process starts with an automated connection of cells and river segments (<a class="reference internal" href="usermanual.html"><span class="doc">Step-by-step user guide</span></a>, Flow connections).
+Optionally, the catchment can be discretised in smaller units (<a class="reference internal" href="usermanual.html"><span class="doc">Step-by-step user guide</span></a>, Spatial discretisation). The user has then
+the opportunity to select from three different option for running the whole catchment and one option to simulate only single cells. This is an unique future
+of the model, because it provides flexibility in terms of hydrological detail and spatial representation of the catchment.</p>
+<div class="align-center figure">
+<img alt="_images/concept_uml_catchment.png" src="_images/concept_uml_catchment.png" />
+</div>
+<p>Options (a)-(c) provide the same output for each river segment in the catchment, but differ in the calculation
+method of water flow across land areas:</p>
+<p>(a) <strong>completeCatchment:</strong> The entire flow network of the catchment is simulating including river segments and cells. All fluxes are simulated by CMF
+on the basis of climate and soil data.</p>
+<p>(b) <strong>timeseriesCatchment:</strong> The entire flow network of the catchment is simulating including river segments and cells. The fluxes from single cells
+must be provided as time series for surface runoff, drainage flow and groundwater flow. Theses flows can be calculated using the <strong>*1dField</strong> option or by any other
+1D field scale model such as MACRO or PEARL.</p>
+<p>(c) <strong>areayieldCatchment:</strong> Only the stream network is simulated. In order to simulate the inflow into each reach, the area weighted inflow
+is calculated by multiplying the related catchment area by observed flow. The catchment
+area is calculated on the basis on the cumulative areas of cells which are connected to directly or indirectly to the reach.</p>
+<p>The last options differs from previous ones:</p>
+<p>(d) <strong>1dField:</strong> Only single fields are simulated with a 1D simulation approach. The soil is divided into several layers as well as holds a
+surface, drainage and groundwater flow. This approach is equal to the field representation of completeCatchment,
+but without connecting the cells across the catchment.</p>
+<p>The background for using different options is as follows. In larger catchments environmental data is often similar for single fields (e.g. climate x soil x management).
+Such fields can be summarized as unique combinations which can be simulated one time (using ‘1dField’ option and afterwards related to localised cells
+using the ‘timeserisCatchment’ option. This approach can save a lot of simulation time, because the complexity of individual setups is reduced, but
+the spatial discretisation stays in place. Moreover, the timeseriesCatchment option allows the utilisation of time series from established 1d models
+of FOCUS risk assessment, e.g. MACRO, PEARL or PRZM.</p>
+<p><strong>Further details</strong>:
+<a class="reference internal" href="concept.html"><span class="doc">Concept</span></a></p>
+</div>
+<div class="section" id="quick-user-guide">
+<h2>Quick user guide<a class="headerlink" href="#quick-user-guide" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="data-structure">
+<h3>Data structure<a class="headerlink" href="#data-structure" title="Permalink to this headline">¶</a></h3>
+<p>The data structure consists of three hierarchical levels. The ‘runlist’ holds a list with all ‘projects’ as a well
+as information regarding simulations period, number of threads and the hydrolocial modelign option. Projects are grouped in single folders. Each
+folder represents a model run which can be a single agricultural field, a network of river segments or an entire fully distributed catchment. The folder
+contains all input data files, e.g. climate and soil information, crop management and a list of cells, reaches and other spatial units of the catchment.</p>
+<div class="align-center figure">
+<img alt="_images/project-structure.png" src="_images/project-structure.png" />
+</div>
+<p><strong>Further details:</strong>
+<a class="reference internal" href="data_io.html"><span class="doc">Data I/O</span></a></p>
+</div>
+<div class="section" id="pre-processing">
+<h3>Pre-processing<a class="headerlink" href="#pre-processing" title="Permalink to this headline">¶</a></h3>
+<p>A set of pre-processing tools are available, e.g. to create a flow network between single cells and river segments.
+The algorithm calculates Thiessen-Polygons between all cells in the first step. Adjacent
+cells are connected via surface water, drainage and groundwater flow to each other. An iterative adaption
+procedure simplifies the number of connections in order to reduce the complexity of the flow network.</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">LandscapeModel</span> <span class="kn">as</span> <span class="nn">LM</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">Voronoi</span>
+<span class="kn">import</span> <span class="nn">shapely.geometry</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+  <span class="c1"># connect fields and river segments</span>
+  <span class="n">fieldcon</span> <span class="o">=</span> <span class="n">LM</span><span class="o">.</span><span class="n">FieldConnector</span><span class="p">(</span><span class="n">fpath</span><span class="o">=</span><span class="s2">&quot;c:/ExampleCatchment/&quot;</span><span class="p">,</span>
+                 <span class="n">simplify_connections</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span><span class="n">connection_type</span><span class="o">=</span><span class="s2">&quot;RO_GW&quot;</span><span class="p">)</span>
+  <span class="n">fieldcon</span><span class="o">.</span><span class="n">makePlot</span><span class="p">(</span><span class="s2">&quot;ExampleCatchment.png&quot;</span><span class="p">,</span><span class="n">resX</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="n">resY</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                  <span class="n">plotVoroni</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">plotElevation</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">plot_simplified</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<div class="align-center figure">
+<img alt="_images/preprocessing_1.png" src="_images/preprocessing_1.png" />
+</div>
+<p><strong>Further details:</strong>
+<a class="reference internal" href="usermanual.html"><span class="doc">Step-by-step user guide</span></a>, Pre-processing</p>
+</div>
+<div class="section" id="simulation">
+<h3>Simulation<a class="headerlink" href="#simulation" title="Permalink to this headline">¶</a></h3>
+<p>The model can be executed by using a Python script and calling the related functions:</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">LandscapeModel</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+  <span class="c1"># read runlist</span>
+  <span class="n">runFactory</span> <span class="o">=</span> <span class="n">LandscapeModel</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">RunFactory</span><span class="p">(</span><span class="s2">&quot;C:/&quot;</span><span class="p">,</span><span class="n">fname</span><span class="o">=</span> <span class="s2">&quot;runlist.csv&quot;</span><span class="p">)</span>
+  <span class="c1"># make simulation</span>
+  <span class="n">runFactory</span><span class="p">(</span><span class="s2">&quot;ExampleProject1&quot;</span> <span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<p>… or by using a batchfile which will execute all simulations as defined in the ‘runlist’:</p>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7</pre></div></td><td class="code"><div class="highlight"><pre><span></span>@echo off
+<span class="nb">set</span> <span class="nv">list</span><span class="o">=</span>runlist
+<span class="nb">set</span> <span class="nv">key</span><span class="o">=</span>None
+<span class="nb">set</span> <span class="nv">python</span><span class="o">=</span>%cd%/bin/python37/python.exe
+<span class="nb">set</span> <span class="nv">script</span><span class="o">=</span>%cd%/bin/main.py
+call %python% %script% %list% %key%
+pause
+</pre></div>
+</td></tr></table></div>
+<p><strong>Further details:</strong>
+<a class="reference internal" href="usermanual.html"><span class="doc">Step-by-step user guide</span></a>, completeCatchment, timeseriesCatchment, areaYieldCatchment, 1dField</p>
+</div>
+<div class="section" id="post-processing">
+<h3>Post-processing<a class="headerlink" href="#post-processing" title="Permalink to this headline">¶</a></h3>
+<p>Various functions are available to prepare graphs and summaries of the simulation:</p>
+<div class="align-center figure">
+<img alt="_images/plot1.png" src="_images/plot1.png" />
+</div>
+<p>The water and solute balance of single river segments can be evaluated in detail:</p>
+<div class="align-center figure">
+<img alt="_images/plot2.png" src="_images/plot2.png" />
+</div>
+<p>PEC values of several consecutive river segments can be evaluated over space and time:</p>
+<div class="align-center figure">
+<img alt="_images/plot3.png" src="_images/plot3.png" />
+</div>
+<p><strong>Further details:</strong>
+<a class="reference internal" href="usermanual.html"><span class="doc">Step-by-step user guide</span></a>, Post-processing</p>
+</div>
+</div>
+<div class="section" id="about">
+<h2>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h2>
+<p>The tool is a joint development within a project by Bayer AG, knoell Germany GmbH
+and University Giessen.</p>
+<p>Sebastian Multsch <sup>1</sup> , Florian Krebs <sup>1</sup> , Stefan Reichenberger <sup>1</sup> , Philipp Kraft <sup>2</sup> , Lutz Breuer <sup>2</sup> , Thorsten Schad <sup>3</sup></p>
+<p><sup>1</sup> <a class="reference external" href="https://www.knoellconsult.com/enf">knoell Germany GmbH</a></p>
+<p><sup>2</sup> <a class="reference external" href="http://www.uni-giessen.de/faculties/f09/institutes/ilr/hydro">Chair of Landscape, Water and Biogeochemical Cycles, Justus Liebig University Giessen</a></p>
+<p><sup>3</sup> <a class="reference external" href="https://www.cropscience.bayer.de/">Bayer AG, Research &amp; Development, Crop Science</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><strong>Regulatory Catchment Model</strong></a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+<li><a class="reference internal" href="#modelling-concept">Modelling concept</a></li>
+<li><a class="reference internal" href="#quick-user-guide">Quick user guide</a><ul>
+<li><a class="reference internal" href="#data-structure">Data structure</a></li>
+<li><a class="reference internal" href="#pre-processing">Pre-processing</a></li>
+<li><a class="reference internal" href="#simulation">Simulation</a></li>
+<li><a class="reference internal" href="#post-processing">Post-processing</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#about">About</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2018, knoell Germany GmbH.
+    </div>
+  </body>
+</html>

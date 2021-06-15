@@ -1,0 +1,723 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Step-by-step user guide &#8212; LanscapeModelingToolbox 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">LanscapeModelingToolbox 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="step-by-step-user-guide">
+<h1><strong>Step-by-step user guide</strong><a class="headerlink" href="#step-by-step-user-guide" title="Permalink to this headline">¶</a></h1>
+<p>The following guide provides some general instructions for using the model, an explanation of related
+tools as well as a step by step guide to setup the different model versions. In general, the model
+can be executed by using a Python script and calling the related functions:</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">LandscapeModel</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+  <span class="c1"># read runlist</span>
+  <span class="n">runFactory</span> <span class="o">=</span> <span class="n">LandscapeModel</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">RunFactory</span><span class="p">(</span><span class="s2">&quot;C:/&quot;</span><span class="p">,</span><span class="n">fname</span><span class="o">=</span> <span class="s2">&quot;runlist.csv&quot;</span><span class="p">)</span>
+  <span class="c1"># make simulation</span>
+  <span class="n">runFactory</span><span class="p">(</span><span class="s2">&quot;ExampleProject1&quot;</span> <span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<p>For user which are not familiar with Python or do not want use scripting a batch-file (‘./main.bat’) is available
+as well which calls a pre-defined script (‘./bin/main.py’). The batch-file simply runs all entries in the
+‘runlist.csv’ (‘set key=None’). In order to run a specific project, a key (e.g. set key=Example1) can be entered in the batch-file directly:</p>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7</pre></div></td><td class="code"><div class="highlight"><pre><span></span>@echo off
+<span class="nb">set</span> <span class="nv">list</span><span class="o">=</span>runlist
+<span class="nb">set</span> <span class="nv">key</span><span class="o">=</span>Example1
+<span class="nb">set</span> <span class="nv">python</span><span class="o">=</span>%cd%/bin/python37/python.exe
+<span class="nb">set</span> <span class="nv">script</span><span class="o">=</span>%cd%/bin/main.py
+call %python% %script% %list% %key%
+pause
+</pre></div>
+</td></tr></table></div>
+<div class="section" id="completecatchment">
+<h2>completeCatchment<a class="headerlink" href="#completecatchment" title="Permalink to this headline">¶</a></h2>
+<p>The entire flow network of the catchment is simulating including river segments and cells. All fluxes are simulated by CMF
+on the basis of climate and soil data.</p>
+<p>The figure below shows several examples of a setting in the ‘runlist.csv’. All of them run the model for one year
+with the run type ‘completeCatchment’. The database type is ‘csv’ for projects one and two as well as ‘hdf’ for three and four.
+The option catchment separation is activated for two and three. Three uses additionally the chunksize option,
+i.e. data is written from memory to disk in a certain interval defined in hours (e.g. monthly, 30days*24hours=720hours).
+The last setup uses the efate option as well. For this, a substance must be defined as well as the type of drift
+and efate module.</p>
+<div class="align-center figure">
+<img alt="_images/usermanual_fullydisributed_runlist.png" src="_images/usermanual_fullydisributed_runlist.png" />
+</div>
+<p>Some specific information must also be provided in the ‘CellList.csv’. The next reach or cell must be
+defined (columns ‘reach’ and ‘adjacent_field’) as well as the type of the connection (columns ‘reach_connection’
+and ‘field_connection’). The user can select ‘RO’ (surface runoff), ‘DR’ (drainage), ‘GW’ (groundwater) or
+a combination, e.g. ‘RO_GW’ or ‘RO_DR_GW’. All connections can be created with the ‘CatchmentConnector’ (see pre-processing).
+Moreover, the travel time between storages must be set. These values can be defined as saturated
+conductivity (m/day) or in absolute days.</p>
+<div class="align-center figure">
+<img alt="_images/usermanual_fullydisributedtimeseries_cellist.png" src="_images/usermanual_fullydisributedtimeseries_cellist.png" />
+</div>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">LandscapeModel</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1"># load existing setup</span>
+  <span class="n">fpath</span> <span class="o">=</span> <span class="s2">&quot;C:/&quot;</span>
+  <span class="n">fname</span> <span class="o">=</span> <span class="s2">&quot;runlist.csv&quot;</span>
+  <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;ExampleProject1&quot;</span>
+
+  <span class="c1"># read runlist</span>
+  <span class="n">runFactory</span> <span class="o">=</span> <span class="n">LandscapeModel</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">RunFactory</span><span class="p">(</span><span class="n">fpath</span><span class="p">,</span><span class="n">fname</span><span class="p">)</span>
+
+  <span class="c1"># create a setup based on existing data</span>
+  <span class="n">runFactory</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+  <span class="c1"># get model run</span>
+  <span class="n">catchment</span> <span class="o">=</span> <span class="n">runFactory</span><span class="o">.</span><span class="n">runs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1"># pre-processing</span>
+
+  <span class="c1"># create connections between cells&lt;&gt;cells and cells&lt;&gt;reches</span>
+  <span class="n">catchcon</span> <span class="o">=</span> <span class="n">LandscapeModel</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">PreProcessing</span><span class="o">.</span><span class="n">CatchmentConnector</span><span class="p">(</span><span class="n">catchment</span><span class="p">,</span>
+                                                  <span class="n">simplify_connections</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                                  <span class="n">connection_type</span><span class="o">=</span><span class="s2">&quot;RO_GW&quot;</span><span class="p">)</span>
+  <span class="c1"># plot results of separation</span>
+  <span class="n">catchcon</span><span class="o">.</span><span class="n">makePlot</span><span class="p">(</span><span class="s2">&quot;test_network.png&quot;</span><span class="p">,</span><span class="n">resX</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="n">resY</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="n">plotVoroni</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                  <span class="n">plotElevation</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">plot_simplified</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1"># simulation</span>
+  <span class="n">runFactory</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+  <span class="c1"># optional: separate the catchment into sub-units and make simulations</span>
+  <span class="n">catchSep</span> <span class="o">=</span> <span class="n">LandscapeModel</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">CatchmentSeparator</span><span class="p">(</span><span class="n">catchment</span><span class="p">)</span>
+  <span class="n">catchSep</span><span class="p">()</span>
+  <span class="n">catchSep</span><span class="o">.</span><span class="n">plotMap</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span><span class="n">withnames</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+  <span class="n">catchSep</span><span class="o">.</span><span class="n">run_SolverUnits</span><span class="p">()</span>
+  <span class="c1"># note that the catchment separation function can be also activated in</span>
+  <span class="c1"># the runlist.csv. In that case, the function above can be used as well</span>
+
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1"># post-processing</span>
+
+  <span class="c1"># initialise pre-porcessing object with existing catchment</span>
+  <span class="n">pstPrc</span> <span class="o">=</span> <span class="n">LandscapeModel</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">PostProcessing</span><span class="o">.</span><span class="n">AreaYieldCatchment</span><span class="p">(</span><span class="n">catchment</span><span class="p">)</span>
+
+  <span class="c1"># plot observed versus simulated flow</span>
+  <span class="n">pstPrc</span><span class="o">.</span><span class="n">performance</span><span class="p">(</span><span class="s2">&quot;flow&quot;</span><span class="p">)</span>
+
+  <span class="c1"># plot histogramm of hydrological parameter across catchment</span>
+  <span class="n">pstPrc</span><span class="o">.</span><span class="n">catchment_hydrology</span><span class="p">()</span>
+
+  <span class="c1"># plot cumulative distribution function of PEC values across catchment</span>
+  <span class="n">pstPrc</span><span class="o">.</span><span class="n">catchment_efate</span><span class="p">(</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1900</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">),[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span><span class="mi">24</span><span class="p">],</span>
+                         <span class="n">maxSW</span><span class="o">=.</span><span class="mi">4</span><span class="p">,</span><span class="n">maxSED</span><span class="o">=.</span><span class="mo">05</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="timeseriescatchment">
+<h2>timeseriesCatchment<a class="headerlink" href="#timeseriescatchment" title="Permalink to this headline">¶</a></h2>
+<p>The entire flow network of the catchment is simulating including river segments and cells. The fluxes from single cells
+must be provided as time series for surface runoff, drainage flow and groundwater flow. Theses flows can be calculated using the <strong>*1dField</strong> option or by any other
+1D field scale model such as MACRO or PEARL.</p>
+<p>The minimum requirement to run the model are a fully project setup and a ‘/projects/…/Timeseries’ folder
+which holds dataset for each cell with the information on the surface, drainage and groundwater
+flow to the next cell or reach (<a class="reference internal" href="data_io.html"><span class="doc">Data I/O</span></a>).</p>
+<p>The figure below shows several examples of a setting in the ‘runlist.csv’. Note that the run type is ‘timeseriesCatchment’.</p>
+<div class="align-center figure">
+<img alt="_images/usermanual_fullydisributedtimeseries_runlist.png" src="_images/usermanual_fullydisributedtimeseries_runlist.png" />
+</div>
+<p>The required settings in the ‘CellList.csv’ are shown below. The column ‘soilwaterflux’ must be set to ‘timeseries’.</p>
+<div class="align-center figure">
+<img alt="_images/usermanual_fullydisributedtimeseries_cellist.png" src="_images/usermanual_fullydisributedtimeseries_cellist.png" />
+</div>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">LandscapeModel</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+  <span class="o">...</span> <span class="n">same</span> <span class="n">script</span> <span class="k">as</span> <span class="n">defined</span> <span class="k">for</span> <span class="n">the</span> <span class="n">completeCatchment</span> <span class="n">option</span> <span class="o">...</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="areayieldcatchment">
+<h2>areayieldCatchment<a class="headerlink" href="#areayieldcatchment" title="Permalink to this headline">¶</a></h2>
+<p>Only the stream network is simulated. In order to simulate the inflow into each reach, the area weighted inflow
+is calculated by multiplying the related catchment area by observed flow. The catchment
+area is calculated on the basis on the cumulative areas of cells which are connected to directly or indirectly to the reach.</p>
+<p>The minimum requirements to run the model are observed stream flow data from a gauging station
+(to be stored in ‘observation.csv’, a list with single cells (‘CellList.csv’) as well as the stream
+network (‘ReachList.csv’). The connections between reaches must be set (column ‘donwstream_reach’).
+Note that from ‘CellList.csv’ only the information on the spatial coordinates
+of the cells and the area is read in by the model as well as connections. Other columns are not considered for this option.
+The connection between cells and cells and reaches can be provided by user or calculated by one
+of the pre-processing tools.</p>
+<p>The figure below shows several examples of a setting in the ‘runlist.csv’. The settings are similar to
+the completeCatchment, but with ‘areayieldCatchment’ as run type.</p>
+<div class="align-center figure">
+<img alt="_images/usermanual_instream_runlist.png" src="_images/usermanual_instream_runlist.png" />
+</div>
+<p>The timeseries required by the model must hold the information on the key of the reach, time as well
+as the related flow and concentration (<a class="reference internal" href="data_io.html"><span class="doc">Data I/O</span></a>). The flow is the cumulative inflow
+from the related catchment area.</p>
+<p>The following code snippet shows an example to derive time series per reach from observed data, run an in-stream
+model and plot some statistics (see ‘./bin/AreayieldCatchment.py’):</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">LandscapeModel</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1"># load existing setup</span>
+  <span class="n">fpath</span> <span class="o">=</span> <span class="s2">&quot;C:/&quot;</span>
+  <span class="n">fname</span> <span class="o">=</span> <span class="s2">&quot;runlist.csv&quot;</span>
+  <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;ExampleProject1&quot;</span>
+
+  <span class="c1"># read runlist</span>
+  <span class="n">runFactory</span> <span class="o">=</span> <span class="n">LandscapeModel</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">RunFactory</span><span class="p">(</span><span class="n">fpath</span><span class="p">,</span><span class="n">fname</span><span class="p">)</span>
+  <span class="c1"># create a setup based on existing data</span>
+  <span class="n">runFactory</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+  <span class="c1"># get model run</span>
+  <span class="n">catchment</span> <span class="o">=</span> <span class="n">runFactory</span><span class="o">.</span><span class="n">runs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1"># pre-processing</span>
+
+  <span class="c1"># create connections between cells&lt;&gt;cells and cells&lt;&gt;reches</span>
+  <span class="n">catchcon</span> <span class="o">=</span> <span class="n">LandscapeModel</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">PreProcessing</span><span class="o">.</span><span class="n">CatchmentConnector</span><span class="p">(</span><span class="n">catchment</span><span class="p">,</span>
+                                                  <span class="n">simplify_connections</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                                  <span class="n">connection_type</span><span class="o">=</span><span class="s2">&quot;RO_GW&quot;</span><span class="p">)</span>
+  <span class="c1"># plot results of separation</span>
+  <span class="n">catchcon</span><span class="o">.</span><span class="n">makePlot</span><span class="p">(</span><span class="s2">&quot;test_network.png&quot;</span><span class="p">,</span><span class="n">resX</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="n">resY</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="n">plotVoroni</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                  <span class="n">plotElevation</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">plot_simplified</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+  <span class="c1"># calculate area-weighted flow timeseries of reach each and create files</span>
+  <span class="n">ayc</span> <span class="o">=</span> <span class="n">LandscapeModel</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">PreProcessing</span><span class="o">.</span><span class="n">AreaYieldCatchment</span><span class="p">(</span><span class="n">catchment</span><span class="p">)</span>
+  <span class="n">data_resampled</span><span class="o">=</span><span class="n">ayc</span><span class="o">.</span><span class="n">create_timeseries</span><span class="p">(</span><span class="n">resample_rule</span><span class="o">=</span><span class="s2">&quot;1H&quot;</span><span class="p">,</span>
+                                       <span class="n">resample_type</span><span class="o">=</span><span class="s2">&quot;interpolate&quot;</span><span class="p">)</span>
+
+  <span class="c1"># create scenarios (365 days dry 10%-percentile, medium 50%-percentile and</span>
+  <span class="c1"># wet 90%-percentile year) and create files</span>
+  <span class="n">ayc</span><span class="o">.</span><span class="n">create_timeseries_scenarios</span><span class="p">(</span><span class="n">resample_rule</span><span class="o">=</span><span class="s2">&quot;1H&quot;</span><span class="p">,</span>
+                                       <span class="n">resample_type</span><span class="o">=</span><span class="s2">&quot;interpolate&quot;</span><span class="p">)</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1"># simulation</span>
+  <span class="n">runFactory</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1"># post-processing</span>
+
+  <span class="c1"># initialise pre-porcessing object with existing catchment</span>
+  <span class="n">pstPrc</span> <span class="o">=</span> <span class="n">LandscapeModel</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">PostProcessing</span><span class="o">.</span><span class="n">AreaYieldCatchment</span><span class="p">(</span><span class="n">catchment</span><span class="p">)</span>
+
+  <span class="c1"># plot observed versus simulated flow</span>
+  <span class="n">pstPrc</span><span class="o">.</span><span class="n">performance</span><span class="p">(</span><span class="s2">&quot;flow&quot;</span><span class="p">)</span>
+
+  <span class="c1"># plot histogramm of hydrological parameter across catchment</span>
+  <span class="n">pstPrc</span><span class="o">.</span><span class="n">catchment_hydrology</span><span class="p">()</span>
+
+  <span class="c1"># plot cumulative distribution function of PEC values across catchment</span>
+  <span class="n">pstPrc</span><span class="o">.</span><span class="n">catchment_efate</span><span class="p">(</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1900</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">),[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span><span class="mi">24</span><span class="p">],</span>
+                         <span class="n">maxSW</span><span class="o">=.</span><span class="mi">4</span><span class="p">,</span><span class="n">maxSED</span><span class="o">=.</span><span class="mo">05</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="dfield">
+<h2>1dField<a class="headerlink" href="#dfield" title="Permalink to this headline">¶</a></h2>
+<p>Only single fields are simulated with a 1D simulation approach. The soil is divided into several layers as well as holds a
+surface, drainage and groundwater flow. This approach is equal to the field representation of completeCatchment,
+but without connecting the cells across the catchment.</p>
+<p>The setup of the project is similar to the fully distributed approach,
+but without defining connections between cells or cells and reaches. The ‘runlist.csv’ looks the same. The
+difference is in the parameterisation of the ‘CellList.csv’. The connections and connections types must be set
+to ‘None’ and the soilwaterflux parameter to ‘richards_bucket’. This mean that the soil water balance is calculated
+based on the Richards’ approach and the outgoing flows are balanced.</p>
+<div class="align-center figure">
+<img alt="_images/usermanual_1Dfieldscale_celllist.png" src="_images/usermanual_1Dfieldscale_celllist.png" />
+</div>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">LandscapeModel</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1"># load existing setup</span>
+  <span class="n">fpath</span> <span class="o">=</span> <span class="s2">&quot;C:/&quot;</span>
+  <span class="n">fname</span> <span class="o">=</span> <span class="s2">&quot;runlist.csv&quot;</span>
+  <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;ExampleProject1&quot;</span>
+
+  <span class="c1"># read runlist</span>
+  <span class="n">runFactory</span> <span class="o">=</span> <span class="n">LandscapeModel</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">RunFactory</span><span class="p">(</span><span class="n">fpath</span><span class="p">,</span><span class="n">fname</span><span class="p">)</span>
+
+  <span class="c1"># create a setup based on existing data</span>
+  <span class="n">runFactory</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+  <span class="c1"># get model run</span>
+  <span class="n">catchment</span> <span class="o">=</span> <span class="n">runFactory</span><span class="o">.</span><span class="n">runs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1"># pre-processing</span>
+
+  <span class="c1"># -</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1"># simulation</span>
+  <span class="n">runFactory</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1"># post-processing</span>
+
+  <span class="c1"># plot results of fields</span>
+  <span class="n">plots</span> <span class="o">=</span> <span class="n">LandscapeModel</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">Plotting</span><span class="p">()</span>
+  <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">catchment</span><span class="o">.</span><span class="n">inpData</span><span class="o">.</span><span class="n">CellList</span><span class="p">:</span>
+      <span class="c1"># Sankey plot of field water balance</span>
+      <span class="n">plots</span><span class="o">.</span><span class="n">FieldWaterBalance</span><span class="p">(</span><span class="n">catchment</span><span class="p">,</span><span class="n">cell</span><span class="o">.</span><span class="n">key</span><span class="p">,</span><span class="n">title</span><span class="o">=</span><span class="n">key</span><span class="p">,</span><span class="n">fpath</span><span class="o">=</span><span class="s2">&quot;C:/.../&quot;</span><span class="o">+</span><span class="n">key</span><span class="p">)</span>
+      <span class="c1"># Canopy processes</span>
+      <span class="n">plots</span><span class="o">.</span><span class="n">plot_PlantGrowth</span><span class="p">(</span><span class="n">catchment</span><span class="p">,</span><span class="n">cell</span><span class="o">.</span><span class="n">key</span><span class="p">,</span><span class="n">title</span><span class="o">=</span><span class="n">key</span><span class="p">,</span><span class="n">fpath</span><span class="o">=</span><span class="s2">&quot;C:/.../&quot;</span><span class="o">+</span><span class="n">key</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="crop-management">
+<h2>Crop management<a class="headerlink" href="#crop-management" title="Permalink to this headline">¶</a></h2>
+<p>The definition of a crop management is required to apply pesticides and to sow
+plants. For instance, if one wants to simulate only the water balance with the in-stream
+or timeseriesCatchment option, no definition is needed at all.</p>
+<p>All information is defined in ‘CropManagementList.csv’.The basic information when sowing
+crops is the related key in the ‘CropCoefficientList.csv’, the cell key and the time of
+sowing. The application rate (g/ha) must be additionally defined for pesticide application.</p>
+<div class="align-center figure">
+<img alt="_images/usermanual_cropmanagementlist.png" src="_images/usermanual_cropmanagementlist.png" />
+</div>
+</div>
+<div class="section" id="pre-processing">
+<h2>Pre-processing<a class="headerlink" href="#pre-processing" title="Permalink to this headline">¶</a></h2>
+<p><strong>CatchmentConnector</strong>: The automatic creation of connections can be done by using the pre-defined batch-file (‘./catchment_connector.bat’) or by calling the respective functions directly:</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">LandscapeModel</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1"># load exisisting project</span>
+  <span class="n">fname</span> <span class="o">=</span> <span class="s2">&quot;runlist.csv&quot;</span>
+  <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;ExampleProject1&quot;</span>
+
+  <span class="c1"># get current path</span>
+  <span class="n">fdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]),</span><span class="s2">&quot;projects&quot;</span><span class="p">)</span>
+  <span class="c1"># read runlist</span>
+  <span class="n">runFactory</span> <span class="o">=</span> <span class="n">LandscapeModel</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">RunFactory</span><span class="p">(</span><span class="n">fdir</span><span class="p">,</span><span class="n">fname</span><span class="o">=</span><span class="n">fname</span><span class="p">)</span>
+  <span class="c1"># setup catchment</span>
+  <span class="n">runFactory</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+  <span class="n">catchment</span> <span class="o">=</span> <span class="n">runFactory</span><span class="o">.</span><span class="n">runs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1"># create pre-porcessing object and run separatiom</span>
+  <span class="n">catchcon</span> <span class="o">=</span> <span class="n">LandscapeModel</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">PreProcessing</span><span class="o">.</span><span class="n">CatchmentConnector</span><span class="p">(</span><span class="n">catchment</span><span class="p">,</span>
+                                                                   <span class="n">simplify_connections</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                                                   <span class="n">connection_type</span><span class="o">=</span><span class="s2">&quot;RO_GW&quot;</span><span class="p">)</span>
+
+  <span class="c1"># plot results of separation</span>
+  <span class="n">catchcon</span><span class="o">.</span><span class="n">makePlot</span><span class="p">(</span><span class="s2">&quot;test_network.png&quot;</span><span class="p">,</span><span class="n">resX</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="n">resY</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="n">plotVoroni</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                    <span class="n">plotElevation</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">plot_simplified</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+  <span class="n">catchcon</span><span class="o">.</span><span class="n">makePlot</span><span class="p">(</span><span class="s2">&quot;test_voroni.png&quot;</span><span class="p">,</span><span class="n">resX</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="n">resY</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="n">plotVoroni</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                    <span class="n">plotElevation</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">plot_simplified</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<p><strong>CatchmentSeparator</strong>: In order to activate a separated run use the ‘runlist.csv’ and set the column ‘catchment_separation’ to TRUE.</p>
+<div class="align-center figure">
+<img alt="_images/usermanual_fullydisributed_runlist.png" src="_images/usermanual_fullydisributed_runlist.png" />
+</div>
+<p><strong>AreaYieldCatchment</strong>: A set of methods to create models with the mode ‘areayieldCatchment’, e.g. to create reach timeseries and scenarios.</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">LandscapeModel</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+  <span class="o">....</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1"># pre-processing</span>
+
+  <span class="c1"># create connections between cells&lt;&gt;cells and cells&lt;&gt;reches</span>
+  <span class="n">catchcon</span> <span class="o">=</span> <span class="n">LandscapeModel</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">PreProcessing</span><span class="o">.</span><span class="n">CatchmentConnector</span><span class="p">(</span><span class="n">catchment</span><span class="p">,</span>
+                                                  <span class="n">simplify_connections</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                                  <span class="n">connection_type</span><span class="o">=</span><span class="s2">&quot;RO_GW&quot;</span><span class="p">)</span>
+  <span class="c1"># plot results of separation</span>
+  <span class="n">catchcon</span><span class="o">.</span><span class="n">makePlot</span><span class="p">(</span><span class="s2">&quot;test_network.png&quot;</span><span class="p">,</span><span class="n">resX</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="n">resY</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="n">plotVoroni</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                  <span class="n">plotElevation</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">plot_simplified</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+  <span class="c1"># calculate area-weighted flow timeseries of reach each and create files</span>
+  <span class="n">ayc</span> <span class="o">=</span> <span class="n">LandscapeModel</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">PreProcessing</span><span class="o">.</span><span class="n">AreaYieldCatchment</span><span class="p">(</span><span class="n">catchment</span><span class="p">)</span>
+  <span class="n">data_resampled</span><span class="o">=</span><span class="n">ayc</span><span class="o">.</span><span class="n">create_timeseries</span><span class="p">(</span><span class="n">resample_rule</span><span class="o">=</span><span class="s2">&quot;1H&quot;</span><span class="p">,</span>
+                                       <span class="n">resample_type</span><span class="o">=</span><span class="s2">&quot;interpolate&quot;</span><span class="p">)</span>
+
+  <span class="c1"># create scenarios (365 days dry 10%-percentile, medium 50%-percentile and</span>
+  <span class="c1"># wet 90%-percentile year) and create files</span>
+  <span class="n">ayc</span><span class="o">.</span><span class="n">create_timeseries_scenarios</span><span class="p">(</span><span class="n">resample_rule</span><span class="o">=</span><span class="s2">&quot;1H&quot;</span><span class="p">,</span>
+                                       <span class="n">resample_type</span><span class="o">=</span><span class="s2">&quot;interpolate&quot;</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="post-processing">
+<h2>Post-processing<a class="headerlink" href="#post-processing" title="Permalink to this headline">¶</a></h2>
+<p><strong>CatchmentSummary</strong>: Creates a pre-defined summary of a simulation.</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">LandscapeModel</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+  <span class="o">...</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1"># post-processing</span>
+
+  <span class="c1"># initialise pre-porcessing object with existing catchment</span>
+  <span class="n">pstPrc</span> <span class="o">=</span> <span class="n">LandscapeModel</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">PostProcessing</span><span class="o">.</span><span class="n">AreaYieldCatchment</span><span class="p">(</span><span class="n">catchment</span><span class="p">)</span>
+
+  <span class="c1"># plot observed versus simulated flow</span>
+  <span class="n">pstPrc</span><span class="o">.</span><span class="n">performance</span><span class="p">(</span><span class="s2">&quot;flow&quot;</span><span class="p">)</span>
+
+  <span class="c1"># plot histogramm of hydrological parameter across catchment</span>
+  <span class="n">pstPrc</span><span class="o">.</span><span class="n">catchment_hydrology</span><span class="p">()</span>
+
+  <span class="c1"># plot cumulative distribution function of PEC values across catchment</span>
+  <span class="n">pstPrc</span><span class="o">.</span><span class="n">catchment_efate</span><span class="p">(</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1900</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">),[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span><span class="mi">24</span><span class="p">],</span>
+                         <span class="n">maxSW</span><span class="o">=.</span><span class="mi">4</span><span class="p">,</span><span class="n">maxSED</span><span class="o">=.</span><span class="mo">05</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><strong>Step-by-step user guide</strong></a><ul>
+<li><a class="reference internal" href="#completecatchment">completeCatchment</a></li>
+<li><a class="reference internal" href="#timeseriescatchment">timeseriesCatchment</a></li>
+<li><a class="reference internal" href="#areayieldcatchment">areayieldCatchment</a></li>
+<li><a class="reference internal" href="#dfield">1dField</a></li>
+<li><a class="reference internal" href="#crop-management">Crop management</a></li>
+<li><a class="reference internal" href="#pre-processing">Pre-processing</a></li>
+<li><a class="reference internal" href="#post-processing">Post-processing</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/usermanual.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2018, knoell Germany GmbH.
+    </div>
+  </body>
+</html>

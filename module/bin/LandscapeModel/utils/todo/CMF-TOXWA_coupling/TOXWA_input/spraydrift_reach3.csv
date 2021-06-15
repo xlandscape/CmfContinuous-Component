@@ -1,0 +1,8 @@
+# Column 1: Time; 
+# Column 2: Type of loading Drift deposition (mg.m-2);
+# Column 3: Start of stretch of watercourse loaded by all loading types (m) [0|1e4]
+# Column 4: End of stretch of watercourse loaded by all loading types (m) [0|1e4]
+01-May-1986-09h00,Drift,0.0476,0,100
+08-May-1986-09h00,Drift,0.0476,0,100
+01-May-1986-09h00,Drift,0.0476,0,100
+15-May-1986-09h00,Drift,0.0476,0,100

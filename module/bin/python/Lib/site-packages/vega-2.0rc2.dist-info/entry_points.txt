@@ -1,0 +1,6 @@
+[altair.vega.v4.renderer]
+notebook = vega.vega:entry_point_renderer
+
+[altair.vegalite.v3.renderer]
+notebook = vega.vegalite:entry_point_renderer
+

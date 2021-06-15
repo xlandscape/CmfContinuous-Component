@@ -1,0 +1,349 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>numdifftools.core.Hessdiag &mdash; numdifftools 0.9.17 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="numdifftools 0.9.17 documentation" href="../../index.html"/>
+        <link rel="up" title="numdifftools package" href="../numdifftools.html"/>
+        <link rel="next" title="numdifftools.core.Hessian" href="numdifftools.core.Hessian.html"/>
+        <link rel="prev" title="numdifftools.core.Jacobian" href="numdifftools.core.Jacobian.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> numdifftools
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.17
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html">Introduction to Numdifftools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#documentation-and-code">Documentation and code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#unit-tests">Unit tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#acknowledgement">Acknowledgement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/overview.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/numerical/main.html">Numerical differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/algorithmic/main.html">Algorithmic differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../authors.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">Changelog</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">Module reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../numdifftools.html">numdifftools package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../numdifftools.html#step-generators">Step generators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../numdifftools.html#utility-functions">Utility functions</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../numdifftools.html#finite-difference-approximations">Finite difference approximations</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="numdifftools.core.Derivative.html">numdifftools.core.Derivative</a></li>
+<li class="toctree-l4"><a class="reference internal" href="numdifftools.core.Gradient.html">numdifftools.core.Gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="numdifftools.core.Jacobian.html">numdifftools.core.Jacobian</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="">numdifftools.core.Hessdiag</a></li>
+<li class="toctree-l4"><a class="reference internal" href="numdifftools.core.Hessian.html">numdifftools.core.Hessian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="numdifftools.core.directionaldiff.html">numdifftools.core.directionaldiff</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../numdifftools.html#numdifftools-extrapolation-module">numdifftools.extrapolation module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../numdifftools.html#numdifftools-limits-module">numdifftools.limits module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../numdifftools.html#numdifftools-multicomplex-module">numdifftools.multicomplex module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../numdifftools.html#numdifftools-nd-algopy-module">numdifftools.nd_algopy module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../numdifftools.html#module-numdifftools.run_benchmark">numdifftools.run_benchmark module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../numdifftools.html#module-numdifftools">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">numdifftools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../modules.html">Modules</a> &raquo;</li>
+      
+          <li><a href="../numdifftools.html">numdifftools package</a> &raquo;</li>
+      
+    <li>numdifftools.core.Hessdiag</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/api/generated/numdifftools.core.Hessdiag.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="numdifftools-core-hessdiag">
+<h1>numdifftools.core.Hessdiag<a class="headerlink" href="#numdifftools-core-hessdiag" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="numdifftools.core.Hessdiag">
+<em class="property">class </em><code class="descclassname">numdifftools.core.</code><code class="descname">Hessdiag</code><span class="sig-paren">(</span><em>f</em>, <em>step=None</em>, <em>method='central'</em>, <em>order=2</em>, <em>full_output=False</em>, <em>**step_options</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/numdifftools/core.html#Hessdiag"><span class="viewcode-link">[source]</span></a><a class="reference external" href="http://github.com/pbrod/numdifftools/blob/v0.9.17/numdifftools/core.py#L723-L821"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#numdifftools.core.Hessdiag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Hessian diagonal with finite difference approximation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f</strong> : function</p>
+<blockquote>
+<div><p>function of one array f(x, <cite>*args</cite>, <cite>**kwds</cite>)</p>
+</div></blockquote>
+<p><strong>step</strong> : float, array-like or StepGenerator object, optional</p>
+<blockquote>
+<div><p>Defines the spacing used in the approximation.
+Default is MinStepGenerator(base_step=step, step_ratio=None,</p>
+<blockquote>
+<div><p>num_extrap=0, <a href="#id1"><span class="problematic" id="id2">**</span></a>step_options)</p>
+</div></blockquote>
+<p>if step or method in in [&#8216;complex&#8217;, &#8216;multicomplex&#8217;],
+otherwise</p>
+<blockquote>
+<div><p>MaxStepGenerator(step_ratio=None, num_extrap=14, <a href="#id3"><span class="problematic" id="id4">**</span></a>step_options)</p>
+</div></blockquote>
+<p>The results are extrapolated if the StepGenerator generate more than 3
+steps.</p>
+</div></blockquote>
+<p><strong>method</strong> : {&#8216;central&#8217;, &#8216;complex&#8217;, &#8216;multicomplex&#8217;, &#8216;forward&#8217;, &#8216;backward&#8217;}</p>
+<blockquote>
+<div><p>defines the method used in the approximationorder : int, optional
+defines the order of the error term in the Taylor approximation used.
+For &#8216;central&#8217; and &#8216;complex&#8217; methods, it must be an even number.</p>
+</div></blockquote>
+<p><strong>full_output</strong> : bool, optional</p>
+<blockquote>
+<div><p>If <cite>full_output</cite> is False, only the derivative is returned.
+If <cite>full_output</cite> is True, then (der, r) is returned <cite>der</cite> is the
+derivative, and <cite>r</cite> is a Results object.</p>
+</div></blockquote>
+<p><strong>**step_options:</strong></p>
+<blockquote>
+<div><p>options to pass on to the XXXStepGenerator used.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>hessdiag</strong> : array</p>
+<blockquote class="last">
+<div><p>hessian diagonal</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="numdifftools.core.Derivative.html#numdifftools.core.Derivative" title="numdifftools.core.Derivative"><code class="xref py py-obj docutils literal"><span class="pre">Derivative</span></code></a>, <a class="reference internal" href="numdifftools.core.Hessian.html#numdifftools.core.Hessian" title="numdifftools.core.Hessian"><code class="xref py py-obj docutils literal"><span class="pre">Hessian</span></code></a>, <a class="reference internal" href="numdifftools.core.Jacobian.html#numdifftools.core.Jacobian" title="numdifftools.core.Jacobian"><code class="xref py py-obj docutils literal"><span class="pre">Jacobian</span></code></a>, <a class="reference internal" href="numdifftools.core.Gradient.html#numdifftools.core.Gradient" title="numdifftools.core.Gradient"><code class="xref py py-obj docutils literal"><span class="pre">Gradient</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<p>Complex methods are usually the most accurate provided the function to
+differentiate is analytic. The complex-step methods also requires fewer
+steps than the other methods and can work very close to the support of
+a function.
+The complex-step derivative has truncation error O(steps**2) for <cite>n=1</cite> and
+O(steps**4) for <cite>n</cite> larger, so truncation error can be eliminated by
+choosing steps to be very small.
+Especially the first order complex-step derivative avoids the problem of
+round-off error with small steps because there is no subtraction. However,
+this method fails if f(x) does not support complex numbers or involves
+non-analytic functions such as e.g.: abs, max, min.
+Central difference methods are almost as accurate and has no restriction on
+type of function. For this reason the &#8216;central&#8217; method is the default
+method, but sometimes one can only allow evaluation in forward or backward
+direction.</p>
+<p>For all methods one should be careful in decreasing the step size too much
+due to round-off errors.</p>
+<p>Higher order approximation methods will generally be more accurate, but may
+also suffer more from numerical problems. First order methods is usually
+not recommended.</p>
+<dl class="method">
+<dt id="numdifftools.core.Hessdiag.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>f</em>, <em>step=None</em>, <em>method='central'</em>, <em>order=2</em>, <em>full_output=False</em>, <em>**step_options</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/numdifftools/core.html#Hessdiag.__init__"><span class="viewcode-link">[source]</span></a><a class="reference external" href="http://github.com/pbrod/numdifftools/blob/v0.9.17/numdifftools/core.py#L758-L762"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#numdifftools.core.Hessdiag.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#numdifftools.core.Hessdiag.__init__" title="numdifftools.core.Hessdiag.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(f[,&nbsp;step,&nbsp;method,&nbsp;order,&nbsp;full_output])</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">n</span></code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="numdifftools.core.Hessian.html" class="btn btn-neutral float-right" title="numdifftools.core.Hessian" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="numdifftools.core.Jacobian.html" class="btn btn-neutral" title="numdifftools.core.Jacobian" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2009-2015, Per A Brodtkorb, John D&#39;Errico.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.9.17',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

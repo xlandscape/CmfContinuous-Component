@@ -1,0 +1,317 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>numdifftools.tests.test_hessian &mdash; numdifftools 0.9.16 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="numdifftools 0.9.16 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> numdifftools
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.16
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html">Introduction to Numdifftools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#documentation-and-code">Documentation and code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#unit-tests">Unit tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#acknowledgement">Acknowledgement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/numerical/main.html">Numerical differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/algorithmic/main.html">Algorithmic differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Module reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../index.html">numdifftools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      
+    <li>numdifftools.tests.test_hessian</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for numdifftools.tests.test_hessian</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding:utf-8 -*-</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">numdifftools</span> <span class="kn">as</span> <span class="nn">nd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">pi</span><span class="p">,</span> <span class="n">r_</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">array</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">linalg</span><span class="p">,</span> <span class="n">optimize</span><span class="p">,</span> <span class="n">constants</span>
+<span class="kn">from</span> <span class="nn">numdifftools.multicomplex</span> <span class="kn">import</span> <span class="n">c_abs</span> <span class="k">as</span> <span class="nb">abs</span>
+<span class="n">_TINY</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">machar</span><span class="o">.</span><span class="n">tiny</span>
+
+<span class="c1">#  Hamiltonian</span>
+<span class="c1">#     H = sum_i(p_i2/(2m)+ 1/2 * m * w2 x_i2) + sum_(i!=j)(a/|x_i-x_j|)</span>
+<div class="viewcode-block" id="ClassicalHamiltonian"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_hessian.ClassicalHamiltonian">[docs]</a><span class="k">class</span> <span class="nc">ClassicalHamiltonian</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Hamiltonian</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    N : scalar</span>
+<span class="sd">        number of ions in the chain</span>
+<span class="sd">    w : scalar</span>
+<span class="sd">        angular trap frequency</span>
+<span class="sd">    C : scalar</span>
+<span class="sd">        Coulomb constant times the electronic charge in SI units.</span>
+<span class="sd">    m : scalar</span>
+<span class="sd">        the mass of a single trapped ion in the chain</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="mi">1000000</span>      <span class="c1"># f is a scalar, it&#39;s the trap frequency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">f</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">epsilon_0</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">e</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="c1"># C is a scalar, it&#39;s the I</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m</span> <span class="o">=</span> <span class="mf">39.96</span> <span class="o">*</span> <span class="mf">1.66e-27</span>
+
+<div class="viewcode-block" id="ClassicalHamiltonian.potential"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_hessian.ClassicalHamiltonian.potential">[docs]</a>    <span class="k">def</span> <span class="nf">potential</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positionvector</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return potential</span>
+
+<span class="sd">        positionvector is an 1-d array (vector) of length N that contains the</span>
+<span class="sd">        positions of the N ions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">positionvector</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span>
+
+        <span class="c1"># First we consider the potential of the harmonic oscillator</span>
+        <span class="n">Vx</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">m</span> <span class="o">*</span> <span class="p">(</span><span class="n">w</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="nb">sum</span><span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># then we add the coulomb interaction:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">xi</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">xj</span> <span class="ow">in</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]:</span>
+                <span class="n">Vx</span> <span class="o">+=</span> <span class="n">C</span> <span class="o">/</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">xi</span> <span class="o">-</span> <span class="n">xj</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">Vx</span></div>
+
+<div class="viewcode-block" id="ClassicalHamiltonian.initialposition"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_hessian.ClassicalHamiltonian.initialposition">[docs]</a>    <span class="k">def</span> <span class="nf">initialposition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Defines initial position as an estimate for the minimize process.&quot;&quot;&quot;</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span>
+        <span class="n">x_0</span> <span class="o">=</span> <span class="n">r_</span><span class="p">[</span><span class="o">-</span><span class="p">(</span><span class="n">N</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">:(</span><span class="n">N</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">:</span><span class="n">N</span> <span class="o">*</span> <span class="mi">1j</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">x_0</span></div>
+
+<div class="viewcode-block" id="ClassicalHamiltonian.normal_modes"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_hessian.ClassicalHamiltonian.normal_modes">[docs]</a>    <span class="k">def</span> <span class="nf">normal_modes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eigenvalues</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return normal modes</span>
+
+<span class="sd">        the computed eigenvalues of the matrix Vx are of the form</span>
+<span class="sd">        (normal_modes)2*m.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span>
+        <span class="n">normal_modes</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">eigenvalues</span> <span class="o">/</span> <span class="n">m</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">normal_modes</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">_run_hamiltonian</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">ClassicalHamiltonian</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">potential</span><span class="p">(</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])))</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">potential</span><span class="p">(</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])))</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">potential</span><span class="p">(</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])))</span>
+
+    <span class="n">xopt</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">fmin</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">potential</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">initialposition</span><span class="p">(),</span> <span class="n">xtol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span>
+    <span class="c1"># Important to restrict the step in order to avoid the discontinutiy at</span>
+    <span class="c1"># x=[0,0]</span>
+    <span class="c1"># hessian = nd.Hessian(c.potential, step_max=1.0, step_nom=np.abs(xopt))</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">MaxStepGenerator</span><span class="p">(</span><span class="n">step_max</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">step_ratio</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+    <span class="n">hessian</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Hessian</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">potential</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;central&#39;</span><span class="p">,</span>
+                         <span class="n">full_output</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="c1"># hessian = algopy.Hessian(c.potential) # Does not work</span>
+    <span class="c1"># hessian = scientific.Hessian(c.potential) # does not work</span>
+    <span class="n">H</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">hessian</span><span class="p">(</span><span class="n">xopt</span><span class="p">)</span>
+    <span class="n">true_H</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">5.23748385e-12</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.61873829e-12</span><span class="p">],</span>
+                       <span class="p">[</span><span class="o">-</span><span class="mf">2.61873829e-12</span><span class="p">,</span> <span class="mf">5.23748385e-12</span><span class="p">]])</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">xopt</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;H-true_H&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">H</span><span class="o">-</span><span class="n">true_H</span><span class="p">))</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;error_estimate&#39;</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">error_estimate</span><span class="p">)</span>
+
+        <span class="n">eigenvalues</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">eigvals</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
+        <span class="n">normal_modes</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">normal_modes</span><span class="p">(</span><span class="n">eigenvalues</span><span class="p">)</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;eigenvalues&#39;</span><span class="p">,</span> <span class="n">eigenvalues</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;normal_modes&#39;</span><span class="p">,</span> <span class="n">normal_modes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">H</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">error_estimate</span><span class="p">,</span> <span class="n">true_H</span>
+
+
+<div class="viewcode-block" id="TestHessian"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_hessian.TestHessian">[docs]</a><span class="k">class</span> <span class="nc">TestHessian</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestHessian.test_hessian"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_hessian.TestHessian.test_hessian">[docs]</a>    <span class="k">def</span> <span class="nf">test_hessian</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">H</span><span class="p">,</span> <span class="n">_error_estimate</span><span class="p">,</span> <span class="n">true_H</span> <span class="o">=</span> <span class="n">_run_hamiltonian</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">H</span><span class="o">-</span><span class="n">true_H</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-18</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">())</span></div></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c1"># _run_hamiltonian()</span>
+    <span class="n">unittest</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2009-2015, Per A Brodtkorb, John D&#39;Errico.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.9.16',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

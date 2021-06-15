@@ -1,0 +1,341 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>numdifftools.tests.test_extrapolation &mdash; numdifftools 0.9.17 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="numdifftools 0.9.17 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> numdifftools
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.17
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html">Introduction to Numdifftools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#documentation-and-code">Documentation and code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#unit-tests">Unit tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#acknowledgement">Acknowledgement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/numerical/main.html">Numerical differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/algorithmic/main.html">Algorithmic differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Module reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../index.html">numdifftools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      
+    <li>numdifftools.tests.test_extrapolation</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for numdifftools.tests.test_extrapolation</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.testing</span> <span class="kn">import</span> <span class="n">assert_array_almost_equal</span><span class="p">,</span> <span class="n">assert_allclose</span>
+<span class="kn">from</span> <span class="nn">numdifftools.extrapolation</span> <span class="kn">import</span> <span class="n">Dea</span><span class="p">,</span> <span class="n">dea3</span><span class="p">,</span> <span class="n">Richardson</span><span class="p">,</span> <span class="n">EpsAlg</span>
+
+
+<div class="viewcode-block" id="TestRichardson"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_extrapolation.TestRichardson">[docs]</a><span class="k">class</span> <span class="nc">TestRichardson</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestRichardson.setUp"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_extrapolation.TestRichardson.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">true_vals</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.9999999999999998</span><span class="p">,</span> <span class="mf">1.9999999999999998</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.33333333333333304</span><span class="p">,</span> <span class="mf">1.333333333333333</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.14285714285714307</span><span class="p">,</span> <span class="mf">1.142857142857143</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.06666666666666654</span><span class="p">,</span> <span class="mf">1.0666666666666664</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.03225806451612906</span><span class="p">,</span> <span class="mf">1.0322580645161292</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.015873015873015872</span><span class="p">,</span> <span class="mf">1.0158730158730154</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.9999999999999998</span><span class="p">,</span> <span class="mf">1.9999999999999998</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.33333333333333304</span><span class="p">,</span> <span class="mf">1.333333333333333</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.14285714285714307</span><span class="p">,</span> <span class="mf">1.142857142857143</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.06666666666666654</span><span class="p">,</span> <span class="mf">1.0666666666666664</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.03225806451612906</span><span class="p">,</span> <span class="mf">1.0322580645161292</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.015873015873015872</span><span class="p">,</span> <span class="mf">1.0158730158730154</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="p">[</span><span class="mf">0.33333333333333337</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.666666666666667</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="p">[</span><span class="mf">0.04761904761904753</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5714285714285693</span><span class="p">,</span>
+                        <span class="mf">1.523809523809522</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span> <span class="p">[</span><span class="mf">0.009523809523810024</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2285714285714322</span><span class="p">,</span>
+                        <span class="mf">1.2190476190476225</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span> <span class="p">[</span><span class="mf">0.002150537634408055</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.10322580645160284</span><span class="p">,</span>
+                        <span class="mf">1.1010752688171945</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span> <span class="p">[</span><span class="mf">0.0005120327700975248</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.04915514592935677</span><span class="p">,</span>
+                        <span class="mf">1.0486431131592595</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span> <span class="p">[</span><span class="mf">0.0001249843769525012</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.02399700037493191</span><span class="p">,</span>
+                        <span class="mf">1.0238720159979793</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="p">[</span><span class="mf">0.1428571428571428</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.428571428571427</span><span class="p">,</span>
+                        <span class="mf">2.2857142857142843</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="p">[</span><span class="mf">0.022222222222222185</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.444444444444444</span><span class="p">,</span>
+                        <span class="mf">1.4222222222222216</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span> <span class="p">[</span><span class="mf">0.004608294930875861</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1843317972350207</span><span class="p">,</span>
+                        <span class="mf">1.179723502304145</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span> <span class="p">[</span><span class="mf">0.0010582010582006751</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.08465608465608221</span><span class="p">,</span>
+                        <span class="mf">1.0835978835978812</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span> <span class="p">[</span><span class="mf">0.0002540005080009476</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.040640081280166496</span><span class="p">,</span>
+                        <span class="mf">1.0403860807721657</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span> <span class="p">[</span><span class="mf">6.224712107032182e-05</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.01991907874258203</span><span class="p">,</span>
+                        <span class="mf">1.0198568316215115</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.04761904761904734</span><span class="p">,</span> <span class="mf">0.6666666666666641</span><span class="p">,</span>
+                        <span class="o">-</span><span class="mf">2.6666666666666594</span><span class="p">,</span> <span class="mf">3.047619047619042</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.003174603174603108</span><span class="p">,</span> <span class="mf">0.08888888888889318</span><span class="p">,</span>
+                        <span class="o">-</span><span class="mf">0.7111111111111337</span><span class="p">,</span> <span class="mf">1.6253968253968432</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.0003072196620577672</span><span class="p">,</span> <span class="mf">0.01720430107525861</span><span class="p">,</span>
+                        <span class="o">-</span><span class="mf">0.27526881720422713</span><span class="p">,</span> <span class="mf">1.258371735791026</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">3.4135518007183396e-05</span><span class="p">,</span> <span class="mf">0.003823178016754525</span><span class="p">,</span>
+                        <span class="o">-</span><span class="mf">0.12234169653539884</span><span class="p">,</span> <span class="mf">1.1185526540366513</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">4.031754094968587e-06</span><span class="p">,</span> <span class="mf">0.0009031129172963892</span><span class="p">,</span>
+                        <span class="o">-</span><span class="mf">0.0577992267083981</span><span class="p">,</span> <span class="mf">1.056900145545197</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">4.901348115149418e-07</span><span class="p">,</span> <span class="mf">0.00021958039560535103</span><span class="p">,</span>
+                        <span class="o">-</span><span class="mf">0.02810629063481751</span><span class="p">,</span> <span class="mf">1.0278872003740238</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.004608294930874168</span><span class="p">,</span> <span class="mf">0.1935483870967698</span><span class="p">,</span>
+                        <span class="o">-</span><span class="mf">1.5483870967741966</span><span class="p">,</span> <span class="mf">2.359447004608302</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.00035273368606647537</span><span class="p">,</span> <span class="mf">0.02962962962962734</span><span class="p">,</span>
+                        <span class="o">-</span><span class="mf">0.47407407407406155</span><span class="p">,</span> <span class="mf">1.444797178130501</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">3.628578685754835e-05</span><span class="p">,</span> <span class="mf">0.006096012192020994</span><span class="p">,</span>
+                        <span class="o">-</span><span class="mf">0.19507239014474764</span><span class="p">,</span> <span class="mf">1.1890126637395837</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">4.149808071229888e-06</span><span class="p">,</span> <span class="mf">0.0013943355119737377</span><span class="p">,</span>
+                        <span class="o">-</span><span class="mf">0.08923747276669802</span><span class="p">,</span> <span class="mf">1.0878472870627958</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">4.970655732572382e-07</span><span class="p">,</span> <span class="mf">0.0003340280653114369</span><span class="p">,</span>
+                        <span class="o">-</span><span class="mf">0.042755592360228634</span><span class="p">,</span> <span class="mf">1.0424220613604906</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span> <span class="p">[</span><span class="o">-</span><span class="mf">6.08476257157875e-08</span><span class="p">,</span> <span class="mf">8.177920896951241e-05</span><span class="p">,</span>
+                        <span class="o">-</span><span class="mf">0.02093547748207586</span><span class="p">,</span> <span class="mf">1.0208537591207332</span><span class="p">]}</span></div>
+
+<div class="viewcode-block" id="TestRichardson.test_order_step_combinations"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_extrapolation.TestRichardson.test_order_step_combinations">[docs]</a>    <span class="k">def</span> <span class="nf">test_order_step_combinations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">num_terms</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">order</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">):</span>
+                    <span class="n">r_extrap</span> <span class="o">=</span> <span class="n">Richardson</span><span class="p">(</span><span class="n">step_ratio</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span>
+                                          <span class="n">num_terms</span><span class="o">=</span><span class="n">num_terms</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+                    <span class="n">rule</span> <span class="o">=</span> <span class="n">r_extrap</span><span class="o">.</span><span class="n">rule</span><span class="p">()</span>
+                    <span class="c1"># print((num_terms, step, order), rule.tolist())</span>
+                    <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span>
+                                              <span class="bp">self</span><span class="o">.</span><span class="n">true_vals</span><span class="p">[(</span><span class="n">num_terms</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span>
+                                                              <span class="n">order</span><span class="p">)])</span></div></div>
+        <span class="c1"># self.assert_(False)</span>
+
+
+<div class="viewcode-block" id="TestExtrapolation"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_extrapolation.TestExtrapolation">[docs]</a><span class="k">class</span> <span class="nc">TestExtrapolation</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestExtrapolation.setUp"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_extrapolation.TestExtrapolation.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">7</span>
+        <span class="n">e_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">5</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">e_i</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">x</span><span class="p">)</span>
+            <span class="n">h</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">e_i</span> <span class="o">=</span> <span class="n">e_i</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span> <span class="o">=</span> <span class="n">h</span></div>
+
+<div class="viewcode-block" id="TestExtrapolation.test_dea3_on_trapz_sin"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_extrapolation.TestExtrapolation.test_dea3_on_trapz_sin">[docs]</a>    <span class="k">def</span> <span class="nf">test_dea3_on_trapz_sin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">e_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_i</span>
+        <span class="n">e_n</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">dea3</span><span class="p">(</span><span class="n">e_i</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">e_i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">e_i</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">true_err</span> <span class="o">=</span> <span class="n">e_i</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">-</span><span class="mf">1.</span>
+        <span class="n">assert_allclose</span><span class="p">(</span><span class="n">true_err</span><span class="p">,</span>
+                        <span class="p">[</span><span class="o">-</span><span class="mf">2.00805680e-04</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.01999079e-05</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.25498825e-05</span><span class="p">])</span>
+        <span class="n">assert_allclose</span><span class="p">(</span><span class="n">e_n</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertLessEqual</span><span class="p">(</span><span class="n">err</span><span class="p">,</span> <span class="mf">0.00021</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestExtrapolation.test_dea_on_trapz_sin"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_extrapolation.TestExtrapolation.test_dea_on_trapz_sin">[docs]</a>    <span class="k">def</span> <span class="nf">test_dea_on_trapz_sin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">e_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_i</span>
+        <span class="n">dea_3</span> <span class="o">=</span> <span class="n">Dea</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">e_i</span><span class="p">:</span>
+            <span class="n">e_n</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">dea_3</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+        <span class="n">true_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">e_i</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span>
+        <span class="n">err_bound</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.00805680e-04</span><span class="p">,</span> <span class="mf">5.01999079e-05</span><span class="p">,</span>
+                                   <span class="mf">1.25498825e-05</span><span class="p">,</span> <span class="mf">3.13746471e-06</span><span class="p">,</span>
+                                   <span class="mf">7.84365809e-07</span><span class="p">,</span> <span class="mf">1.96091429e-07</span><span class="p">,</span>
+                                   <span class="mf">4.90228558e-08</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">true_err</span> <span class="o">&lt;</span> <span class="n">err_bound</span><span class="p">))</span>
+        <span class="n">assert_allclose</span><span class="p">(</span><span class="n">e_n</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertLessEqual</span><span class="p">(</span><span class="n">err</span><span class="p">,</span> <span class="mf">1e-10</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestExtrapolation.test_richardson"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_extrapolation.TestExtrapolation.test_richardson">[docs]</a>    <span class="k">def</span> <span class="nf">test_richardson</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">e_i</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_i</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">e_n</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">_step</span> <span class="o">=</span> <span class="n">Richardson</span><span class="p">(</span><span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">)(</span><span class="n">e_i</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+        <span class="n">assert_allclose</span><span class="p">(</span><span class="n">e_n</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">err</span> <span class="o">&lt;</span> <span class="mf">0.0022</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="TestExtrapolation.test_epsal"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_extrapolation.TestExtrapolation.test_epsal">[docs]</a>    <span class="k">def</span> <span class="nf">test_epsal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">true_vals</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.78539816</span><span class="p">,</span> <span class="mf">0.94805945</span><span class="p">,</span> <span class="mf">0.99945672</span><span class="p">]</span>
+        <span class="n">dea</span> <span class="o">=</span> <span class="n">EpsAlg</span><span class="p">(</span><span class="n">limexp</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="p">[</span><span class="n">dea</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.78539816</span><span class="p">,</span> <span class="mf">0.94805945</span><span class="p">,</span> <span class="mf">0.98711580</span><span class="p">]]</span>
+        <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">true_vals</span><span class="p">,</span> <span class="n">vals</span><span class="p">)</span>
+        <span class="n">dea2</span> <span class="o">=</span> <span class="n">EpsAlg</span><span class="p">(</span><span class="n">limexp</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+        <span class="n">vals2</span> <span class="o">=</span> <span class="p">[</span><span class="n">dea2</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_i</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">vals2</span><span class="p">,</span>
+                                  <span class="p">[</span><span class="mf">0.99979919432001874</span><span class="p">,</span> <span class="mf">0.99994980009210122</span><span class="p">,</span>
+                                   <span class="mf">0.99999999949599017</span><span class="p">,</span> <span class="mf">0.99999999996850009</span><span class="p">,</span>
+                                   <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span></div></div>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">unittest</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2009-2015, Per A Brodtkorb, John D&#39;Errico.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.9.17',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

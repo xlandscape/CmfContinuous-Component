@@ -1,0 +1,3 @@
+[console_scripts]
+hvplot = hvplot.__main__:main
+

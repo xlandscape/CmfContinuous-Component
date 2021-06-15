@@ -1,0 +1,457 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>numdifftools.tests.test_nd_algopy &mdash; numdifftools 0.9.17 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="numdifftools 0.9.17 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> numdifftools
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.17
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html">Introduction to Numdifftools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#documentation-and-code">Documentation and code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#unit-tests">Unit tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#acknowledgement">Acknowledgement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/overview.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/numerical/main.html">Numerical differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/algorithmic/main.html">Algorithmic differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Module reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../index.html">numdifftools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      
+    <li>numdifftools.tests.test_nd_algopy</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for numdifftools.tests.test_nd_algopy</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding:utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">numdifftools.nd_algopy</span> <span class="kn">as</span> <span class="nn">nd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.testing</span> <span class="kn">import</span> <span class="n">assert_array_almost_equal</span>
+<span class="kn">import</span> <span class="nn">algopy</span>
+<span class="kn">from</span> <span class="nn">numdifftools.testing</span> <span class="kn">import</span> <span class="n">rosen</span>
+<span class="kn">from</span> <span class="nn">numdifftools.tests.hamiltonian</span> <span class="kn">import</span> <span class="n">run_hamiltonian</span>
+
+
+<div class="viewcode-block" id="TestHessian"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestHessian">[docs]</a><span class="k">class</span> <span class="nc">TestHessian</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestHessian.test_run_hamiltonian"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestHessian.test_run_hamiltonian">[docs]</a>    <span class="k">def</span> <span class="nf">test_run_hamiltonian</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">h</span><span class="p">,</span> <span class="n">_error_estimate</span><span class="p">,</span> <span class="n">true_h</span> <span class="o">=</span> <span class="n">run_hamiltonian</span><span class="p">(</span><span class="n">nd</span><span class="o">.</span><span class="n">Hessian</span><span class="p">(</span><span class="bp">None</span><span class="p">),</span>
+                                                     <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">h</span> <span class="o">-</span> <span class="n">true_h</span><span class="p">)</span><span class="o">/</span><span class="n">true_h</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-4</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">())</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TestHessian.test_hessian_cos_x_y__at_0_0"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestHessian.test_hessian_cos_x_y__at_0_0">[docs]</a>    <span class="k">def</span> <span class="nf">test_hessian_cos_x_y__at_0_0</span><span class="p">():</span>
+        <span class="c1"># cos(x-y), at (0,0)</span>
+
+        <span class="k">def</span> <span class="nf">fun</span><span class="p">(</span><span class="n">xy</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">htrue</span> <span class="o">=</span> <span class="p">[[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">]]</span>
+        <span class="n">methods</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="p">]</span>  <span class="c1"># &#39;reverse&#39;]</span>
+
+        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
+            <span class="n">h_fun</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Hessian</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+            <span class="n">h2</span> <span class="o">=</span> <span class="n">h_fun</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="c1"># print(method, (h2-np.array(htrue)))</span>
+            <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">h2</span><span class="p">,</span> <span class="n">htrue</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestDerivative"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestDerivative">[docs]</a><span class="k">class</span> <span class="nc">TestDerivative</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="c1"># TODO: Derivative does not tackle non-finite values.</span>
+    <span class="c1">#     def test_infinite_functions(self):</span>
+    <span class="c1">#         def finf(x):</span>
+    <span class="c1">#             return np.inf * np.ones_like(x)</span>
+    <span class="c1">#         df = nd.Derivative(finf, method=&#39;forward&#39;)</span>
+    <span class="c1">#         val = df(0)</span>
+    <span class="c1">#         self.assert_(np.isnan(val))</span>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TestDerivative.test_directional_diff"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestDerivative.test_directional_diff">[docs]</a>    <span class="k">def</span> <span class="nf">test_directional_diff</span><span class="p">():</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+
+        <span class="n">directional_diff</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">directionaldiff</span><span class="p">(</span><span class="n">rosen</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">directional_diff</span><span class="p">,</span> <span class="mf">743.87633380824832</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TestDerivative.test_high_order_derivative_cos"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestDerivative.test_high_order_derivative_cos">[docs]</a>    <span class="k">def</span> <span class="nf">test_high_order_derivative_cos</span><span class="p">():</span>
+        <span class="n">true_vals</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">5</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span>  <span class="c1"># np.linspace(0, np.pi/2, 15)</span>
+        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">]:</span>
+            <span class="n">nmax</span> <span class="o">=</span> <span class="mi">15</span> <span class="k">if</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;forward&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="mi">2</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nmax</span><span class="p">):</span>
+                <span class="n">d3cos</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Derivative</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">d3cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">true_vals</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TestDerivative.test_fun_with_additional_parameters"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestDerivative.test_fun_with_additional_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">test_fun_with_additional_parameters</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;Test for issue #9&quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">b</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span>
+        <span class="n">methods</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;reverse&#39;</span><span class="p">,</span> <span class="s1">&#39;forward&#39;</span><span class="p">]</span>
+        <span class="n">dfuns</span> <span class="o">=</span> <span class="p">[</span><span class="n">nd</span><span class="o">.</span><span class="n">Jacobian</span><span class="p">,</span> <span class="n">nd</span><span class="o">.</span><span class="n">Derivative</span><span class="p">,</span> <span class="n">nd</span><span class="o">.</span><span class="n">Gradient</span><span class="p">,</span> <span class="n">nd</span><span class="o">.</span><span class="n">Hessdiag</span><span class="p">,</span>
+                 <span class="n">nd</span><span class="o">.</span><span class="n">Hessian</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">dfun</span> <span class="ow">in</span> <span class="n">dfuns</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">dfun</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">df</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TestDerivative.test_derivative_cube"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestDerivative.test_derivative_cube">[docs]</a>    <span class="k">def</span> <span class="nf">test_derivative_cube</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;Test for Issue 7&quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">cube</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span>
+
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">]:</span>
+            <span class="n">dcube</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Derivative</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="n">dcube</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">dx</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="nb">list</span><span class="p">(</span><span class="n">shape</span><span class="p">),</span>
+                                      <span class="n">decimal</span><span class="o">=</span><span class="mi">13</span><span class="p">,</span>
+                                      <span class="n">err_msg</span><span class="o">=</span><span class="s1">&#39;Shape mismatch&#39;</span><span class="p">)</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="s1">&#39;First differing element </span><span class="si">%d</span><span class="se">\n</span><span class="s1"> value = </span><span class="si">%g</span><span class="s1">,</span><span class="se">\n</span><span class="s1"> true value = </span><span class="si">%g</span><span class="s1">&#39;</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">tval</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">dx</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span>
+                                                <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">())):</span>
+                <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">tval</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+                                          <span class="n">err_msg</span><span class="o">=</span><span class="n">txt</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">tval</span><span class="p">))</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TestDerivative.test_derivative_exp"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestDerivative.test_derivative_exp">[docs]</a>    <span class="k">def</span> <span class="nf">test_derivative_exp</span><span class="p">():</span>
+        <span class="c1"># derivative of exp(x), at x == 0</span>
+        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">]:</span>
+            <span class="n">dexp</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Derivative</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+            <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">dexp</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">decimal</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TestDerivative.test_derivative_sin"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestDerivative.test_derivative_sin">[docs]</a>    <span class="k">def</span> <span class="nf">test_derivative_sin</span><span class="p">():</span>
+        <span class="c1"># Evaluate the indicated (default = first)</span>
+        <span class="c1"># derivative at multiple points</span>
+        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">]:</span>
+            <span class="n">dsin</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Derivative</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">13</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">dsin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">decimal</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestDerivative.test_derivative_on_sinh"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestDerivative.test_derivative_on_sinh">[docs]</a>    <span class="k">def</span> <span class="nf">test_derivative_on_sinh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="p">]:</span>  <span class="c1"># &#39;reverse&#39;]: # TODO: reverse fails</span>
+            <span class="n">dsinh</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Derivative</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sinh</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">dsinh</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TestDerivative.test_derivative_on_log"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestDerivative.test_derivative_on_log">[docs]</a>    <span class="k">def</span> <span class="nf">test_derivative_on_log</span><span class="p">():</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">]:</span>
+            <span class="n">dlog</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Derivative</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+
+            <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">dlog</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">x</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestJacobian"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestJacobian">[docs]</a><span class="k">class</span> <span class="nc">TestJacobian</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TestJacobian.test_scalar_to_vector"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestJacobian.test_scalar_to_vector">[docs]</a>    <span class="k">def</span> <span class="nf">test_scalar_to_vector</span><span class="p">():</span>
+        <span class="k">def</span> <span class="nf">fun</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">algopy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+            <span class="n">out</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span>
+            <span class="n">out</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="o">**</span><span class="mi">3</span>
+            <span class="k">return</span> <span class="n">out</span>
+
+        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;reverse&#39;</span><span class="p">,</span> <span class="s1">&#39;forward&#39;</span><span class="p">]:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">()</span>
+            <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">nd</span><span class="o">.</span><span class="n">Jacobian</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)(</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+                                      <span class="p">[[</span><span class="mf">1.</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">val</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">val</span><span class="o">**</span><span class="mi">2</span><span class="p">]])</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TestJacobian.test_on_scalar_function"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestJacobian.test_on_scalar_function">[docs]</a>    <span class="k">def</span> <span class="nf">test_on_scalar_function</span><span class="p">():</span>
+        <span class="k">def</span> <span class="nf">fun</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">]:</span>
+            <span class="n">j_fun</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Jacobian</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">j_fun</span><span class="p">([</span><span class="mf">3.</span><span class="p">,</span> <span class="mf">5.</span><span class="p">,</span> <span class="mf">7.</span><span class="p">])</span>
+            <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[[</span><span class="mf">135.42768462</span><span class="p">,</span> <span class="mf">41.08553692</span><span class="p">,</span> <span class="mf">15.</span><span class="p">]])</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TestJacobian.test_on_vector_valued_function"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestJacobian.test_on_vector_valued_function">[docs]</a>    <span class="k">def</span> <span class="nf">test_on_vector_valued_function</span><span class="p">():</span>
+        <span class="n">xdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">ydata</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">0.75</span> <span class="o">*</span> <span class="n">xdata</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">fun</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">xdata</span><span class="p">)</span> <span class="o">-</span> <span class="n">ydata</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;reverse&#39;</span><span class="p">,</span> <span class="p">]:</span>  <span class="c1"># TODO: &#39;forward&#39; fails</span>
+
+            <span class="n">j_fun</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Jacobian</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+            <span class="n">J</span> <span class="o">=</span> <span class="n">j_fun</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">])</span>  <span class="c1"># should be numerically zero</span>
+            <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">J</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">ydata</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TestJacobian.test_on_matrix_valued_function"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestJacobian.test_on_matrix_valued_function">[docs]</a>    <span class="k">def</span> <span class="nf">test_on_matrix_valued_function</span><span class="p">():</span>
+        <span class="k">def</span> <span class="nf">fun</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+
+            <span class="n">f0</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">f1</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">3</span>
+
+            <span class="n">s0</span> <span class="o">=</span> <span class="n">f0</span><span class="o">.</span><span class="n">size</span>
+            <span class="n">s1</span> <span class="o">=</span> <span class="n">f1</span><span class="o">.</span><span class="n">size</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">algopy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">s0</span> <span class="o">+</span> <span class="n">s1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">f0</span>
+            <span class="n">out</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">f1</span>
+            <span class="k">return</span> <span class="n">out</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                      <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">[[</span><span class="mf">26.</span><span class="p">,</span> <span class="mf">40.</span><span class="p">,</span> <span class="mf">58.</span><span class="p">,</span> <span class="mf">80.</span><span class="p">],</span>
+                                      <span class="p">[</span><span class="mf">126.</span><span class="p">,</span> <span class="mf">224.</span><span class="p">,</span> <span class="mf">370.</span><span class="p">,</span> <span class="mf">576.</span><span class="p">]])</span>
+
+        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="p">]:</span>  <span class="c1"># TODO: &#39;reverse&#39; fails</span>
+            <span class="n">jaca</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Jacobian</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+
+            <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">jaca</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="p">[[[</span><span class="mf">2.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">]],</span>
+                                                     <span class="p">[[</span><span class="mf">3.</span><span class="p">,</span> <span class="mf">12.</span><span class="p">]]])</span>
+            <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">jaca</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]),</span> <span class="p">[[[</span><span class="mf">6.</span><span class="p">,</span> <span class="mf">8.</span><span class="p">]],</span>
+                                                     <span class="p">[[</span><span class="mf">27.</span><span class="p">,</span> <span class="mf">48.</span><span class="p">]]])</span>
+
+            <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">jaca</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                                            <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]]),</span>
+                                      <span class="p">[[[</span><span class="mf">2.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">6.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+                                        <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">8.</span><span class="p">]],</span>
+                                       <span class="p">[[</span><span class="mf">3.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">27.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+                                        <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">12.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">48.</span><span class="p">]]])</span>
+
+            <span class="n">val</span> <span class="o">=</span> <span class="n">jaca</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">val</span><span class="p">,</span>
+                                      <span class="p">[[[</span><span class="mf">2.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">10.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+                                        <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">12.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+                                        <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">6.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">14.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+                                        <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">8.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">16.</span><span class="p">]],</span>
+                                       <span class="p">[[</span><span class="mf">3.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">75.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+                                        <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">12.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">108.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+                                        <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">27.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">147.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+                                        <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">48.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">192.</span><span class="p">]]])</span></div></div>
+
+
+<div class="viewcode-block" id="TestGradient"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestGradient">[docs]</a><span class="k">class</span> <span class="nc">TestGradient</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TestGradient.test_on_scalar_function"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestGradient.test_on_scalar_function">[docs]</a>    <span class="k">def</span> <span class="nf">test_on_scalar_function</span><span class="p">():</span>
+        <span class="k">def</span> <span class="nf">fun</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">dtrue</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">,</span> <span class="mf">6.</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="s1">&#39;reverse&#39;</span><span class="p">]:</span>  <span class="c1">#</span>
+
+            <span class="n">dfun</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Gradient</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">dfun</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+            <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">dtrue</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestHessdiag"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestHessdiag">[docs]</a><span class="k">class</span> <span class="nc">TestHessdiag</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TestHessdiag.test_forward"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestHessdiag.test_forward">[docs]</a>    <span class="k">def</span> <span class="nf">test_forward</span><span class="p">():</span>
+        <span class="k">def</span> <span class="nf">fun</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">**</span> <span class="mi">3</span>
+        <span class="n">htrue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">18.</span><span class="p">])</span>
+        <span class="n">h_fun</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Hessdiag</span><span class="p">(</span><span class="n">fun</span><span class="p">)</span>
+        <span class="n">hd</span> <span class="o">=</span> <span class="n">h_fun</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="n">_error</span> <span class="o">=</span> <span class="n">hd</span> <span class="o">-</span> <span class="n">htrue</span>
+        <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">hd</span><span class="p">,</span> <span class="n">htrue</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TestHessdiag.test_reverse"><a class="viewcode-back" href="../../../api/numdifftools.tests.html#numdifftools.tests.test_nd_algopy.TestHessdiag.test_reverse">[docs]</a>    <span class="k">def</span> <span class="nf">test_reverse</span><span class="p">():</span>
+        <span class="k">def</span> <span class="nf">fun</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">**</span> <span class="mi">3</span>
+        <span class="n">htrue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">18.</span><span class="p">])</span>
+        <span class="n">h_fun</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">Hessdiag</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;reverse&#39;</span><span class="p">)</span>
+        <span class="n">hd</span> <span class="o">=</span> <span class="n">h_fun</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="n">_error</span> <span class="o">=</span> <span class="n">hd</span> <span class="o">-</span> <span class="n">htrue</span>
+        <span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">hd</span><span class="p">,</span> <span class="n">htrue</span><span class="p">)</span></div></div>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c1"># _run_hamiltonian()</span>
+    <span class="n">unittest</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2009-2015, Per A Brodtkorb, John D&#39;Errico.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.9.17',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

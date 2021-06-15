@@ -1,0 +1,4 @@
+[gui_scripts]
+guiqwt-tests-py3 = guiqwt.tests:run
+sift-py3 = guiqwt.tests.sift:run
+

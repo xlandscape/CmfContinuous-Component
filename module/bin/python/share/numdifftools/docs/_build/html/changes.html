@@ -1,0 +1,652 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Changelog &mdash; numdifftools 0.9.17 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="numdifftools 0.9.17 documentation" href="index.html"/>
+        <link rel="next" title="Modules" href="api/modules.html"/>
+        <link rel="prev" title="Developers" href="authors.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> numdifftools
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.17
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="src/overview.html">Introduction to Numdifftools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/overview.html#documentation-and-code">Documentation and code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/overview.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/overview.html#unit-tests">Unit tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/overview.html#acknowledgement">Acknowledgement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/overview.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/numerical/main.html">Numerical differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/algorithmic/main.html">Algorithmic differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Developers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-9-17-sep-8-2016">Version 0.9.17, Sep 8, 2016</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-9-15-may-10-2016">Version 0.9.15, May 10, 2016</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-9-14-november-10-2015">Version 0.9.14, November 10, 2015</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-9-13-october-30-2015">Version 0.9.13, October 30, 2015</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-9-12-august-28-2015">Version 0.9.12, August 28, 2015</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-9-11-august-27-2015">Version 0.9.11, August 27, 2015</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-9-10-august-26-2015">Version 0.9.10, August 26, 2015</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-9-4-august-26-2015">Version 0.9.4, August 26, 2015</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-9-3-august-23-2015">Version 0.9.3, August 23, 2015</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-9-2-august-20-2015">Version 0.9.2, August 20, 2015</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-9-1-august-20-2015">Version 0.9.1, August 20,2015</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-7-7-december-18-2014">Version 0.7.7, December 18, 2014</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-7-3-december-17-2014">Version 0.7.3, December 17, 2014</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-6-0-february-8-2014">Version 0.6.0, February 8, 2014</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-5-0-january-10-2014">Version 0.5.0, January 10, 2014</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-4-0-may-5-2012">Version 0.4.0, May 5, 2012</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-3-5-may-19-2011">Version 0.3.5, May 19, 2011</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-3-4-feb-24-2011">Version 0.3.4, Feb 24, 2011</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-3-1-may-20-2009">Version 0.3.1, May 20, 2009</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">Module reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">numdifftools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Changelog</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/changes.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="changelog">
+<span id="changes"></span><h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
+<p>Created with gitcommand: git shortlog v0.9.16..v0.9.17</p>
+<div class="section" id="version-0-9-17-sep-8-2016">
+<h2>Version 0.9.17, Sep 8, 2016<a class="headerlink" href="#version-0-9-17-sep-8-2016" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>Andrew Fowlie (1):</dt>
+<dd><ul class="first last simple">
+<li>Fix ReadTheDocs link as mentioned in #21</li>
+</ul>
+</dd>
+<dt>Per A Brodtkorb (79):</dt>
+<dd><ul class="first last">
+<li><p class="first">Added test for MinMaxStepgenerator</p>
+</li>
+<li><p class="first">Removed obsolete docs from core.py</p>
+</li>
+<li><p class="first">Updated appveyor.yml</p>
+</li>
+<li><p class="first">Fixed sign in inverse matrix</p>
+</li>
+<li><p class="first">Simplified code</p>
+</li>
+<li><p class="first">Added appveyor badge + synchronised info.py with README.rst.</p>
+</li>
+<li><p class="first">Removed plot in help header</p>
+</li>
+<li><p class="first">Added Programming Language :: Python :: 3.5</p>
+</li>
+<li><p class="first">Simplified code</p>
+</li>
+<li><p class="first">Renamed bicomplex to Bicomplex</p>
+</li>
+<li><p class="first">Simplified example_functions.py</p>
+</li>
+<li><dl class="first docutils">
+<dt>Moved MinStepGenerator, MaxStepGeneretor and MinMaxStepGenerator to step_generators.py</dt>
+<dd><ul class="first last simple">
+<li>Unified the step generators</li>
+<li>Moved step_generator tests to test_step_generators.py</li>
+<li>Major simplification of step_generators.py</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">Removed duplicated code + pep8</p>
+</li>
+<li><p class="first">Moved fornberg_weights to fornberg.py + added taylor and derivative</p>
+</li>
+<li><p class="first">Fixed print statement</p>
+</li>
+<li><p class="first">Replace xrange with range</p>
+</li>
+<li><p class="first">Added examples + made computation more robust.</p>
+</li>
+<li><p class="first">Made &#8216;backward&#8217; and alias for &#8216;reverse&#8217; in nd_algopy.py</p>
+</li>
+<li><p class="first">Expanded the tests + added test_docstrings to testing.py</p>
+</li>
+<li><p class="first">Replace string interpolation with format()</p>
+</li>
+<li><p class="first">Removed obsolete parameter</p>
+</li>
+<li><p class="first">Smaller start radius for Fornberg method</p>
+</li>
+<li><p class="first">Simplified &#8220;n&#8221; and &#8220;order&#8221; properties</p>
+</li>
+<li><p class="first">Simplified default_scale</p>
+</li>
+<li><p class="first">Removed unecessary parenthesis and code. pep8</p>
+</li>
+<li><p class="first">Fixed a bug in Dea + small refactorings.</p>
+</li>
+<li><p class="first">Added test for EpsAlg</p>
+</li>
+<li><p class="first">Avoid mutable default args and prefer static methods over instance-meth.</p>
+</li>
+<li><p class="first">Refactored to reduce cyclomatic complexity</p>
+</li>
+<li><p class="first">Changed some instance methods to static methods</p>
+</li>
+<li><p class="first">Renamed non-pythonic variable names</p>
+</li>
+<li><p class="first">Turned on xvfb (X Virtual Framebuffer) to imitate a display.</p>
+</li>
+<li><p class="first">Added extra test for Jacobian</p>
+</li>
+<li><p class="first">Replace lambda function with a def</p>
+</li>
+<li><p class="first">Removed unused import</p>
+</li>
+<li><p class="first">Added test for epsalg</p>
+</li>
+<li><p class="first">Fixed test_scalar_to_vector</p>
+</li>
+<li><p class="first">Updated test_docstrings</p>
+</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="version-0-9-15-may-10-2016">
+<h2>Version 0.9.15, May 10, 2016<a class="headerlink" href="#version-0-9-15-may-10-2016" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>Cody (2):</dt>
+<dd><ul class="first last simple">
+<li>Migrated <cite>%</cite> string formating</li>
+<li>Migrated <cite>%</cite> string formating</li>
+</ul>
+</dd>
+<dt>Per A Brodtkorb (28):</dt>
+<dd><ul class="first last simple">
+<li>Updated README.rst + setup.cfg</li>
+<li>Replaced instance methods with static methods +pep8</li>
+<li>Merge branch &#8216;master&#8217; of <a class="reference external" href="https://github.com/pbrod/numdifftools">https://github.com/pbrod/numdifftools</a></li>
+<li>Fixed a bug: replaced missing triple quote</li>
+<li>Added depsy badge</li>
+<li>added .checkignore for quantificode</li>
+<li>Added .codeclimate.yml</li>
+<li>Fixed failing tests</li>
+<li>Changed instance methods to static methods</li>
+<li>Made untyped exception handlers specific</li>
+<li>Replaced local function with a static method</li>
+<li>Simplified tests</li>
+<li>Removed duplicated code Simplified _Derivative._get_function_name</li>
+<li>exclude tests from testclimate</li>
+<li>Renamed test_functions.py to example_functions.py Added test_example_functions.py</li>
+</ul>
+</dd>
+<dt>Per A. Brodtkorb (2):</dt>
+<dd><ul class="first last simple">
+<li>Merge pull request #17 from pbrod/autofix/wrapped2_to3_fix</li>
+<li>Merge pull request #18 from pbrod/autofix/wrapped2_to3_fix-0</li>
+</ul>
+</dd>
+<dt>pbrod (17):</dt>
+<dd><ul class="first last simple">
+<li>updated conf.py</li>
+<li>added numpydoc&gt;=0.5, sphinx_rtd_theme&gt;=0.1.7 to setup_requires if sphinx</li>
+<li>updated setup.py</li>
+<li>added requirements.readthedocs.txt</li>
+<li>Updated README.rst with info about how to install it using conda in an anaconda package.</li>
+<li>updated conda install description</li>
+<li>Fixed number of arguments so it does not differs from overridden &#8216;_default_base_step&#8217; method</li>
+<li>Added codecov to .travis.yml</li>
+<li>Attempt to remove coverage of test-files</li>
+<li>Added directionaldiff function in order to calculate directional derivatives. Fixes issue #16. Also added supporting tests and examples to the documentation.</li>
+<li>Fixed isssue #19 multiple observations mishandled in Jacobian</li>
+<li>Moved rosen function into numdifftools.testing.py</li>
+<li>updated import of rosen function from numdifftools.testing</li>
+<li>Simplified code + pep8 + added TestResidue</li>
+<li>Updated readme.rst and replaced string interpolation with format()</li>
+<li>Cleaned Dea class + pep8</li>
+<li>Updated references for Wynn extrapolation method.</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="version-0-9-14-november-10-2015">
+<h2>Version 0.9.14, November 10, 2015<a class="headerlink" href="#version-0-9-14-november-10-2015" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>pbrod (53):</dt>
+<dd><ul class="first last simple">
+<li>Updated documentation of setup.py</li>
+<li>Updated README.rst</li>
+<li>updated version</li>
+<li>Added more documentation</li>
+<li>Updated example</li>
+<li>Added .landscape.yml     updated .coveragerc, .travis.yml</li>
+<li>Added coverageall to README.rst.</li>
+<li>updated docs/index.rst</li>
+<li>Removed unused code and added tests/test_extrapolation.py</li>
+<li>updated tests</li>
+<li>Added more tests</li>
+<li>Readded c_abs c_atan2</li>
+<li>Removed dependence on wheel, numpydoc&gt;=0.5 and sphinx_rtd_theme&gt;=0.1.7 (only needed for building documentation)</li>
+<li>updated conda path in .travis.yml</li>
+<li>added omnia channel to .travis.yml</li>
+<li>Added conda_recipe files     Filtered out warnings in limits.py</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="version-0-9-13-october-30-2015">
+<h2>Version 0.9.13, October 30, 2015<a class="headerlink" href="#version-0-9-13-october-30-2015" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>pbrod (21):</dt>
+<dd><ul class="first last simple">
+<li>Updated README.rst and CHANGES.rst.</li>
+<li>updated Limits.</li>
+<li>Made it possible to differentiate complex functions and allow zero&#8217;th order derivative.</li>
+<li>BUG: added missing derivative order, n to Gradient, Hessian, Jacobian.</li>
+<li>Made test more robust.</li>
+<li>Updated structure in setup according to pyscaffold version 2.4.2.</li>
+<li>Updated setup.cfg and deleted duplicate tests folder.</li>
+<li>removed unused code.</li>
+<li>Added appveyor.yml.</li>
+<li>Added required appveyor install scripts</li>
+<li>Fixed bug in appveyor.yml.</li>
+<li>added wheel to requirements.txt.</li>
+<li>updated appveyor.yml.</li>
+<li>Removed import matplotlib.</li>
+</ul>
+</dd>
+<dt>Justin Lecher (1):</dt>
+<dd><ul class="first last simple">
+<li>Fix min version for numpy.</li>
+</ul>
+</dd>
+<dt>kikocorreoso (1):</dt>
+<dd><ul class="first last simple">
+<li>fix some prints on run_benchmark.py to make it work with py3</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="version-0-9-12-august-28-2015">
+<h2>Version 0.9.12, August 28, 2015<a class="headerlink" href="#version-0-9-12-august-28-2015" title="Permalink to this headline">¶</a></h2>
+<p>pbrod (12):</p>
+<blockquote>
+<div><ul class="simple">
+<li>Updated documentation.</li>
+<li>Updated version in conf.py.</li>
+<li>Updated CHANGES.rst.</li>
+<li>Reimplemented outlier detection and made it more robust.</li>
+<li>Added limits.py with tests.</li>
+<li>Updated main tests folder.</li>
+<li>Moved Richardson and dea3 to extrapolation.py.</li>
+<li>Making a new release in order to upload to pypi.</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="version-0-9-11-august-27-2015">
+<h2>Version 0.9.11, August 27, 2015<a class="headerlink" href="#version-0-9-11-august-27-2015" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>pbrod (2):</dt>
+<dd><ul class="first last simple">
+<li>Fixed sphinx-build and updated docs.</li>
+<li>Fixed issue #9 Backward differentiation method fails with additional parameters.</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="version-0-9-10-august-26-2015">
+<h2>Version 0.9.10, August 26, 2015<a class="headerlink" href="#version-0-9-10-august-26-2015" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>pbrod (7):</dt>
+<dd><ul class="first last simple">
+<li>Fixed sphinx-build and updated docs.</li>
+<li>Added more tests to nd_algopy.</li>
+<li>Dropped support for Python 2.6.</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="version-0-9-4-august-26-2015">
+<h2>Version 0.9.4, August 26, 2015<a class="headerlink" href="#version-0-9-4-august-26-2015" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>pbrod (7):</dt>
+<dd><ul class="first last simple">
+<li>Fixed sphinx-build and updated docs.</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="version-0-9-3-august-23-2015">
+<h2>Version 0.9.3, August 23, 2015<a class="headerlink" href="#version-0-9-3-august-23-2015" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>Paul Kienzle (1):</dt>
+<dd><ul class="first last simple">
+<li>more useful benchmark plots.</li>
+</ul>
+</dd>
+<dt>pbrod (7):</dt>
+<dd><ul class="first last simple">
+<li>Fixed bugs and updated docs.</li>
+<li>Major rewrite of the easy to use interface to Algopy.</li>
+<li>Added possibility to calculate n&#8217;th order derivative not just for n=1 in nd_algopy.</li>
+<li>Added tests to the easy to use interface to algopy.</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="version-0-9-2-august-20-2015">
+<h2>Version 0.9.2, August 20, 2015<a class="headerlink" href="#version-0-9-2-august-20-2015" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>pbrod (3):</dt>
+<dd><ul class="first last simple">
+<li>Updated documentation</li>
+<li>Added parenthesis to a call to the print function</li>
+<li>Made the test less strict in order to pass the tests on Travis for python 2.6 and 3.2.</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="version-0-9-1-august-20-2015">
+<h2>Version 0.9.1, August 20,2015<a class="headerlink" href="#version-0-9-1-august-20-2015" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>Christoph Deil (1):</dt>
+<dd><ul class="first last simple">
+<li>Fix Sphinx build</li>
+</ul>
+</dd>
+<dt>pbrod (47):</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>Total remake of numdifftools with slightly different call syntax.</dt>
+<dd><ul class="first last simple">
+<li>Can compute derivatives of order up to 10-14 depending on function and method used.</li>
+<li>Updated documentation and tests accordingly.</li>
+<li>Fixed a bug in dea3.</li>
+<li>Added StepsGenerator as an replacement for the adaptive option.</li>
+<li>Added bicomplex class for testing the complex step second derivative.</li>
+<li>Added fornberg_weights_all for computing optimal finite difference rules in a stable way.</li>
+<li>Added higher order complex step derivative methods.</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="version-0-7-7-december-18-2014">
+<h2>Version 0.7.7, December 18, 2014<a class="headerlink" href="#version-0-7-7-december-18-2014" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>pbrod (35):</dt>
+<dd><ul class="first last simple">
+<li>Got travis-ci working in order to run the tests automatically.</li>
+<li>Fixed bugs in Dea class.</li>
+<li>Fixed better error estimate for the Hessian.</li>
+<li>Fixed tests for python 2.6.</li>
+<li>Adding tests as subpackage.</li>
+<li>Restructerd folders of numdifftools.</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="version-0-7-3-december-17-2014">
+<h2>Version 0.7.3, December 17, 2014<a class="headerlink" href="#version-0-7-3-december-17-2014" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>pbrod (5):</dt>
+<dd><ul class="first last simple">
+<li>Small cosmetic fixes.</li>
+<li>pep8 + some refactorings.</li>
+<li>Simplified code by refactoring.</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="version-0-6-0-february-8-2014">
+<h2>Version 0.6.0, February 8, 2014<a class="headerlink" href="#version-0-6-0-february-8-2014" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>pbrod (20):</dt>
+<dd><ul class="first last simple">
+<li>Update and rename README.md to README.rst.</li>
+<li>Simplified call to Derivative: removed step_fix.</li>
+<li>Deleted unused code.</li>
+<li>Simplified and Refactored. Now possible to choose step_num=1.</li>
+<li>Changed default step_nom from max(abs(x0), 0.2) to max(log2(abs(x0)), 0.2).</li>
+<li>pep8ified code and made sure that all tests pass.</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="version-0-5-0-january-10-2014">
+<h2>Version 0.5.0, January 10, 2014<a class="headerlink" href="#version-0-5-0-january-10-2014" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>pbrod (9):</dt>
+<dd><ul class="first last simple">
+<li>Updated the examples in Gradient class and in info.py.</li>
+<li>Added test for vec2mat and docstrings + cosmetic fixes.</li>
+<li>Refactored code into private methods.</li>
+<li>Fixed issue #7: Derivative(fun)(numpy.ones((10,5)) * 2) failed.</li>
+<li>Made print statements compatible with python 3.</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="version-0-4-0-may-5-2012">
+<h2>Version 0.4.0, May 5, 2012<a class="headerlink" href="#version-0-4-0-may-5-2012" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>pbrod (1)</dt>
+<dd><ul class="first last simple">
+<li>Fixed a bug for inf and nan values.</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="version-0-3-5-may-19-2011">
+<h2>Version 0.3.5, May 19, 2011<a class="headerlink" href="#version-0-3-5-may-19-2011" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>pbrod (1)</dt>
+<dd><ul class="first last simple">
+<li>Fixed a bug for inf and nan values.</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="version-0-3-4-feb-24-2011">
+<h2>Version 0.3.4, Feb 24, 2011<a class="headerlink" href="#version-0-3-4-feb-24-2011" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>pbrod (11)</dt>
+<dd><ul class="first last simple">
+<li>Made automatic choice for the stepsize more robust.</li>
+<li>Added easy to use interface to the algopy and scientificpython modules.</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="version-0-3-1-may-20-2009">
+<h2>Version 0.3.1, May 20, 2009<a class="headerlink" href="#version-0-3-1-may-20-2009" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>pbrod (4)</dt>
+<dd><ul class="first last simple">
+<li>First version of numdifftools published on google.code</li>
+</ul>
+</dd>
+</dl>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="api/modules.html" class="btn btn-neutral float-right" title="Modules" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="authors.html" class="btn btn-neutral" title="Developers" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2009-2015, Per A Brodtkorb, John D&#39;Errico.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.9.17',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

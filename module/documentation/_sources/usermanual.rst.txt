@@ -1,0 +1,439 @@
+**Step-by-step user guide**
+******************************
+
+The following guide provides some general instructions for using the model, an explanation of related 
+tools as well as a step by step guide to setup the different model versions. In general, the model
+can be executed by using a Python script and calling the related functions:
+
+.. code-block:: python
+  :linenos:
+
+  import LandscapeModel
+
+  if __name__ == "__main__":
+    # read runlist
+    runFactory = LandscapeModel.utils.RunFactory("C:/",fname= "runlist.csv")
+    # make simulation
+    runFactory("ExampleProject1" )
+    
+For user which are not familiar with Python or do not want use scripting a batch-file ('./main.bat') is available
+as well which calls a pre-defined script ('./bin/main.py'). The batch-file simply runs all entries in the
+'runlist.csv' ('set key=None'). In order to run a specific project, a key (e.g. set key=Example1) can be entered in the batch-file directly:
+
+.. code-block:: bash
+  :linenos:
+
+  @echo off
+  set list=runlist
+  set key=Example1
+  set python=%cd%/bin/python37/python.exe
+  set script=%cd%/bin/main.py
+  call %python% %script% %list% %key%
+  pause
+
+completeCatchment
+=========================
+
+The entire flow network of the catchment is simulating including river segments and cells. All fluxes are simulated by CMF
+on the basis of climate and soil data.
+
+The figure below shows several examples of a setting in the 'runlist.csv'. All of them run the model for one year
+with the run type 'completeCatchment'. The database type is 'csv' for projects one and two as well as 'hdf' for three and four.
+The option catchment separation is activated for two and three. Three uses additionally the chunksize option, 
+i.e. data is written from memory to disk in a certain interval defined in hours (e.g. monthly, 30days*24hours=720hours). 
+The last setup uses the efate option as well. For this, a substance must be defined as well as the type of drift 
+and efate module.
+
+.. figure:: /_static/usermanual_fullydisributed_runlist.png
+    :align: center
+    :figclass: align-center 
+
+Some specific information must also be provided in the 'CellList.csv'. The next reach or cell must be 
+defined (columns 'reach' and 'adjacent_field') as well as the type of the connection (columns 'reach_connection'
+and 'field_connection'). The user can select 'RO' (surface runoff), 'DR' (drainage), 'GW' (groundwater) or
+a combination, e.g. 'RO_GW' or 'RO_DR_GW'. All connections can be created with the 'CatchmentConnector' (see pre-processing).
+Moreover, the travel time between storages must be set. These values can be defined as saturated 
+conductivity (m/day) or in absolute days.
+
+.. figure:: /_static/usermanual_fullydisributedtimeseries_cellist.png
+    :align: center
+    :figclass: align-center 
+
+.. code-block:: python
+  :linenos:
+
+  import LandscapeModel
+  from datetime import datetime
+
+  if __name__ == "__main__":
+    
+    ###########################################################################
+    # load existing setup
+    fpath = "C:/"
+    fname = "runlist.csv"
+    key = "ExampleProject1"
+    
+    # read runlist
+    runFactory = LandscapeModel.utils.RunFactory(fpath,fname)
+       
+    # create a setup based on existing data
+    runFactory.setup(key)
+
+    # get model run
+    catchment = runFactory.runs[0]
+    
+    ###########################################################################
+    # pre-processing
+    
+    # create connections between cells<>cells and cells<>reches
+    catchcon = LandscapeModel.utils.PreProcessing.CatchmentConnector(catchment,
+                                                    simplify_connections=4,
+                                                    connection_type="RO_GW")
+    # plot results of separation
+    catchcon.makePlot("test_network.png",resX=100,resY=100,plotVoroni=False,
+                    plotElevation=True,plot_simplified=True)
+
+    ###########################################################################
+    # simulation
+    runFactory(key)
+
+    # optional: separate the catchment into sub-units and make simulations
+    catchSep = LandscapeModel.utils.CatchmentSeparator(catchment)
+    catchSep()
+    catchSep.plotMap(fontsize=8,withnames=True)
+    catchSep.run_SolverUnits()
+    # note that the catchment separation function can be also activated in
+    # the runlist.csv. In that case, the function above can be used as well
+
+
+    ###########################################################################
+    # post-processing
+    
+    # initialise pre-porcessing object with existing catchment
+    pstPrc = LandscapeModel.utils.PostProcessing.AreaYieldCatchment(catchment)
+
+    # plot observed versus simulated flow
+    pstPrc.performance("flow")
+
+    # plot histogramm of hydrological parameter across catchment
+    pstPrc.catchment_hydrology()
+    
+    # plot cumulative distribution function of PEC values across catchment
+    pstPrc.catchment_efate(datetime(1900,5,10,10),[1,2,4,8,16,24],
+                           maxSW=.4,maxSED=.05)
+
+timeseriesCatchment
+=========================
+
+The entire flow network of the catchment is simulating including river segments and cells. The fluxes from single cells
+must be provided as time series for surface runoff, drainage flow and groundwater flow. Theses flows can be calculated using the ***1dField** option or by any other 
+1D field scale model such as MACRO or PEARL.
+
+The minimum requirement to run the model are a fully project setup and a '/projects/.../Timeseries' folder
+which holds dataset for each cell with the information on the surface, drainage and groundwater
+flow to the next cell or reach (:doc:`Data I/O </data_io>`). 
+
+The figure below shows several examples of a setting in the 'runlist.csv'. Note that the run type is 'timeseriesCatchment'.
+
+
+.. figure:: /_static/usermanual_fullydisributedtimeseries_runlist.png
+    :align: center
+    :figclass: align-center 
+
+The required settings in the 'CellList.csv' are shown below. The column 'soilwaterflux' must be set to 'timeseries'.
+
+.. figure:: /_static/usermanual_fullydisributedtimeseries_cellist.png
+    :align: center
+    :figclass: align-center 
+
+.. code-block:: python
+  :linenos:
+
+  import LandscapeModel
+  from datetime import datetime
+
+  if __name__ == "__main__":
+    
+    ... same script as defined for the completeCatchment option ...
+
+
+
+areayieldCatchment
+=========================
+
+Only the stream network is simulated. In order to simulate the inflow into each reach, the area weighted inflow
+is calculated by multiplying the related catchment area by observed flow. The catchment
+area is calculated on the basis on the cumulative areas of cells which are connected to directly or indirectly to the reach.
+
+The minimum requirements to run the model are observed stream flow data from a gauging station
+(to be stored in 'observation.csv', a list with single cells ('CellList.csv') as well as the stream
+network ('ReachList.csv'). The connections between reaches must be set (column 'donwstream_reach').  
+Note that from 'CellList.csv' only the information on the spatial coordinates
+of the cells and the area is read in by the model as well as connections. Other columns are not considered for this option.
+The connection between cells and cells and reaches can be provided by user or calculated by one
+of the pre-processing tools. 
+
+The figure below shows several examples of a setting in the 'runlist.csv'. The settings are similar to
+the completeCatchment, but with 'areayieldCatchment' as run type.
+
+.. figure:: /_static/usermanual_instream_runlist.png
+    :align: center
+    :figclass: align-center 
+
+The timeseries required by the model must hold the information on the key of the reach, time as well
+as the related flow and concentration (:doc:`Data I/O </data_io>`). The flow is the cumulative inflow
+from the related catchment area. 
+
+The following code snippet shows an example to derive time series per reach from observed data, run an in-stream
+model and plot some statistics (see './bin/AreayieldCatchment.py'):
+
+.. code-block:: python
+  :linenos:
+
+  import LandscapeModel
+  from datetime import datetime
+ 
+  if __name__ == "__main__":
+    
+    ###########################################################################
+    # load existing setup
+    fpath = "C:/"
+    fname = "runlist.csv"
+    key = "ExampleProject1"
+    
+    # read runlist
+    runFactory = LandscapeModel.utils.RunFactory(fpath,fname)
+    # create a setup based on existing data
+    runFactory.setup(key)
+    # get model run
+    catchment = runFactory.runs[0]
+    
+    ###########################################################################
+    # pre-processing
+    
+    # create connections between cells<>cells and cells<>reches
+    catchcon = LandscapeModel.utils.PreProcessing.CatchmentConnector(catchment,
+                                                    simplify_connections=4,
+                                                    connection_type="RO_GW")
+    # plot results of separation
+    catchcon.makePlot("test_network.png",resX=100,resY=100,plotVoroni=False,
+                    plotElevation=True,plot_simplified=True)
+  
+    # calculate area-weighted flow timeseries of reach each and create files
+    ayc = LandscapeModel.utils.PreProcessing.AreaYieldCatchment(catchment)
+    data_resampled=ayc.create_timeseries(resample_rule="1H",
+                                         resample_type="interpolate")
+
+    # create scenarios (365 days dry 10%-percentile, medium 50%-percentile and 
+    # wet 90%-percentile year) and create files
+    ayc.create_timeseries_scenarios(resample_rule="1H",
+                                         resample_type="interpolate")
+
+    ###########################################################################
+    # simulation  
+    runFactory(key)
+    
+    ###########################################################################
+    # post-processing
+    
+    # initialise pre-porcessing object with existing catchment
+    pstPrc = LandscapeModel.utils.PostProcessing.AreaYieldCatchment(catchment)
+
+    # plot observed versus simulated flow
+    pstPrc.performance("flow")
+
+    # plot histogramm of hydrological parameter across catchment
+    pstPrc.catchment_hydrology()
+    
+    # plot cumulative distribution function of PEC values across catchment
+    pstPrc.catchment_efate(datetime(1900,5,10,10),[1,2,4,8,16,24],
+                           maxSW=.4,maxSED=.05)
+
+1dField
+=========================
+
+Only single fields are simulated with a 1D simulation approach. The soil is divided into several layers as well as holds a 
+surface, drainage and groundwater flow. This approach is equal to the field representation of completeCatchment, 
+but without connecting the cells across the catchment.
+
+The setup of the project is similar to the fully distributed approach, 
+but without defining connections between cells or cells and reaches. The 'runlist.csv' looks the same. The 
+difference is in the parameterisation of the 'CellList.csv'. The connections and connections types must be set
+to 'None' and the soilwaterflux parameter to 'richards_bucket'. This mean that the soil water balance is calculated
+based on the Richards' approach and the outgoing flows are balanced.
+
+.. figure:: /_static/usermanual_1Dfieldscale_celllist.png
+    :align: center
+    :figclass: align-center 
+
+.. code-block:: python
+  :linenos:
+
+  import LandscapeModel
+  from datetime import datetime
+
+  if __name__ == "__main__":
+    
+    ###########################################################################
+    # load existing setup
+    fpath = "C:/"
+    fname = "runlist.csv"
+    key = "ExampleProject1"
+    
+    # read runlist
+    runFactory = LandscapeModel.utils.RunFactory(fpath,fname)
+       
+    # create a setup based on existing data
+    runFactory.setup(key)
+
+    # get model run
+    catchment = runFactory.runs[0]
+    
+    ###########################################################################
+    # pre-processing
+
+    # -
+
+    ###########################################################################
+    # simulation
+    runFactory(key)
+
+    ###########################################################################
+    # post-processing
+    
+    # plot results of fields
+    plots = LandscapeModel.utils.Plotting()
+    for cell in catchment.inpData.CellList:
+        # Sankey plot of field water balance
+        plots.FieldWaterBalance(catchment,cell.key,title=key,fpath="C:/.../"+key)
+        # Canopy processes
+        plots.plot_PlantGrowth(catchment,cell.key,title=key,fpath="C:/.../"+key)  
+
+Crop management
+=========================
+
+The definition of a crop management is required to apply pesticides and to sow
+plants. For instance, if one wants to simulate only the water balance with the in-stream
+or timeseriesCatchment option, no definition is needed at all.
+
+All information is defined in 'CropManagementList.csv'.The basic information when sowing 
+crops is the related key in the 'CropCoefficientList.csv', the cell key and the time of
+sowing. The application rate (g/ha) must be additionally defined for pesticide application.
+
+.. figure:: /_static/usermanual_cropmanagementlist.png
+    :align: center
+    :figclass: align-center 
+
+Pre-processing
+=========================
+
+**CatchmentConnector**: The automatic creation of connections can be done by using the pre-defined batch-file ('./catchment_connector.bat') or by calling the respective functions directly:
+
+.. code-block:: python
+  :linenos:
+
+  import os
+  import LandscapeModel
+
+  if __name__ == "__main__":
+    
+    ###########################################################################
+    # load exisisting project 
+    fname = "runlist.csv"
+    key = "ExampleProject1"
+    
+    # get current path
+    fdir = os.path.join(os.sep.join(os.path.abspath(__file__).split(os.sep)[:-2]),"projects")   
+    # read runlist
+    runFactory = LandscapeModel.utils.RunFactory(fdir,fname=fname)
+    # setup catchment
+    runFactory.setup(key)
+    catchment = runFactory.runs[0]
+    
+    ###########################################################################
+    # create pre-porcessing object and run separatiom
+    catchcon = LandscapeModel.utils.PreProcessing.CatchmentConnector(catchment,
+                                                                     simplify_connections=4,
+                                                                     connection_type="RO_GW")
+    
+    # plot results of separation
+    catchcon.makePlot("test_network.png",resX=100,resY=100,plotVoroni=False,
+                      plotElevation=True,plot_simplified=True)
+    catchcon.makePlot("test_voroni.png",resX=100,resY=100,plotVoroni=True,
+                      plotElevation=False,plot_simplified=True)
+
+
+**CatchmentSeparator**: In order to activate a separated run use the 'runlist.csv' and set the column 'catchment_separation' to TRUE.
+
+.. figure:: /_static/usermanual_fullydisributed_runlist.png
+    :align: center
+    :figclass: align-center 
+
+**AreaYieldCatchment**: A set of methods to create models with the mode 'areayieldCatchment', e.g. to create reach timeseries and scenarios.
+
+.. code-block:: python
+  :linenos:
+
+  import LandscapeModel
+  from datetime import datetime
+ 
+  if __name__ == "__main__":
+    
+    ....
+    
+    ###########################################################################
+    # pre-processing
+    
+    # create connections between cells<>cells and cells<>reches
+    catchcon = LandscapeModel.utils.PreProcessing.CatchmentConnector(catchment,
+                                                    simplify_connections=4,
+                                                    connection_type="RO_GW")
+    # plot results of separation
+    catchcon.makePlot("test_network.png",resX=100,resY=100,plotVoroni=False,
+                    plotElevation=True,plot_simplified=True)
+  
+    # calculate area-weighted flow timeseries of reach each and create files
+    ayc = LandscapeModel.utils.PreProcessing.AreaYieldCatchment(catchment)
+    data_resampled=ayc.create_timeseries(resample_rule="1H",
+                                         resample_type="interpolate")
+
+    # create scenarios (365 days dry 10%-percentile, medium 50%-percentile and 
+    # wet 90%-percentile year) and create files
+    ayc.create_timeseries_scenarios(resample_rule="1H",
+                                         resample_type="interpolate")
+
+
+Post-processing
+=========================
+
+**CatchmentSummary**: Creates a pre-defined summary of a simulation.
+
+
+.. code-block:: python
+  :linenos:
+
+  import LandscapeModel
+  from datetime import datetime
+ 
+  if __name__ == "__main__":
+    
+    ...
+    
+    ###########################################################################
+    # post-processing
+    
+    # initialise pre-porcessing object with existing catchment
+    pstPrc = LandscapeModel.utils.PostProcessing.AreaYieldCatchment(catchment)
+
+    # plot observed versus simulated flow
+    pstPrc.performance("flow")
+
+    # plot histogramm of hydrological parameter across catchment
+    pstPrc.catchment_hydrology()
+    
+    # plot cumulative distribution function of PEC values across catchment
+    pstPrc.catchment_efate(datetime(1900,5,10,10),[1,2,4,8,16,24],
+                           maxSW=.4,maxSED=.05)
+
+
+

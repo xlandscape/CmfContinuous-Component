@@ -1,0 +1,50 @@
+{
+  "_from": "reveal.js-chalkboard@~1.0.0",
+  "_id": "reveal.js-chalkboard@1.0.0",
+  "_inBundle": false,
+  "_integrity": "sha512-lSNmMiIbYo/1Bh2wF3JgWgAB6K60wI8GO5AJhO6sBTSVV5nRAQnlH6ybkzr8PnY+pbcjvsPsXVghFF7pt/2WIw==",
+  "_location": "/reveal.js-chalkboard",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "range",
+    "registry": true,
+    "raw": "reveal.js-chalkboard@~1.0.0",
+    "name": "reveal.js-chalkboard",
+    "escapedName": "reveal.js-chalkboard",
+    "rawSpec": "~1.0.0",
+    "saveSpec": null,
+    "fetchSpec": "~1.0.0"
+  },
+  "_requiredBy": [
+    "#DEV:/"
+  ],
+  "_resolved": "https://registry.npmjs.org/reveal.js-chalkboard/-/reveal.js-chalkboard-1.0.0.tgz",
+  "_shasum": "5fa4a1e631082f92524a78cb590897128158c993",
+  "_spec": "reveal.js-chalkboard@~1.0.0",
+  "_where": "/Users/davila/devel/jupyter/RISE",
+  "author": {
+    "name": "Asvin Goel"
+  },
+  "bugs": {
+    "url": "https://github.com/rajgoel/reveal.js-plugins.git/issues"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "Add a blackboard to your reveal.js presentations",
+  "homepage": "https://github.com/rajgoel/reveal.js-plugins/blob/master/chalkboard/README.md",
+  "keywords": [
+    "reveal",
+    "chalkboard",
+    "blackboard"
+  ],
+  "license": "MIT",
+  "name": "reveal.js-chalkboard",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rajgoel/reveal.js-plugins.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.0.0"
+}
