@@ -10,7 +10,7 @@ import base
 import attrib
 
 
-class CmfContinuousEfate(base.Component):
+class CmfContinuous(base.Component):
     """
     The Landscape Model component encapsulating the CMF Continuous module.
     """
@@ -32,26 +32,37 @@ class CmfContinuousEfate(base.Component):
     )
 
     # CHANGELOG
-    VERSION.added("1.2.37", "components.CatchmentModel component")
-    VERSION.changed("1.2.38", "components.CatchmentModel renamed to components.CmfContinuousEfate")
-    VERSION.fixed("1.3.3", "increased numeric precision in components.CmfContinuousEfate (preliminary)")
-    VERSION.fixed("1.3.6", "Fixes in components.CmfContinuousEfate")
-    VERSION.changed("1.3.16", "Substance parameterization in components.CmfContinuousEfate changed")
-    VERSION.changed("1.3.24", "components.CmfContinuousEfate uses base function to call module")
-    VERSION.changed("1.3.27", "components.CmfContinuousEfate specifies scales")
-    VERSION.changed("1.3.33", "components.CmfContinuousEfate checks input types strictly")
-    VERSION.changed("1.3.33", "components.CmfContinuousEfate checks for physical units")
-    VERSION.changed("1.3.33", "components.CmfContinuousEfate reports physical units to the data store")
-    VERSION.changed("1.3.33", "components.CmfContinuousEfate checks for scales")
-    VERSION.changed("1.3.35", "components.CmfContinuousEfate receives empty path environment variable")
+    VERSION.added("1.2.37", "`components.CatchmentModel` component")
+    # noinspection SpellCheckingInspection
+    VERSION.changed("1.2.38", "`components.CatchmentModel` renamed to `components.CmfContinuousEfate` ")
+    # noinspection SpellCheckingInspection
+    VERSION.fixed("1.3.3", "increased numeric precision in `components.CmfContinuousEfate` (preliminary)")
+    # noinspection SpellCheckingInspection
+    VERSION.fixed("1.3.6", "Fixes in `components.CmfContinuousEfate` ")
+    # noinspection SpellCheckingInspection
+    VERSION.changed("1.3.16", "Substance parameterization in `components.CmfContinuousEfate` changed")
+    # noinspection SpellCheckingInspection
+    VERSION.changed("1.3.24", "`components.CmfContinuousEfate` uses base function to call module")
+    # noinspection SpellCheckingInspection
+    VERSION.changed("1.3.27", "`components.CmfContinuousEfate` specifies scales")
+    # noinspection SpellCheckingInspection
+    VERSION.changed("1.3.33", "`components.CmfContinuousEfate` checks input types strictly")
+    # noinspection SpellCheckingInspection
+    VERSION.changed("1.3.33", "`components.CmfContinuousEfate` checks for physical units")
+    # noinspection SpellCheckingInspection
+    VERSION.changed("1.3.33", "`components.CmfContinuousEfate` reports physical units to the data store")
+    # noinspection SpellCheckingInspection
+    VERSION.changed("1.3.33", "`components.CmfContinuousEfate` checks for scales")
+    # noinspection SpellCheckingInspection
+    VERSION.changed("1.3.35", "`components.CmfContinuousEfate` receives empty path environment variable")
     VERSION.changed("2.0.0", "First independent release")
     VERSION.added("2.0.1", "Changelog and release history")
-    VERSION.changed("2.0.2", "Changed specification of Timeseries input and added InflowReaches input")
+    VERSION.changed("2.0.2", "Changed specification of `TimeSeries` input and added `InflowReaches` input")
     VERSION.changed("2.0.2", "Inflows from fields into reaches are now processed from the Landscape model data store")
     VERSION.fixed("2.0.3", "Suppressed spelling error check for CSV file header")
 
     def __init__(self, name, observer, store):
-        super(CmfContinuousEfate, self).__init__(name, observer, store)
+        super(CmfContinuous, self).__init__(name, observer, store)
         self._module = base.Module("Regulatory Catchment Model", "8 Aug 2018")
         # noinspection SpellCheckingInspection
         self._inputs = base.InputContainer(self, [
@@ -121,7 +132,7 @@ class CmfContinuousEfate(base.Component):
                 self.default_observer
             ),
             base.Input(
-                "QFAC",
+                "QFac",
                 (attrib.Class(float, 1), attrib.Unit("1", 1), attrib.Scales("global", 1)),
                 self.default_observer
             ),
@@ -140,7 +151,7 @@ class CmfContinuousEfate(base.Component):
                 self.default_observer
             ),
             base.Input(
-                "Timeseries",
+                "TimeSeries",
                 (attrib.Class(np.ndarray, 1), attrib.Unit("m³/d", 1), attrib.Scales("time/hour, space/reach2", 1)),
                 self.default_observer
             ),
@@ -172,7 +183,7 @@ class CmfContinuousEfate(base.Component):
         processing_path = self.inputs["ProcessingPath"].read().values
         self.prepare_project(processing_path, project_name)
         self.prepare_drift_deposition(os.path.join(processing_path, project_name, "SprayDriftList.csv"))
-        self.prepare_time_series(os.path.join(processing_path, project_name, "Timeseries"))
+        self.prepare_time_series(os.path.join(processing_path, project_name, "TimeSeries"))
         self.run_project(processing_path, project_name)
         self.read_outputs(os.path.join(processing_path, project_name, project_name + "_reaches.csv"))
         return
@@ -366,7 +377,7 @@ class CmfContinuousEfate(base.Component):
                 self.inputs["Temp0"].read().values,
                 self.inputs["Q10"].read().values,
                 self.inputs["PlantUptake"].read().values,
-                self.inputs["QFAC"].read().values
+                self.inputs["QFac"].read().values
             ))
         return
 
@@ -413,19 +424,19 @@ class CmfContinuousEfate(base.Component):
                 )
         return
 
-    def prepare_time_series(self, timeseries):
+    def prepare_time_series(self, time_series):
         """
         Prepares the hydrological time series.
-        :param timeseries: The file path for the hydrological time series.
+        :param time_series: The file path for the hydrological time series.
         :return: Nothing.
         """
-        os.mkdir(timeseries)
+        os.mkdir(time_series)
         inflow_reaches = self._inputs["InflowReaches"].read().values
-        number_hours = self._inputs["Timeseries"].describe()["shape"][0]
+        number_hours = self._inputs["TimeSeries"].describe()["shape"][0]
         simulation_start = datetime.datetime.combine(self._inputs["Begin"].read().values, datetime.time(0))
         for r, reach in enumerate(inflow_reaches):
-            inflows = self._inputs["Timeseries"].read(slices=(slice(number_hours), r)).values
-            with open(os.path.join(timeseries, "r" + str(reach) + ".csv"), "w") as f:
+            inflows = self._inputs["TimeSeries"].read(slices=(slice(number_hours), r)).values
+            with open(os.path.join(time_series, "r" + str(reach) + ".csv"), "w") as f:
                 # noinspection SpellCheckingInspection
                 f.write("key,time,flow,conc\n")
                 for t, record in enumerate(inflows):
@@ -445,7 +456,7 @@ class CmfContinuousEfate(base.Component):
         self.outputs["PEC_SW"].set_values(
             np.ndarray,
             shape=(number_time_steps, self._reaches.shape[0]),
-            dtype=np.float,
+            data_type=np.float,
             chunks=(min(65536, number_time_steps), 1),
             scales="time/hour, space/base_geometry",
             default=0,
