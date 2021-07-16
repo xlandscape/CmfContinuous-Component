@@ -16,6 +16,7 @@ class CmfContinuous(base.Component):
     """
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.4", "2021-07-16"),
         base.VersionInfo("2.0.3", "2020-12-28"),
         base.VersionInfo("2.0.2", "2020-12-07"),
         base.VersionInfo("2.0.1", "2020-12-03"),
@@ -60,6 +61,10 @@ class CmfContinuous(base.Component):
     VERSION.changed("2.0.2", "Changed specification of `TimeSeries` input and added `InflowReaches` input")
     VERSION.changed("2.0.2", "Inflows from fields into reaches are now processed from the Landscape model data store")
     VERSION.fixed("2.0.3", "Suppressed spelling error check for CSV file header")
+    VERSION.changed("2.0.4", "Renamed component")
+    VERSION.changed("2.0.4", "Use of markdown in changelog")
+    VERSION.changed("2.0.4", "Spelling of input names")
+    VERSION.fixed("2.0.4", "Data type access")
 
     def __init__(self, name, observer, store):
         super(CmfContinuous, self).__init__(name, observer, store)
