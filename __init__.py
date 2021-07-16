@@ -1,5 +1,5 @@
 """
-Imports for the Landscape Model CmfContinuousEfate component.
+Imports for the Landscape Model CmfContinuous component.
 """
 
-from .CmfContinuousEfate import *
+from .CmfContinuous import *
