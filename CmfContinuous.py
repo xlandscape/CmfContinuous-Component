@@ -32,6 +32,26 @@ class CmfContinuous(base.Component):
         base.VersionInfo("1.2.37", None)
     )
 
+    # AUTHORS
+    VERSION.authors.extend((
+        "Sascha Bub (component) - sascha.bub@gmx.de",
+        "Thorsten Schad (component) - thorsten.schad@bayer.com",
+        "Sebastian Multsch (module) - smultsch@knoell.com"
+    ))
+
+    # ACKNOWLEDGEMENTS
+    VERSION.acknowledgements.extend((
+        "[cmf](https://philippkraft.github.io/cmf/)",
+        "[GDAL](https://pypi.org/project/GDAL)",
+        "[NumPy](https://numpy.org)"
+    ))
+
+    # ROADMAP
+    VERSION.roadmap.extend((
+        "z-value precision ([#3](https://gitlab.bayer.com/aqrisk-landscape/cmfcontinuous-component/-/issues/1))",
+        "Deprecation warning ([#2](https://gitlab.bayer.com/aqrisk-landscape/cmfcontinuous-component/-/issues/2))"
+    ))
+
     # CHANGELOG
     VERSION.added("1.2.37", "`components.CatchmentModel` component")
     # noinspection SpellCheckingInspection
@@ -74,77 +94,103 @@ class CmfContinuous(base.Component):
             base.Input(
                 "ProcessingPath",
                 (attrib.Class(str, 1), attrib.Unit(None, 1), attrib.Scales("global", 1)),
-                self.default_observer
+                self.default_observer,
+                description="""The working directory for the module. It is used for all files prepared as module inputs
+                or generated as (temporary) module outputs."""
             ),
             base.Input(
                 "Begin",
                 (attrib.Class(datetime.date, 1), attrib.Unit(None, 1), attrib.Scales("global", 1)),
-                self.default_observer
+                self.default_observer,
+                description="""The first time step for which input data is provided. This is also the time step of where
+                the CmfContinuous simulation starts."""
             ),
             base.Input(
                 "End",
                 (attrib.Class(datetime.date, 1), attrib.Unit(None, 1), attrib.Scales("global", 1)),
-                self.default_observer
+                self.default_observer,
+                description="""The last time step for which input data is provided. This is also the time step of where
+                the CmfContinuous simulation ends."""
             ),
             base.Input(
                 "Threads",
                 (attrib.Class(int, 1), attrib.Unit(None, 1), attrib.Scales("global", 1)),
-                self.default_observer
+                self.default_observer,
+                description="The number of simultaneous processes that are spawned by the CmfContinuous module."
             ),
             base.Input(
                 "SolverType",
-                (attrib.Class(str, 1), attrib.Unit(None, 1), attrib.Scales("global", 1)),
-                self.default_observer
+                (attrib.Class(str, 1), attrib.Unit(None, 1), attrib.Scales("global", 1), attrib.Equals("CVodeKLU")),
+                self.default_observer,
+                description="The type of solver used by cmf. Currently, only `CVodeKLU` is supported by CmfContinuous."
             ),
             base.Input(
                 "Hydrography",
                 (attrib.Class(str, 1), attrib.Unit(None, 1), attrib.Scales("global", 1)),
-                self.default_observer
+                self.default_observer,
+                description="""The spatial delineation of the hydrographic features in the simulated landscape. This
+                input basically represents the flow-lines used during preparation of the hydrology. The hydrography is
+                consistently for all components of the Landscape Model subdivided into individual segments (*reaches*).
+                """
             ),
             base.Input(
                 "MolarMass",
                 (attrib.Class(float, 1), attrib.Unit("g/mol", 1), attrib.Scales("global", 1)),
-                self.default_observer
+                self.default_observer,
+                description="The molar mass of the substance depositing at the water body surface."
             ),
             base.Input(
                 "DT50sw",
                 (attrib.Class(float, 1), attrib.Unit("d", 1), attrib.Scales("global", 1)),
-                self.default_observer
+                self.default_observer,
+                description="""The half-life transformation time in water of the substance depositing at the water body 
+                surface."""
             ),
             base.Input(
                 "DT50sed",
                 (attrib.Class(float, 1), attrib.Unit("d", 1), attrib.Scales("global", 1)),
-                self.default_observer
+                self.default_observer,
+                description="""The half-life transformation time in sediment of the substance depositing at the water 
+                body surface."""
             ),
             base.Input(
                 "KOC",
                 (attrib.Class(float, 1), attrib.Unit("l/kg", 1), attrib.Scales("global", 1)),
-                self.default_observer
+                self.default_observer,
+                description="""The coefficient for equilibrium adsorption in sediment of the substance depositing at 
+                the water body surface."""
             ),
             base.Input(
                 "Temp0",
                 (attrib.Class(float, 1), attrib.Unit("°C", 1), attrib.Scales("global", 1)),
-                self.default_observer
+                self.default_observer,
+                description="The reference temperature to which the physical and chemical substance values apply."
             ),
             base.Input(
                 "Q10",
                 (attrib.Class(float, 1), attrib.Unit("1", 1), attrib.Scales("global", 1)),
-                self.default_observer
+                self.default_observer,
+                description="The temperature coefficient for chemical reactions of the deposited substance."
             ),
             base.Input(
                 "PlantUptake",
                 (attrib.Class(float, 1), attrib.Unit("1", 1), attrib.Scales("global", 1)),
-                self.default_observer
+                self.default_observer,
+                description="The fraction of pesticide that is taken up by plants."
             ),
             base.Input(
                 "QFac",
                 (attrib.Class(float, 1), attrib.Unit("1", 1), attrib.Scales("global", 1)),
-                self.default_observer
+                self.default_observer,
+                description="The QFac parameter is not documented in the module documentation."
             ),
             base.Input(
                 "Catchment",
                 (attrib.Class(str, 1), attrib.Unit(None, 1), attrib.Scales("global", 1)),
-                self.default_observer
+                self.default_observer,
+                description="""A file path to a CSV file detailing the hydrographic properties of the entire catchment
+                depicted by hydrographic the scenario. This file is usually provided by the scenario developer (if
+                usage of CmfContinuous is supported by the scenario) and is made available as a project macro."""
             ),
             base.Input(
                 "DriftDeposition",
@@ -153,26 +199,42 @@ class CmfContinuous(base.Component):
                     attrib.Unit("mg/m²", 1),
                     attrib.Scales("time/day, space/reach", 1)
                 ),
-                self.default_observer
+                self.default_observer,
+                description="The average drift deposition onto the surface of a water body."
             ),
             base.Input(
                 "TimeSeries",
                 (attrib.Class(np.ndarray, 1), attrib.Unit("m³/d", 1), attrib.Scales("time/hour, space/reach2", 1)),
-                self.default_observer
+                self.default_observer,
+                description="""The inflows to individual reaches. This includes only flows that do not originate from an
+                upstream reach (these are modelled by cmf), i.e., lateral inflows. Not every reach has such inflows and
+                the list of reaches with inflows therefore is a subset of the list of reaches considered by the 
+                hydrographic scenario."""
             ),
             base.Input(
                 "ReachesDrift",
                 (attrib.Class(np.ndarray, 1), attrib.Unit(None, 1), attrib.Scales("space/reach", 1)),
-                self.default_observer
+                self.default_observer,
+                description="""The numeric identifiers for individual reaches (in the order of the `DriftDeposition` 
+                input) that apply scenario-wide."""
             ),
             base.Input(
                 "InflowReaches",
                 (attrib.Class("list[int]", 1), attrib.Unit(None, 1), attrib.Scales("space/reach2", 1)),
-                self.default_observer
+                self.default_observer,
+                description="""The numeric identifiers for individual reaches that show lateral inflows (in the order of
+                the `TimeSeries` input)."""
             )
         ])
         self._outputs = base.OutputContainer(self, [
-            base.Output("Reaches", store, self),
+            base.Output(
+                "Reaches",
+                store,
+                self,
+                {"scales": "space/reach", "unit": None},
+                "The numerical identifiers of the reaches in the order presented by the `PEC_SW` output.",
+                {"type": "list[int]"}
+            ),
             base.Output("PEC_SW", store, self)
         ])
         self._reaches = None
@@ -349,7 +411,7 @@ class CmfContinuous(base.Component):
                 f.write(str(feature.GetField("depth_sed")) + ",")
                 f.write(str(feature.GetField("depth_sed_")) + "\n")
                 self._reaches[index] = key_r
-        self.outputs["Reaches"].set_values(self._reaches.tolist(), scales="space/reach")
+        self.outputs["Reaches"].set_values(self._reaches.tolist())
         return
 
     @staticmethod
