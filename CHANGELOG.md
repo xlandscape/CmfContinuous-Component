@@ -1,6 +1,16 @@
 # Changelog
 This is the changelog for the CmfContinuous component. It was automatically created on 2021-08-17.
 
+## [2.0.5] - 2021-08-17
+
+### Added
+- README, CHANGELOG, CONTRIBUTING and LICENSE
+
+### Changed
+
+### Fixed
+
+
 ## [2.0.4] - 2021-07-16
 
 ### Added
