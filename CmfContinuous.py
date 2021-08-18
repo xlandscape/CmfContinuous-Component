@@ -16,6 +16,7 @@ class CmfContinuous(base.Component):
     """
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.6", "2021-08-18"),
         base.VersionInfo("2.0.5", "2021-08-17"),
         base.VersionInfo("2.0.4", "2021-07-16"),
         base.VersionInfo("2.0.3", "2020-12-28"),
@@ -87,10 +88,11 @@ class CmfContinuous(base.Component):
     VERSION.changed("2.0.4", "Spelling of input names")
     VERSION.fixed("2.0.4", "Data type access")
     VERSION.added("2.0.5", "README, CHANGELOG, CONTRIBUTING and LICENSE")
+    VERSION.added("2.0.6", "Missing reference to module documentation and missing documentation of `PEC_SW` output")
 
     def __init__(self, name, observer, store):
         super(CmfContinuous, self).__init__(name, observer, store)
-        self._module = base.Module("Regulatory Catchment Model", "8 Aug 2018")
+        self._module = base.Module("Regulatory Catchment Model", "8 Aug 2018", r"\module\documentation")
         # noinspection SpellCheckingInspection
         self._inputs = base.InputContainer(self, [
             base.Input(
@@ -237,8 +239,23 @@ class CmfContinuous(base.Component):
                 "The numerical identifiers of the reaches in the order presented by the `PEC_SW` output.",
                 {"type": "list[int]"}
             ),
-            base.Output("PEC_SW", store, self)
+            base.Output(
+                "PEC_SW",
+                store,
+                self,
+                {"data_type": np.float, "scales": "time/hour, space/base_geometry", "default": 0, "unit": "mg/m³"},
+                "The modelled concentration in the water phase.",
+                {
+                    "type": np.ndarray,
+                    "shape": (
+                        "the number of simulated hours as spanned by the [Begin](#Begin) and [End](#end) input",
+                        "the number of reaches included in the [Hydrography](#Hydrography) input"
+                    ),
+                    "chunks": "for fast retrieval of time series"
+                }
+            )
         ])
+
         self._reaches = None
         return
 
@@ -523,14 +540,7 @@ class CmfContinuous(base.Component):
         begin_date_time = datetime.datetime.combine(begin, datetime.time(1))
         number_time_steps = ((self.inputs["End"].read().values - begin).days + 1) * 24
         self.outputs["PEC_SW"].set_values(
-            np.ndarray,
-            shape=(number_time_steps, self._reaches.shape[0]),
-            data_type=np.float,
-            chunks=(min(65536, number_time_steps), 1),
-            scales="time/hour, space/base_geometry",
-            default=0,
-            unit="mg/m³"
-        )
+            np.ndarray, shape=(number_time_steps, self._reaches.shape[0]), chunks=(min(65536, number_time_steps), 1))
         with open(reaches_file) as f:
             line = f.readline()
             while line:
