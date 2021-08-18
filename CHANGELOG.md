@@ -1,5 +1,15 @@
 # Changelog
-This is the changelog for the CmfContinuous component. It was automatically created on 2021-08-17.
+This is the changelog for the CmfContinuous component. It was automatically created on 2021-08-18.
+
+## [2.0.6] - 2021-08-18
+
+### Added
+- Missing reference to module documentation and missing documentation of `PEC_SW` output
+
+### Changed
+
+### Fixed
+
 
 ## [2.0.5] - 2021-08-17
 

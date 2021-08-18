@@ -16,6 +16,7 @@ class CmfContinuous(base.Component):
     """
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.6", "2021-08-18"),
         base.VersionInfo("2.0.5", "2021-08-17"),
         base.VersionInfo("2.0.4", "2021-07-16"),
         base.VersionInfo("2.0.3", "2020-12-28"),
@@ -87,6 +88,7 @@ class CmfContinuous(base.Component):
     VERSION.changed("2.0.4", "Spelling of input names")
     VERSION.fixed("2.0.4", "Data type access")
     VERSION.added("2.0.5", "README, CHANGELOG, CONTRIBUTING and LICENSE")
+    VERSION.added("2.0.6", "Missing reference to module documentation and missing documentation of `PEC_SW` output")
 
     def __init__(self, name, observer, store):
         super(CmfContinuous, self).__init__(name, observer, store)

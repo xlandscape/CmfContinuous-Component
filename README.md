@@ -17,15 +17,15 @@
 ## About the project
 The Landscape Model component encapsulating the CMF Continuous module.  
 This is an automatically generated documentation based on the available code and in-line documentation. The current
-version of this document is from 2021-08-17.  
+version of this document is from 2021-08-18.  
 
 ### Built with
-* Landscape Model core version 1.5.6
-* Regulatory Catchment Model version 8 Aug 2018 
+* Landscape Model core version 1.5.7
+* Regulatory Catchment Model version 8 Aug 2018 (see `\module\documentation` for details)
 
 
 ## Getting Started
-The component can be used in any Landscape Model based on core version 1.5.6 or newer. See the Landscape Model
+The component can be used in any Landscape Model based on core version 1.5.7 or newer. See the Landscape Model
 core's `README` for general tips on how to add a component to a Landscape Model.
 
 ### Prerequisites
@@ -43,82 +43,95 @@ The following gives a sample configuration of the `CascadeToxswa` component. See
 [outputs](#outputs) for further details on the component's interface.
 ```xml
 <CascadeToxswa module="CascadeToxswa" class="CascadeToxswa" enabled="$(RunCascadeToxswa)">
-    <ProcessingPath>$(_MCS_BASE_DIR_)\$(_MC_NAME_)\processing\fate\cascade</ProcessingPath>
+<ProcessingPath>$(_MCS_BASE_DIR_)\$(_MC_NAME_)\processing\fate\cascade</ProcessingPath>
     <Hydrography>
-        <FromOutput component="LandscapeScenario" output="hydrography" />
+<FromOutput component="LandscapeScenario" output="hydrography" />
     </Hydrography>
-    <SuspendedSolids type="float" unit="g/m&#179;">15</SuspendedSolids>
+    <SuspendedSolids type="float"
+unit="g/m&#179;">15</SuspendedSolids>
     <Reaches>
-        <FromOutput component="DepositionToReach" output="Reaches" />
+        <FromOutput component="DepositionToReach" output="Reaches"
+/>
     </Reaches>
     <TimeSeriesStart>
         <FromOutput component="Hydrology" output="TimeSeriesStart" />
-    </TimeSeriesStart>
+</TimeSeriesStart>
     <WaterDischarge>
         <FromOutput component="Hydrology" output="Flow" />
     </WaterDischarge>
-    <WaterDepth>
+<WaterDepth>
         <FromOutput component="Hydrology" output="Depth" />
     </WaterDepth>
     <Temperature>
-        <FromOutput component="Weather" output="TEMPERATURE_AVG" />
+<FromOutput component="Weather" output="TEMPERATURE_AVG" />
     </Temperature>
     <MassLoadingSprayDrift>
-        <FromOutput component="DepositionToReach" output="Deposition" />
+<FromOutput component="DepositionToReach" output="Deposition" />
     </MassLoadingSprayDrift>
-    <MolarMass type="float" unit="g/mol">$(MolarMass)</MolarMass>
-    <SaturatedVapourPressure type="float" unit="Pa">$(SaturatedVapourPressure)</SaturatedVapourPressure>
-    <ReferenceTemperatureForSaturatedVapourPressure type="float" unit="&#176;C">
+    <MolarMass
+type="float" unit="g/mol">$(MolarMass)</MolarMass>
+    <SaturatedVapourPressure type="float"
+unit="Pa">$(SaturatedVapourPressure)</SaturatedVapourPressure>
+    <ReferenceTemperatureForSaturatedVapourPressure
+type="float" unit="&#176;C">
         $(Temp0)
     </ReferenceTemperatureForSaturatedVapourPressure>
-    <MolarEnthalpyOfVaporization type="float" unit="kJ/mol">
+<MolarEnthalpyOfVaporization type="float" unit="kJ/mol">
         $(MolarEnthalpyOfVaporization)
-    </MolarEnthalpyOfVaporization>
+</MolarEnthalpyOfVaporization>
     <SolubilityInWater type="float" unit="mg/l">$(SolubilityInWater)</SolubilityInWater>
-    <ReferenceTemperatureForWaterSolubility type="float" unit="&#176;C">
+<ReferenceTemperatureForWaterSolubility type="float" unit="&#176;C">
         $(Temp0)
-    </ReferenceTemperatureForWaterSolubility>
+</ReferenceTemperatureForWaterSolubility>
     <MolarEnthalpyOfDissolution type="float" unit="kJ/mol">
-        $(MolarEnthalpyOfDissolution)
+$(MolarEnthalpyOfDissolution)
     </MolarEnthalpyOfDissolution>
-    <DiffusionCoefficient type="float" unit="m&#178;/d">$(DiffusionCoefficient)</DiffusionCoefficient>
-    <ReferenceTemperatureForDiffusion type="float" unit="&#176;C">$(Temp0)</ReferenceTemperatureForDiffusion>
-    <HalfLifeTransformationInWater type="float" unit="d">$(DT50sw)</HalfLifeTransformationInWater>
-    <TemperatureAtWhichHalfLifeInWaterWasMeasured type="float" unit="&#176;C">
+    <DiffusionCoefficient type="float"
+unit="m&#178;/d">$(DiffusionCoefficient)</DiffusionCoefficient>
+    <ReferenceTemperatureForDiffusion type="float"
+unit="&#176;C">$(Temp0)</ReferenceTemperatureForDiffusion>
+    <HalfLifeTransformationInWater type="float"
+unit="d">$(DT50sw)</HalfLifeTransformationInWater>
+    <TemperatureAtWhichHalfLifeInWaterWasMeasured type="float"
+unit="&#176;C">
         $(Temp0)
     </TemperatureAtWhichHalfLifeInWaterWasMeasured>
-    <MolarActivationEnthalpyOfTransformationInWater type="float" unit="kJ/mol">
-        $(MolarActivationEnthalpyOfTransformationInWater)
+<MolarActivationEnthalpyOfTransformationInWater type="float" unit="kJ/mol">
+$(MolarActivationEnthalpyOfTransformationInWater)
     </MolarActivationEnthalpyOfTransformationInWater>
-    <HalfLifeTransformationInSediment type="float" unit="d">$(DT50sed)</HalfLifeTransformationInSediment>
-    <TemperatureAtWhichHalfLifeInSedimentWasMeasured type="float" unit="&#176;C">
+<HalfLifeTransformationInSediment type="float" unit="d">$(DT50sed)</HalfLifeTransformationInSediment>
+<TemperatureAtWhichHalfLifeInSedimentWasMeasured type="float" unit="&#176;C">
         $(Temp0)
-    </TemperatureAtWhichHalfLifeInSedimentWasMeasured>
-    <MolarActivationEnthalpyOfTransformationInSediment type="float" unit="kJ/mol">
+</TemperatureAtWhichHalfLifeInSedimentWasMeasured>
+    <MolarActivationEnthalpyOfTransformationInSediment type="float"
+unit="kJ/mol">
         $(MolarActivationEnthalpyOfTransformationInSediment)
-    </MolarActivationEnthalpyOfTransformationInSediment>
-    <CoefficientForEquilibriumAdsorptionInSediment type="float" unit="l/kg" eval="true">
+</MolarActivationEnthalpyOfTransformationInSediment>
+    <CoefficientForEquilibriumAdsorptionInSediment type="float"
+unit="l/kg" eval="true">
         $(KOC) / 1.742
     </CoefficientForEquilibriumAdsorptionInSediment>
-    <ReferenceConcentrationInLiquidPhaseInSediment type="float" unit="mg/l">
+<ReferenceConcentrationInLiquidPhaseInSediment type="float" unit="mg/l">
         $(ReferenceConcentrationForKOC)
-    </ReferenceConcentrationInLiquidPhaseInSediment>
+</ReferenceConcentrationInLiquidPhaseInSediment>
     <FreundlichExponentInSediment type="float" unit="1">
-        $(FreundlichExponentInSedimentAndSuspendedParticles)
+$(FreundlichExponentInSedimentAndSuspendedParticles)
     </FreundlichExponentInSediment>
-    <CoefficientForEquilibriumAdsorptionOfSuspendedSoils type="float" unit="l/kg" eval="true">
+<CoefficientForEquilibriumAdsorptionOfSuspendedSoils type="float" unit="l/kg" eval="true">
         $(KOC) / 1.742
-    </CoefficientForEquilibriumAdsorptionOfSuspendedSoils>
-    <ReferenceConcentrationForSuspendedSoils type="float" unit="mg/l">
+</CoefficientForEquilibriumAdsorptionOfSuspendedSoils>
+    <ReferenceConcentrationForSuspendedSoils type="float"
+unit="mg/l">
         $(ReferenceConcentrationForKOC)
     </ReferenceConcentrationForSuspendedSoils>
-    <FreundlichExponentForSuspendedSoils type="float" unit="1">
+<FreundlichExponentForSuspendedSoils type="float" unit="1">
         $(FreundlichExponentInSedimentAndSuspendedParticles)
-    </FreundlichExponentForSuspendedSoils>
+</FreundlichExponentForSuspendedSoils>
     <CoefficientForLinearAdsorptionOnMacrophytes type="float" unit="l/kg">
-        0
+0
     </CoefficientForLinearAdsorptionOnMacrophytes>
-    <NumberWorkers type="int">$(CascadeToxswaWorkers)</NumberWorkers>
+    <NumberWorkers
+type="int">$(CascadeToxswaWorkers)</NumberWorkers>
 </CascadeToxswa>
 ```
 
@@ -260,6 +273,16 @@ Values are expectedly of type `list[int]`.
 The values apply to the following scale: `space/reach`.
 Values have no physical unit.
 #### PEC_SW
+The modelled concentration in the water phase.  
+Values are expectedly of type `ndarray`.
+Value representation is in a 2-dimensional array.
+Dimension 1 spans the number of simulated hours as spanned by the [Begin](#Begin) and [End](#end) input.
+Dimension 2 spans the number of reaches included in the [Hydrography](#Hydrography) input.
+Chunking of the array is for fast retrieval of time series.
+Individual array elements have a type of `float`.
+The values apply to the following scale: `time/hour, space/base_geometry`.
+The default value of the output is `0`.
+The physical unit of the values is `mg/m³`.
 
 
 ## Roadmap
