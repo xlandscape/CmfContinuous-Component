@@ -1,5 +1,15 @@
 # Changelog
-This is the changelog for the CmfContinuous component. It was automatically created on 2021-08-18.
+This is the changelog for the CmfContinuous component. It was automatically created on 2021-09-02.
+
+## [2.0.7] - 2021-09-02
+
+### Added
+- ogr module import
+
+### Changed
+
+### Fixed
+
 
 ## [2.0.6] - 2021-08-18
 

@@ -3,7 +3,7 @@ Component for the CMF Continuous module.
 """
 import datetime
 import numpy as np
-import ogr
+from osgeo import ogr
 import os
 import shutil
 import base
@@ -16,6 +16,7 @@ class CmfContinuous(base.Component):
     """
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.7", "2021-09-02"),
         base.VersionInfo("2.0.6", "2021-08-18"),
         base.VersionInfo("2.0.5", "2021-08-17"),
         base.VersionInfo("2.0.4", "2021-07-16"),
@@ -89,6 +90,7 @@ class CmfContinuous(base.Component):
     VERSION.fixed("2.0.4", "Data type access")
     VERSION.added("2.0.5", "README, CHANGELOG, CONTRIBUTING and LICENSE")
     VERSION.added("2.0.6", "Missing reference to module documentation and missing documentation of `PEC_SW` output")
+    VERSION.added("2.0.7", "ogr module import")
 
     def __init__(self, name, observer, store):
         super(CmfContinuous, self).__init__(name, observer, store)
