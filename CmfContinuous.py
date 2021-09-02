@@ -3,7 +3,7 @@ Component for the CMF Continuous module.
 """
 import datetime
 import numpy as np
-import ogr
+from osgeo import ogr
 import os
 import shutil
 import base
