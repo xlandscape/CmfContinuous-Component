@@ -226,7 +226,7 @@ class CmfContinuous(base.Component):
             ),
             base.Input(
                 "InflowReaches",
-                (attrib.Class("list[int]", 1), attrib.Unit(None, 1), attrib.Scales("space/reach2", 1)),
+                (attrib.Class(list[int], 1), attrib.Unit(None, 1), attrib.Scales("space/reach2", 1)),
                 self.default_observer,
                 description="""The numeric identifiers for individual reaches that show lateral inflows (in the order of
                 the `TimeSeries` input)."""
