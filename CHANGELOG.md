@@ -1,5 +1,15 @@
 # Changelog
-This is the changelog for the CmfContinuous component. It was automatically created on 2021-09-02.
+This is the changelog for the CmfContinuous component. It was automatically created on 2021-09-17.
+
+## [2.0.8] - 2021-09-17
+
+### Added
+
+### Changed
+- Make use of generic types for class attributes
+
+### Fixed
+
 
 ## [2.0.7] - 2021-09-02
 

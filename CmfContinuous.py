@@ -16,6 +16,7 @@ class CmfContinuous(base.Component):
     """
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.8", "2021-09-17"),
         base.VersionInfo("2.0.7", "2021-09-02"),
         base.VersionInfo("2.0.6", "2021-08-18"),
         base.VersionInfo("2.0.5", "2021-08-17"),
@@ -91,6 +92,7 @@ class CmfContinuous(base.Component):
     VERSION.added("2.0.5", "README, CHANGELOG, CONTRIBUTING and LICENSE")
     VERSION.added("2.0.6", "Missing reference to module documentation and missing documentation of `PEC_SW` output")
     VERSION.added("2.0.7", "ogr module import")
+    VERSION.changed("2.0.8", "Make use of generic types for class attributes")
 
     def __init__(self, name, observer, store):
         super(CmfContinuous, self).__init__(name, observer, store)
@@ -226,7 +228,7 @@ class CmfContinuous(base.Component):
             ),
             base.Input(
                 "InflowReaches",
-                (attrib.Class("list[int]", 1), attrib.Unit(None, 1), attrib.Scales("space/reach2", 1)),
+                (attrib.Class(list[int], 1), attrib.Unit(None, 1), attrib.Scales("space/reach2", 1)),
                 self.default_observer,
                 description="""The numeric identifiers for individual reaches that show lateral inflows (in the order of
                 the `TimeSeries` input)."""
