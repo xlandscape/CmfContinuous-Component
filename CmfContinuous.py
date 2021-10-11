@@ -275,7 +275,7 @@ class CmfContinuous(base.Component):
         self.prepare_drift_deposition(os.path.join(processing_path, project_name, "SprayDriftList.csv"))
         self.prepare_time_series(os.path.join(processing_path, project_name, "TimeSeries"))
         self.run_project(processing_path, project_name)
-        self.read_outputs(os.path.join(processing_path, project_name, project_name + "_reaches.csv"))
+        self.read_outputs(os.path.join(processing_path, project_name, f"{project_name}_reaches.csv"))
         return
 
     def prepare_catchment_list(self, catchment_file):
@@ -297,10 +297,11 @@ class CmfContinuous(base.Component):
         with open(cell_list, "w") as f:
             # noinspection SpellCheckingInspection
             f.write(
-                "key,reach,reach_connection,adjacent_field,field_connection,x,y,z,latitude,gw_depth," +
-                "residencetime_gw_river,residencetime_drainage_river,puddledepth,saturated_depth,evap_depth,area," +
-                "deep_gw,deep_gw_rt,drainage_depth,drainage_suction_limit,drainage_t_ret,flowwdith_sw,slope_sw," +
-                "nManning,hasDrainage,meteostation,rainstation,soil,plantmodel,unit_traveltime,soilwaterflux")
+                "key,reach,reach_connection,adjacent_field,field_connection,x,y,z,latitude,gw_depth,"
+                "residencetime_gw_river,residencetime_drainage_river,puddledepth,saturated_depth,evap_depth,area,"
+                "deep_gw,deep_gw_rt,drainage_depth,drainage_suction_limit,drainage_t_ret,flowwdith_sw,slope_sw,"
+                "nManning,hasDrainage,meteostation,rainstation,soil,plantmodel,unit_traveltime,soilwaterflux"
+            )
         return
 
     @staticmethod
@@ -324,8 +325,9 @@ class CmfContinuous(base.Component):
         with open(crop_coefficient_list, "w") as f:
             # noinspection SpellCheckingInspection
             f.write(
-                "key,GLAImin,GLAImax,GLAIharv,rootinit,rootmax,heightinit,heightmax,rpin,Dmin,Dstart,Dmax,Dharv," +
-                "cform,dform,feddes1,feddes2,feddes3,feddes4,croptype,wintercrop")
+                "key,GLAImin,GLAImax,GLAIharv,rootinit,rootmax,heightinit,heightmax,rpin,Dmin,Dstart,Dmax,Dharv,"
+                "cform,dform,feddes1,feddes2,feddes3,feddes4,croptype,wintercrop"
+            )
         return
 
     @staticmethod
@@ -348,7 +350,7 @@ class CmfContinuous(base.Component):
         """
         project_path = os.path.join(processing_path, project_name)
         os.makedirs(project_path)
-        self.prepare_project_list(os.path.join(processing_path, project_name + ".csv"), project_name, processing_path)
+        self.prepare_project_list(os.path.join(processing_path, f"{project_name}.csv"), project_name, processing_path)
         self.prepare_climate(os.path.join(project_path, "ClimateList.csv"))
         self.prepare_cell_list(os.path.join(project_path, "CellList.csv"))
         self.prepare_reach_list(os.path.join(project_path, "ReachList.csv"))
@@ -370,29 +372,14 @@ class CmfContinuous(base.Component):
         with open(project_list_file, "w") as f:
             # noinspection SpellCheckingInspection
             f.write(
-                "key,fpath,database,runtype,catchment_separation,begin,end,separate_solver,threads,solvertype," +
-                "solutesolvertype,chunksize,substance,efate,drift,timestep,simulation,preprocessing,postprocessing\n" +
-                "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}".format(
-                    project_name,  # key
-                    processing_path,  # fpath
-                    "csv",  # database
-                    "inStream",  # runtype
-                    "FALSE",  # catchment_separation
-                    self.inputs["Begin"].read().values.strftime("%Y-%m-%dT%H:%M"),  # begin
-                    self.inputs["End"].read().values.strftime("%Y-%m-%dT%H:%M"),  # end
-                    "FALSE",  # separate_solver
-                    self.inputs["Threads"].read().values,  # threads
-                    self.inputs["SolverType"].read().values,  # solvertype
-                    "None",  # solutesolvertype
-                    "0",  # chunksize
-                    "CMP_A",  # substance
-                    "steps1234",  # efate
-                    "xdrift",  # drift
-                    "hour",  # timestep
-                    "TRUE",  # simulation
-                    "FALSE",  # preprocessing
-                    "FALSE"  # prostprocessing
-                ))
+                "key,fpath,database,runtype,catchment_separation,begin,end,separate_solver,threads,solvertype,"
+                "solutesolvertype,chunksize,substance,efate,drift,timestep,simulation,preprocessing,postprocessing\n"
+                f"{project_name},{processing_path},csv,inStream,FALSE,"
+                f"{self.inputs['Begin'].read().values.strftime('%Y-%m-%dT%H:%M')},"
+                f"{self.inputs['End'].read().values.strftime('%Y-%m-%dT%H:%M')},FALSE,"
+                f"{self.inputs['Threads'].read().values},{self.inputs['SolverType'].read().values},None,0,CMP_A,"
+                "steps1234,xdrift,hour,TRUE,FALSE,FALSE"
+            )
         return
 
     def prepare_reach_list(self, reach_list_file):
@@ -409,30 +396,31 @@ class CmfContinuous(base.Component):
         with open(reach_list_file, "w") as f:
             # noinspection SpellCheckingInspection
             f.write(
-                "key,x,y,z,downstream,initial_depth,manning_n,bankslope,bottomwidth,floodplainslope,shape,dens," +
-                "porosity,oc,depth_sed,depth_sed_deep\n")
+                "key,x,y,z,downstream,initial_depth,manning_n,bankslope,bottomwidth,floodplainslope,shape,dens,"
+                "porosity,oc,depth_sed,depth_sed_deep\n"
+            )
             for index, feature in enumerate(layer):
                 key_r = feature.GetField("key")
                 geom = feature.GetGeometryRef()
                 coord = geom.GetPoint(0)
                 downstream = feature.GetField("downstream")
-                f.write("r" + str(key_r) + ",")
-                f.write(str(round(coord[0], 2)) + ",")  # x
-                f.write(str(round(coord[1], 2)) + ",")  # y
-                f.write(str(round(coord[2], 8)) + ",")  # z
-                f.write(("" if downstream == "Outlet" else "r") + downstream + ',')
-                f.write(str(feature.GetField("initial_de")) + ",")
-                f.write(str(feature.GetField("manning_n")) + ",")
+                f.write(f"r{key_r},")
+                f.write(f"{round(coord[0], 2)},")
+                f.write(f"{round(coord[1], 2)},")
+                f.write(f"{round(coord[2], 8)},")
+                f.write(f"{'' if downstream == 'Outlet' else 'r'}{downstream},")
+                f.write(f"{feature.GetField('initial_de')},")
+                f.write(f"{feature.GetField('manning_n')},")
                 # noinspection SpellCheckingInspection
-                f.write(str(feature.GetField("bankslope")) + ",")
-                f.write(str(feature.GetField("width")) + ",")
+                f.write(f"{feature.GetField('bankslope')},")
+                f.write(f"{feature.GetField('width')},")
                 f.write("200,")  # floodplain
-                f.write(feature.GetField("shape_1") + ",")
-                f.write(str(feature.GetField("dens")) + ",")
-                f.write(str(feature.GetField("porosity")) + ",")
-                f.write(str(feature.GetField("oc")) + ",")
-                f.write(str(feature.GetField("depth_sed")) + ",")
-                f.write(str(feature.GetField("depth_sed_")) + "\n")
+                f.write(f"{feature.GetField('shape_1')},")
+                f.write(f"{feature.GetField('dens')},")
+                f.write(f"{feature.GetField('porosity')},")
+                f.write(f"{feature.GetField('oc')},")
+                f.write(f"{feature.GetField('depth_sed')},")
+                f.write(f"{feature.GetField('depth_sed_')}\n")
                 self._reaches[index] = key_r
         self.outputs["Reaches"].set_values(self._reaches.tolist())
         return
@@ -459,16 +447,12 @@ class CmfContinuous(base.Component):
             # noinspection SpellCheckingInspection
             f.write("key,molarmass,DT50sw,DT50sed,KOC,Temp0,Q10,plantuptake,QFAC\n")
             # noinspection SpellCheckingInspection
-            f.write("CMP_A,{},{},{},{},{},{},{},{}\n".format(
-                self.inputs["MolarMass"].read().values,
-                self.inputs["DT50sw"].read().values,
-                self.inputs["DT50sed"].read().values,
-                self.inputs["KOC"].read().values,
-                self.inputs["Temp0"].read().values,
-                self.inputs["Q10"].read().values,
-                self.inputs["PlantUptake"].read().values,
-                self.inputs["QFac"].read().values
-            ))
+            f.write(
+                f"CMP_A,{self.inputs['MolarMass'].read().values},{self.inputs['DT50sw'].read().values},"
+                f"{self.inputs['DT50sed'].read().values},{self.inputs['KOC'].read().values},"
+                f"{self.inputs['Temp0'].read().values},{self.inputs['Q10'].read().values},"
+                f"{self.inputs['PlantUptake'].read().values},{self.inputs['QFac'].read().values}\n"
+            )
         return
 
     def run_project(self, processing_path, project_name):
@@ -503,14 +487,11 @@ class CmfContinuous(base.Component):
             f.write("key,substance,time,rate\n")
             deposition_events = np.nonzero(deposition)
             for i in range(len(deposition_events[0])):
+                time_stamp = datetime.datetime.strftime(
+                    begin + datetime.timedelta(int(deposition_events[0][i])), '%Y-%m-%dT12:00')
                 f.write(
-                    "r{},{},{},{:f}\n".format(
-                        reaches_drift[deposition_events[1][i]],
-                        "CMP_A",
-                        datetime.datetime.strftime(
-                            begin + datetime.timedelta(int(deposition_events[0][i])), "%Y-%m-%dT12:00"),
-                        deposition[(deposition_events[0][i], deposition_events[1][i])]
-                    )
+                    f"r{reaches_drift[deposition_events[1][i]]},CMP_A,{time_stamp},"
+                    f"{format(deposition[(deposition_events[0][i], deposition_events[1][i])], 'f')}\n"
                 )
         return
 
@@ -526,12 +507,14 @@ class CmfContinuous(base.Component):
         simulation_start = datetime.datetime.combine(self._inputs["Begin"].read().values, datetime.time(0))
         for r, reach in enumerate(inflow_reaches):
             inflows = self._inputs["TimeSeries"].read(slices=(slice(number_hours), r)).values
-            with open(os.path.join(time_series, "r" + str(reach) + ".csv"), "w") as f:
+            with open(os.path.join(time_series, f"r{reach}.csv"), "w") as f:
                 # noinspection SpellCheckingInspection
                 f.write("key,time,flow,conc\n")
                 for t, record in enumerate(inflows):
-                    f.write("r{},{},{},0\n".format(
-                        reach, (simulation_start + datetime.timedelta(hours=t)).strftime("%Y-%m-%dT%H:%M"), record))
+                    f.write(
+                        f"r{reach},{(simulation_start + datetime.timedelta(hours=t)).strftime('%Y-%m-%dT%H:%M')},"
+                        f"{record},0\n"
+                    )
         return
 
     def read_outputs(self, reaches_file):
