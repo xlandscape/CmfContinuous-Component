@@ -16,6 +16,7 @@ class CmfContinuous(base.Component):
     """
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.9", "2021-10-11"),
         base.VersionInfo("2.0.8", "2021-09-17"),
         base.VersionInfo("2.0.7", "2021-09-02"),
         base.VersionInfo("2.0.6", "2021-08-18"),
@@ -93,6 +94,7 @@ class CmfContinuous(base.Component):
     VERSION.added("2.0.6", "Missing reference to module documentation and missing documentation of `PEC_SW` output")
     VERSION.added("2.0.7", "ogr module import")
     VERSION.changed("2.0.8", "Make use of generic types for class attributes")
+    VERSION.changed("2.0.9", "Replaced legacy format strings by f-strings")
 
     def __init__(self, name, observer, store):
         super(CmfContinuous, self).__init__(name, observer, store)
