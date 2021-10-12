@@ -1,6 +1,4 @@
-"""
-Component for the CMF Continuous module.
-"""
+"""Component for the CMF Continuous module."""
 import datetime
 import numpy as np
 from osgeo import ogr
@@ -11,9 +9,7 @@ import attrib
 
 
 class CmfContinuous(base.Component):
-    """
-    The Landscape Model component encapsulating the CMF Continuous module.
-    """
+    """The Landscape Model component encapsulating the CMF Continuous module."""
     # RELEASES
     VERSION = base.VersionCollection(
         base.VersionInfo("2.0.9", "2021-10-11"),
@@ -97,6 +93,14 @@ class CmfContinuous(base.Component):
     VERSION.changed("2.0.9", "Replaced legacy format strings by f-strings")
 
     def __init__(self, name, observer, store):
+        """
+        Initializes the CmfContinuous component.
+
+        Args:
+            name: The name of the component
+            observer: The default observer of the component
+            store: The default store of the component.
+        """
         super(CmfContinuous, self).__init__(name, observer, store)
         self._module = base.Module("Regulatory Catchment Model", "8 Aug 2018", r"\module\documentation")
         # noinspection SpellCheckingInspection
@@ -263,12 +267,13 @@ class CmfContinuous(base.Component):
         ])
 
         self._reaches = None
-        return
 
     def run(self):
         """
         Runs the component.
-        :return: Nothing.
+
+        Returns:
+            Nothing.
         """
         self.default_observer.write_message(2, "Component relies on insensible high precision of z-coordinate")
         project_name = "e1"
@@ -278,51 +283,64 @@ class CmfContinuous(base.Component):
         self.prepare_time_series(os.path.join(processing_path, project_name, "TimeSeries"))
         self.run_project(processing_path, project_name)
         self.read_outputs(os.path.join(processing_path, project_name, f"{project_name}_reaches.csv"))
-        return
 
     def prepare_catchment_list(self, catchment_file):
         """
         Prepares the catchment list.
-        :param catchment_file: The file path for the catchment list.
-        :return: Nothing.
+
+        Args:
+            catchment_file: The file path for the catchment list.
+
+        Returns:
+            Nothing.
         """
         shutil.copyfile(self.inputs["Catchment"].read().values, catchment_file)
-        return
 
     @staticmethod
     def prepare_cell_list(cell_list):
         """
         Prepares the hydrological cell list.
-        :param cell_list: The file path for the hydrological cell list.
-        :return: Nothing.
+
+        Args:
+            cell_list: The file path for the hydrological cell list.
+
+        Returns:
+            Nothing.
         """
         with open(cell_list, "w") as f:
             # noinspection SpellCheckingInspection
+            # noinspection GrazieInspection
             f.write(
                 "key,reach,reach_connection,adjacent_field,field_connection,x,y,z,latitude,gw_depth,"
                 "residencetime_gw_river,residencetime_drainage_river,puddledepth,saturated_depth,evap_depth,area,"
                 "deep_gw,deep_gw_rt,drainage_depth,drainage_suction_limit,drainage_t_ret,flowwdith_sw,slope_sw,"
                 "nManning,hasDrainage,meteostation,rainstation,soil,plantmodel,unit_traveltime,soilwaterflux"
             )
-        return
 
     @staticmethod
     def prepare_climate(climate_list):
         """
         Prepares the weather input.
-        :param climate_list: The file pah for the weather input
-        :return: Nothing.
+
+        Args:
+            climate_list: The file pah for the weather input.
+
+        Returns:
+            Nothing.
         """
         with open(climate_list, "w") as f:
             f.write("key,x,y,z,lat,lon")
-        return
 
     @staticmethod
     def prepare_crop_coefficient_list(crop_coefficient_list):
         """
         Prepares the crop coefficient list.
-        :param crop_coefficient_list: The file path for the crop coefficient list.
-        :return: Nothing.
+
+        Args:
+            crop_coefficient_list: The file path for the crop coefficient list.
+
+        Returns:
+            Nothing.
         """
         with open(crop_coefficient_list, "w") as f:
             # noinspection SpellCheckingInspection
@@ -330,25 +348,31 @@ class CmfContinuous(base.Component):
                 "key,GLAImin,GLAImax,GLAIharv,rootinit,rootmax,heightinit,heightmax,rpin,Dmin,Dstart,Dmax,Dharv,"
                 "cform,dform,feddes1,feddes2,feddes3,feddes4,croptype,wintercrop"
             )
-        return
 
     @staticmethod
     def prepare_crop_management_list(crop_management_list):
         """
         Prepares the crop management list.
-        :param crop_management_list: The file path for the crop management list.
-        :return: Nothing.
+
+        Args:
+            crop_management_list: The file path for the crop management list.
+
+        Returns:
+            Nothing.
         """
         with open(crop_management_list, "w") as f:
             f.write("key,date,task,description,value")
-        return
 
     def prepare_project(self, processing_path, project_name):
         """
         Prepares the module project.
-        :param processing_path: The file path where processing should be conducted.
-        :param project_name: The name of the project
-        :return: Nothing.
+
+        Args:
+            processing_path: The file path where processing should be conducted.
+            project_name: The name of the project.
+
+        Returns:
+            Nothing.
         """
         project_path = os.path.join(processing_path, project_name)
         os.makedirs(project_path)
@@ -361,15 +385,18 @@ class CmfContinuous(base.Component):
         self.prepare_crop_coefficient_list(os.path.join(project_path, "CropCoefficientList.csv"))
         self.prepare_crop_management_list(os.path.join(project_path, "CropManagementList.csv"))
         self.prepare_catchment_list(os.path.join(project_path, "CatchmentList.csv"))
-        return
 
     def prepare_project_list(self, project_list_file, project_name, processing_path):
         """
         Prepares the project list.
-        :param project_list_file: The file path for the project list.
-        :param project_name: The name of the project.
-        :param processing_path: The file path where processing should be conducted.
-        :return: Nothing.
+
+        Args:
+            project_list_file: The file path for the project list.
+            project_name: The name of the project.
+            processing_path: The file path where processing should be conducted.
+
+        Returns:
+            Nothing.
         """
         with open(project_list_file, "w") as f:
             # noinspection SpellCheckingInspection
@@ -382,13 +409,16 @@ class CmfContinuous(base.Component):
                 f"{self.inputs['Threads'].read().values},{self.inputs['SolverType'].read().values},None,0,CMP_A,"
                 "steps1234,xdrift,hour,TRUE,FALSE,FALSE"
             )
-        return
 
     def prepare_reach_list(self, reach_list_file):
         """
         Prepares the reaches list.
-        :param reach_list_file: The file path for the reaches list.
-        :return: Nothing.
+
+        Args:
+            reach_list_file: The file path for the reaches list.
+
+        Returns:
+            Nothing.
         """
         hydrography = self.inputs["Hydrography"].read().values
         driver = ogr.GetDriverByName("ESRI Shapefile")
@@ -425,25 +455,30 @@ class CmfContinuous(base.Component):
                 f.write(f"{feature.GetField('depth_sed_')}\n")
                 self._reaches[index] = key_r
         self.outputs["Reaches"].set_values(self._reaches.tolist())
-        return
 
     @staticmethod
     def prepare_soil_list(soil_list):
         """
         Prepares the soil list.
-        :param soil_list: The file path for the soil list.
-        :return: Nothing.
+
+        Args:
+            soil_list: The file path for the soil list.
+
+        Returns:
+            Nothing.
         """
         with open(soil_list, "w") as f:
             # noinspection SpellCheckingInspection
             f.write("key,depth,Ksat,Phi,alpha,n,m,Corg,residual_wetness")
-        return
 
     def prepare_substance_list(self, substance_list_file):
         """
         Prepares the substance list.
-        :param substance_list_file: The file path for the substance list.
-        :return: Nothing.
+
+        Args:
+            substance_list_file: The file path for the substance list.
+
+        Returns: Nothing.
         """
         with open(substance_list_file, "w") as f:
             # noinspection SpellCheckingInspection
@@ -455,14 +490,17 @@ class CmfContinuous(base.Component):
                 f"{self.inputs['Temp0'].read().values},{self.inputs['Q10'].read().values},"
                 f"{self.inputs['PlantUptake'].read().values},{self.inputs['QFac'].read().values}\n"
             )
-        return
 
     def run_project(self, processing_path, project_name):
         """
-        Runs the project
-        :param processing_path: The working directory for the module.
-        :param project_name: The name of the project.
-        :return: Nothing.
+        Runs the project.
+
+        Args:
+            processing_path: The working directory for the module.
+            project_name: The name of the project.
+
+        Returns:
+            Nothing.
         """
         module_path = os.path.join(os.path.dirname(__file__), "module", "bin")
         python = os.path.join(module_path, "python", "python.exe")
@@ -474,13 +512,16 @@ class CmfContinuous(base.Component):
             self.default_observer,
             {"PATH": ""}
         )
-        return
 
     def prepare_drift_deposition(self, spray_drift_list):
         """
         Prepares the drift deposition.
-        :param spray_drift_list: The file path for the drift deposition.
-        :return: Nothing.
+
+        Args:
+            spray_drift_list: The file path for the drift deposition.
+
+        Returns:
+            Nothing.
         """
         deposition = self.inputs["DriftDeposition"].read().values
         begin = datetime.datetime.combine(self.inputs["Begin"].read().values, datetime.time())
@@ -495,13 +536,16 @@ class CmfContinuous(base.Component):
                     f"r{reaches_drift[deposition_events[1][i]]},CMP_A,{time_stamp},"
                     f"{format(deposition[(deposition_events[0][i], deposition_events[1][i])], 'f')}\n"
                 )
-        return
 
     def prepare_time_series(self, time_series):
         """
         Prepares the hydrological time series.
-        :param time_series: The file path for the hydrological time series.
-        :return: Nothing.
+
+        Args:
+            time_series: The file path for the hydrological time series.
+
+        Returns:
+            Nothing.
         """
         os.mkdir(time_series)
         inflow_reaches = self._inputs["InflowReaches"].read().values
@@ -517,13 +561,16 @@ class CmfContinuous(base.Component):
                         f"r{reach},{(simulation_start + datetime.timedelta(hours=t)).strftime('%Y-%m-%dT%H:%M')},"
                         f"{record},0\n"
                     )
-        return
 
     def read_outputs(self, reaches_file):
         """
         Reads the module outputs into the Landscape Model.
-        :param reaches_file: The file path of the module's output file.
-        :return: Nothing.
+
+        Args:
+            reaches_file: The file path of the module's output file.
+
+        Returns:
+            Nothing.
         """
         begin = self.inputs["Begin"].read().values
         begin_date_time = datetime.datetime.combine(begin, datetime.time(1))
@@ -543,4 +590,3 @@ class CmfContinuous(base.Component):
                         x = int(np.where(self._reaches == key)[0])
                         t = int((time - begin_date_time).total_seconds() / 3600)
                         self.outputs["PEC_SW"].set_values(pec_sw, slices=(t, x), create=False)
-        return
