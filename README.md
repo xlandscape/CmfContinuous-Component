@@ -17,15 +17,15 @@
 ## About the project
 The Landscape Model component encapsulating the CMF Continuous module.  
 This is an automatically generated documentation based on the available code and in-line documentation. The current
-version of this document is from 2021-10-11.  
+version of this document is from 2021-10-12.  
 
 ### Built with
-* Landscape Model core version 1.8
+* Landscape Model core version 1.9
 * Regulatory Catchment Model version 8 Aug 2018 (see `\module\documentation` for details)
 
 
 ## Getting Started
-The component can be used in any Landscape Model based on core version 1.8 or newer. See the Landscape
+The component can be used in any Landscape Model based on core version 1.9 or newer. See the Landscape
 Model core's `README` for general tips on how to add a component to a Landscape Model.
 
 ### Prerequisites
