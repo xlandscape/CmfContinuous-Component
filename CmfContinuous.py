@@ -12,6 +12,7 @@ class CmfContinuous(base.Component):
     """The Landscape Model component encapsulating the CMF Continuous module."""
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.10", "2021-10-12"),
         base.VersionInfo("2.0.9", "2021-10-11"),
         base.VersionInfo("2.0.8", "2021-09-17"),
         base.VersionInfo("2.0.7", "2021-09-02"),
@@ -91,6 +92,7 @@ class CmfContinuous(base.Component):
     VERSION.added("2.0.7", "ogr module import")
     VERSION.changed("2.0.8", "Make use of generic types for class attributes")
     VERSION.changed("2.0.9", "Replaced legacy format strings by f-strings")
+    VERSION.changed("2.0.10", "Switched to Google docstring style")
 
     def __init__(self, name, observer, store):
         """
