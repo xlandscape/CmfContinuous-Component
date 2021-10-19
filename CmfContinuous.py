@@ -510,7 +510,7 @@ class CmfContinuous(base.Component):
         # noinspection SpellCheckingInspection
         base.run_process(
             (python, script, "--folder", processing_path, "--runlist", project_name, "--key", "None"),
-            None,
+            processing_path,
             self.default_observer,
             {"PATH": ""}
         )
