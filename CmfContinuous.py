@@ -230,13 +230,6 @@ class CmfContinuous(base.Component):
                 hydrographic scenario."""
             ),
             base.Input(
-                "ReachesDrift",
-                (attrib.Class(np.ndarray, 1), attrib.Unit(None, 1), attrib.Scales("space/reach", 1)),
-                self.default_observer,
-                description="""The numeric identifiers for individual reaches (in the order of the `DriftDeposition` 
-                input) that apply scenario-wide."""
-            ),
-            base.Input(
                 "InflowReaches",
                 (attrib.Class(list[int], 1), attrib.Unit(None, 1), attrib.Scales("space/reach2", 1)),
                 self.default_observer,
@@ -458,7 +451,7 @@ class CmfContinuous(base.Component):
                 f.write(f"{feature.GetField('depth_sed')},")
                 f.write(f"{feature.GetField('depth_sed_')}\n")
                 self._reaches[index] = key_r
-        self.outputs["Reaches"].set_values(self._reaches.tolist())
+        self.outputs["Reaches"].set_values(self._reaches.tolist(), element_names=(self.outputs["Reaches"],))
 
     @staticmethod
     def prepare_soil_list(soil_list):
@@ -527,18 +520,18 @@ class CmfContinuous(base.Component):
         Returns:
             Nothing.
         """
-        deposition = self.inputs["DriftDeposition"].read().values
+        deposition = self.inputs["DriftDeposition"].read()
+        reaches_drift = deposition.element_names[1].get_values()
         begin = datetime.datetime.combine(self.inputs["Begin"].read().values, datetime.time())
-        reaches_drift = self.inputs["ReachesDrift"].read().values
         with open(spray_drift_list, "w") as f:
             f.write("key,substance,time,rate\n")
-            deposition_events = np.nonzero(deposition)
+            deposition_events = np.nonzero(deposition.values)
             for i in range(len(deposition_events[0])):
                 time_stamp = datetime.datetime.strftime(
                     begin + datetime.timedelta(int(deposition_events[0][i])), '%Y-%m-%dT12:00')
                 f.write(
                     f"r{reaches_drift[deposition_events[1][i]]},CMP_A,{time_stamp},"
-                    f"{format(deposition[(deposition_events[0][i], deposition_events[1][i])], 'f')}\n"
+                    f"{format(deposition.values[(deposition_events[0][i], deposition_events[1][i])], 'f')}\n"
                 )
 
     def prepare_time_series(self, time_series):
@@ -580,7 +573,11 @@ class CmfContinuous(base.Component):
         begin_date_time = datetime.datetime.combine(begin, datetime.time(1))
         number_time_steps = ((self.inputs["End"].read().values - begin).days + 1) * 24
         self.outputs["PEC_SW"].set_values(
-            np.ndarray, shape=(number_time_steps, self._reaches.shape[0]), chunks=(min(65536, number_time_steps), 1))
+            np.ndarray,
+            shape=(number_time_steps, self._reaches.shape[0]),
+            chunks=(min(65536, number_time_steps), 1),
+            element_names=(None, self.outputs["Reaches"])
+        )
         with open(reaches_file) as f:
             line = f.readline()
             while line:
