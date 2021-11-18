@@ -1,5 +1,16 @@
 # Changelog
-This is the changelog for the CmfContinuous component. It was automatically created on 2021-10-19.
+This is the changelog for the CmfContinuous component. It was automatically created on 2021-11-18.
+
+## [2.0.12] - 2021-11-18
+
+### Added
+
+### Changed
+- Removed `ReachesDrift` input
+- Reports element names of outputs
+
+### Fixed
+
 
 ## [2.0.11] - 2021-10-19
 
