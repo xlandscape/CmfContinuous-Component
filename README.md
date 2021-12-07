@@ -17,15 +17,15 @@
 ## About the project
 The Landscape Model component encapsulating the CMF Continuous module.  
 This is an automatically generated documentation based on the available code and in-line documentation. The current
-version of this document is from 2021-11-18.  
+version of this document is from 2021-12-07.  
 
 ### Built with
-* Landscape Model core version 1.10
+* Landscape Model core version 1.10.3
 * Regulatory Catchment Model version 8 Aug 2018 (see `\module\documentation` for details)
 
 
 ## Getting Started
-The component can be used in any Landscape Model based on core version 1.10 or newer. See the Landscape
+The component can be used in any Landscape Model based on core version 1.10.3 or newer. See the Landscape
 Model core's `README` for general tips on how to add a component to a Landscape Model.
 
 ### Prerequisites
@@ -301,7 +301,7 @@ Values have no physical unit.
 The modelled concentration in the water phase.  
 Values are expectedly of type `ndarray`.
 Value representation is in a 2-dimensional array.
-Dimension 1 spans the number of simulated hours as spanned by the [Begin](#Begin) and [End](#end) input.
+Dimension 1 spans the number of simulated hours as spanned by the [Beginning](#Begin) and [End](#end) input.
 Dimension 2 spans the number of reaches included in the [Hydrography](#Hydrography) input.
 Chunking of the array is for fast retrieval of time series.
 Individual array elements have a type of `float`.

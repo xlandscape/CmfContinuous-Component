@@ -12,6 +12,7 @@ class CmfContinuous(base.Component):
     """The Landscape Model component encapsulating the CMF Continuous module."""
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.13", "2021-12-07"),
         base.VersionInfo("2.0.12", "2021-11-18"),
         base.VersionInfo("2.0.11", "2021-10-19"),
         base.VersionInfo("2.0.10", "2021-10-12"),
@@ -98,6 +99,7 @@ class CmfContinuous(base.Component):
     VERSION.changed("2.0.11", "Specified working directory for module")
     VERSION.changed("2.0.12", "Removed `ReachesDrift` input")
     VERSION.changed("2.0.12", "Reports element names of outputs")
+    VERSION.changed("2.0.13", "Spell checking")
 
     def __init__(self, name, observer, store):
         """
@@ -258,7 +260,7 @@ class CmfContinuous(base.Component):
                 {
                     "type": np.ndarray,
                     "shape": (
-                        "the number of simulated hours as spanned by the [Begin](#Begin) and [End](#end) input",
+                        "the number of simulated hours as spanned by the [Beginning](#Begin) and [End](#end) input",
                         "the number of reaches included in the [Hydrography](#Hydrography) input"
                     ),
                     "chunks": "for fast retrieval of time series"
@@ -550,7 +552,7 @@ class CmfContinuous(base.Component):
         os.mkdir(time_series)
         inflow_reaches = self._inputs["InflowReaches"].read().values
         number_hours = self._inputs["TimeSeries"].describe()["shape"][0]
-        simulation_start = datetime.datetime.combine(self._inputs["Begin"].read().values, datetime.time(0))
+        simulation_start = datetime.datetime.combine(self._inputs["Begin"].read().values, datetime.time())
         for r, reach in enumerate(inflow_reaches):
             inflows = self._inputs["TimeSeries"].read(slices=(slice(number_hours), r)).values
             with open(os.path.join(time_series, f"r{reach}.csv"), "w") as f:
