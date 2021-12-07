@@ -258,7 +258,7 @@ class CmfContinuous(base.Component):
                 {
                     "type": np.ndarray,
                     "shape": (
-                        "the number of simulated hours as spanned by the [Begin](#Begin) and [End](#end) input",
+                        "the number of simulated hours as spanned by the [Beginning](#Begin) and [End](#end) input",
                         "the number of reaches included in the [Hydrography](#Hydrography) input"
                     ),
                     "chunks": "for fast retrieval of time series"
@@ -550,7 +550,7 @@ class CmfContinuous(base.Component):
         os.mkdir(time_series)
         inflow_reaches = self._inputs["InflowReaches"].read().values
         number_hours = self._inputs["TimeSeries"].describe()["shape"][0]
-        simulation_start = datetime.datetime.combine(self._inputs["Begin"].read().values, datetime.time(0))
+        simulation_start = datetime.datetime.combine(self._inputs["Begin"].read().values, datetime.time())
         for r, reach in enumerate(inflow_reaches):
             inflows = self._inputs["TimeSeries"].read(slices=(slice(number_hours), r)).values
             with open(os.path.join(time_series, f"r{reach}.csv"), "w") as f:
