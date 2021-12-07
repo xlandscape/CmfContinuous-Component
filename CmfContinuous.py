@@ -12,6 +12,7 @@ class CmfContinuous(base.Component):
     """The Landscape Model component encapsulating the CMF Continuous module."""
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.13", "2021-12-07"),
         base.VersionInfo("2.0.12", "2021-11-18"),
         base.VersionInfo("2.0.11", "2021-10-19"),
         base.VersionInfo("2.0.10", "2021-10-12"),
@@ -98,6 +99,7 @@ class CmfContinuous(base.Component):
     VERSION.changed("2.0.11", "Specified working directory for module")
     VERSION.changed("2.0.12", "Removed `ReachesDrift` input")
     VERSION.changed("2.0.12", "Reports element names of outputs")
+    VERSION.changed("2.0.13", "Spell checking")
 
     def __init__(self, name, observer, store):
         """

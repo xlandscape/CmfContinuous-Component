@@ -1,5 +1,15 @@
 # Changelog
-This is the changelog for the CmfContinuous component. It was automatically created on 2021-11-18.
+This is the changelog for the CmfContinuous component. It was automatically created on 2021-12-07.
+
+## [2.0.13] - 2021-12-07
+
+### Added
+
+### Changed
+- Spell checking
+
+### Fixed
+
 
 ## [2.0.12] - 2021-11-18
 
