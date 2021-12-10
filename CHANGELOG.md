@@ -1,5 +1,15 @@
 # Changelog
-This is the changelog for the CmfContinuous component. It was automatically created on 2021-12-07.
+This is the changelog for the CmfContinuous component. It was automatically created on 2021-12-10.
+
+## [2.0.14] - 2021-12-10
+
+### Added
+
+### Changed
+- Specifies offset of outputs
+
+### Fixed
+
 
 ## [2.0.13] - 2021-12-07
 
