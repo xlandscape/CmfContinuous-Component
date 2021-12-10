@@ -12,6 +12,7 @@ class CmfContinuous(base.Component):
     """The Landscape Model component encapsulating the CMF Continuous module."""
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.14", "2021-12-10"),
         base.VersionInfo("2.0.13", "2021-12-07"),
         base.VersionInfo("2.0.12", "2021-11-18"),
         base.VersionInfo("2.0.11", "2021-10-19"),
@@ -100,6 +101,7 @@ class CmfContinuous(base.Component):
     VERSION.changed("2.0.12", "Removed `ReachesDrift` input")
     VERSION.changed("2.0.12", "Reports element names of outputs")
     VERSION.changed("2.0.13", "Spell checking")
+    VERSION.changed("2.0.14", "Specifies offset of outputs")
 
     def __init__(self, name, observer, store):
         """
@@ -581,7 +583,8 @@ class CmfContinuous(base.Component):
             np.ndarray,
             shape=(number_time_steps, self._reaches.shape[0]),
             chunks=(min(65536, number_time_steps), 1),
-            element_names=(None, self.outputs["Reaches"])
+            element_names=(None, self.outputs["Reaches"]),
+            offset=(begin_date_time, None)
         )
         with open(reaches_file) as f:
             line = f.readline()
