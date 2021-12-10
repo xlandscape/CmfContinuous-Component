@@ -581,7 +581,8 @@ class CmfContinuous(base.Component):
             np.ndarray,
             shape=(number_time_steps, self._reaches.shape[0]),
             chunks=(min(65536, number_time_steps), 1),
-            element_names=(None, self.outputs["Reaches"])
+            element_names=(None, self.outputs["Reaches"]),
+            offset=(begin_date_time, None)
         )
         with open(reaches_file) as f:
             line = f.readline()
