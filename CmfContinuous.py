@@ -475,6 +475,7 @@ class CmfContinuous(base.Component):
             # noinspection SpellCheckingInspection
             f.write("key,depth,Ksat,Phi,alpha,n,m,Corg,residual_wetness")
 
+    # noinspection DuplicatedCode
     def prepare_substance_list(self, substance_list_file):
         """
         Prepares the substance list.
