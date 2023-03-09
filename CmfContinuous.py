@@ -115,7 +115,7 @@ class CmfContinuous(base.Component):
             store: The default store of the component.
         """
         super(CmfContinuous, self).__init__(name, observer, store)
-        self._module = base.Module("Regulatory Catchment Model", "8 Aug 2018", r"\module\documentation")
+        self._module = base.Module("Regulatory Catchment Model", "8 Aug 2018-1", r"\module\documentation")
         # noinspection SpellCheckingInspection
         self._inputs = base.InputContainer(self, [
             base.Input(
