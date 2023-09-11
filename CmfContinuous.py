@@ -12,6 +12,7 @@ class CmfContinuous(base.Component):
     """The Landscape Model component encapsulating the CMF Continuous module."""
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.17", "2023-09-11"),
         base.VersionInfo("2.0.16", "2023-03-09"),
         base.VersionInfo("2.0.15", "2022-03-03"),
         base.VersionInfo("2.0.14", "2021-12-10"),
@@ -107,6 +108,7 @@ class CmfContinuous(base.Component):
     VERSION.changed("2.0.15", "Mitigated weak code warning")
     VERSION.changed(
         "2.0.16", "Updated module to version 8 Aug 2018-1 (removed large files from due to file size limits)")
+    VERSION.added("2.0.17", "Information on runtime environment")
 
     def __init__(self, name, observer, store):
         """
@@ -118,7 +120,13 @@ class CmfContinuous(base.Component):
             store: The default store of the component.
         """
         super(CmfContinuous, self).__init__(name, observer, store)
-        self._module = base.Module("Regulatory Catchment Model", "8 Aug 2018-1", r"\module\documentation")
+        self._module = base.Module(
+            "Regulatory Catchment Model",
+            "8 Aug 2018-1",
+            "module",
+            r"\module\documentation",
+            base.Module("Python", "3.7.2", "module/bin/python", "module/bin/python/NEWS.txt", None)
+        )
         # noinspection SpellCheckingInspection
         self._inputs = base.InputContainer(self, [
             base.Input(
