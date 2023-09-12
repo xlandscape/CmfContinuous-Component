@@ -12,6 +12,8 @@ class CmfContinuous(base.Component):
     """The Landscape Model component encapsulating the CMF Continuous module."""
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.19", "2023-09-12"),
+        base.VersionInfo("2.0.18", "2023-09-11"),
         base.VersionInfo("2.0.17", "2023-09-11"),
         base.VersionInfo("2.0.16", "2023-03-09"),
         base.VersionInfo("2.0.15", "2022-03-03"),
@@ -108,6 +110,11 @@ class CmfContinuous(base.Component):
     VERSION.changed("2.0.15", "Mitigated weak code warning")
     VERSION.changed("2.0.16", "Updated module to version 8 Aug 2018-1")
     VERSION.added("2.0.17", "Information on runtime environment")
+    VERSION.added("2.0.18", "Creation of repository info during documentation")
+    VERSION.changed("2.0.18", "Extended module information")
+    VERSION.added("2.0.18", "Repository info, changelog, contributing note, readme and license to module")
+    VERSION.added("2.0.18", "Repository info to Python runtime environment")
+    VERSION.changed("2.0.19", "Updated changelog")
 
     def __init__(self, name, observer, store):
         """
