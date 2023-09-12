@@ -106,8 +106,7 @@ class CmfContinuous(base.Component):
     VERSION.changed("2.0.13", "Spell checking")
     VERSION.changed("2.0.14", "Specifies offset of outputs")
     VERSION.changed("2.0.15", "Mitigated weak code warning")
-    VERSION.changed(
-        "2.0.16", "Updated module to version 8 Aug 2018-1 (removed large files from due to file size limits)")
+    VERSION.changed("2.0.16", "Updated module to version 8 Aug 2018-1")
     VERSION.added("2.0.17", "Information on runtime environment")
 
     def __init__(self, name, observer, store):
@@ -124,8 +123,16 @@ class CmfContinuous(base.Component):
             "Regulatory Catchment Model",
             "8 Aug 2018-1",
             "module",
-            r"\module\documentation",
-            base.Module("Python", "3.7.2", "module/bin/python", "module/bin/python/NEWS.txt", None)
+            r"\module\documentation\index.html",
+            base.Module(
+                "Python",
+                "3.7.2",
+                "module/bin/python",
+                "module/bin/python/Doc/python372.chm",
+                None,
+                True,
+                "module/bin/python/NEWS.txt"
+            )
         )
         # noinspection SpellCheckingInspection
         self._inputs = base.InputContainer(self, [
