@@ -1,6 +1,6 @@
 # Changelog
 
-This is the changelog for the CmfContinuous component. It was automatically created on 2023-09-11.
+This is the changelog for the CmfContinuous component. It was automatically created on 2023-09-12.
 
 ## [2.0.17] - 2023-09-11
 
@@ -18,7 +18,7 @@ This is the changelog for the CmfContinuous component. It was automatically crea
 
 ### Changed
 
-- Updated module to version 8 Aug 2018-1 (removed large files from due to file size limits)
+- Updated module to version 8 Aug 2018-1
 
 ### Fixed
 
