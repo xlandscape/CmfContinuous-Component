@@ -2,6 +2,32 @@
 
 This is the changelog for the CmfContinuous component. It was automatically created on 2023-09-12.
 
+## [2.0.19] - 2023-09-12
+
+### Added
+
+### Changed
+
+- Updated changelog
+
+### Fixed
+
+## [2.0.18] - 2023-09-11
+
+### Added
+
+- Creation of repository info during documentation
+
+- Repository info, changelog, contributing note, readme and license to module
+
+- Repository info to Python runtime environment
+
+### Changed
+
+- Extended module information
+
+### Fixed
+
 ## [2.0.17] - 2023-09-11
 
 ### Added
